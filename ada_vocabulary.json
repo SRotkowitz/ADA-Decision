@@ -1,0 +1,941 @@
+{
+  "metadata": {
+    "domain": "ada_reasonable_accommodation",
+    "version": "0.2",
+    "last_updated": "2026-04-17",
+    "description": "Controlled vocabulary for ADA Reasonable Accommodation Decision Engine. All terms are snake_case. All definitions are drawn from or traceable to statutory, regulatory, or EEOC guidance sources. Terms marked derived_from are grounded in cited source text but drawn from regulatory subsections not fully captured in Phase 1 fetch (see OQ-004).",
+    "source_documents": [
+      "https://www.law.cornell.edu/uscode/text/42/12112",
+      "https://www.law.cornell.edu/cfr/text/29/part-1630",
+      "https://www.law.cornell.edu/cfr/text/29/1630.2",
+      "https://www.law.cornell.edu/cfr/text/29/1630.9",
+      "https://www.law.cornell.edu/cfr/text/29/1630.15",
+      "https://www.eeoc.gov/laws/guidance/enforcement-guidance-reasonable-accommodation-and-undue-hardship-under-ada",
+      "https://www.eeoc.gov/publications/ada-your-responsibilities-employer",
+      "https://www.eeoc.gov/laws/guidance/questions-and-answers-final-rule-implementing-ada-amendments-act-2008",
+      "https://askjan.org/publications/employers/employers-guide.cfm",
+      "https://adata.org/factsheet/reasonable-accommodations-workplace"
+    ]
+  },
+  "categories": {
+
+    "employer_types": {
+      "description": "Categories of covered entities subject to Title I of the ADA, per 29 CFR § 1630.2(b) and EEOC publications.",
+      "terms": {
+        "private_employer": {
+          "canonical": "private_employer",
+          "aliases": ["private company", "for-profit employer", "non-government employer"],
+          "definition": "A person engaged in an industry affecting commerce with 15 or more employees for 20+ weeks in the current or preceding calendar year. Excludes US government, wholly government-owned corporations, and Indian tribes.",
+          "source": "29 CFR § 1630.2(e)(1); EEOC Pub. 'ADA: Your Responsibilities as an Employer'"
+        },
+        "state_local_government": {
+          "canonical": "state_local_government",
+          "aliases": ["state government employer", "local government", "municipal employer", "county employer"],
+          "definition": "State and local government employers are covered by Title I (EEOC-enforced, 15+ employee threshold) and independently by Title II (DOJ-enforced, regardless of size).",
+          "source": "29 CFR § 1630.2(e); EEOC-NVTA-2011-1 Q&A #4"
+        },
+        "employment_agency": {
+          "canonical": "employment_agency",
+          "aliases": ["staffing agency", "recruiter", "placement agency", "temp agency"],
+          "definition": "An entity that procures employees for employers or opportunities for individuals seeking employment. Covered entity under 29 CFR § 1630.2(b).",
+          "source": "29 CFR § 1630.2(b); 29 CFR § 1630.2(c)"
+        },
+        "labor_organization": {
+          "canonical": "labor_organization",
+          "aliases": ["union", "trade union", "labor union", "collective bargaining unit"],
+          "definition": "An organization in which employees participate to deal with employers concerning conditions of employment. Covered entity under 29 CFR § 1630.2(b).",
+          "source": "29 CFR § 1630.2(b)"
+        },
+        "joint_labor_management_committee": {
+          "canonical": "joint_labor_management_committee",
+          "aliases": ["joint committee", "labor-management committee"],
+          "definition": "A committee including both employer and labor organization representatives that controls apprenticeship or other training programs. Covered entity under 29 CFR § 1630.2(b).",
+          "source": "29 CFR § 1630.2(b)"
+        }
+      }
+    },
+
+    "individual_statuses": {
+      "description": "The employment relationship status of the individual asserting ADA rights, which determines scope of applicable protections.",
+      "terms": {
+        "current_employee": {
+          "canonical": "current_employee",
+          "aliases": ["employee", "worker", "staff member", "active employee"],
+          "definition": "An individual employed by a covered entity at the time of the alleged discrimination or accommodation request.",
+          "source": "29 CFR § 1630.2(f); 42 U.S.C. § 12112(a)"
+        },
+        "job_applicant": {
+          "canonical": "job_applicant",
+          "aliases": ["applicant", "candidate", "prospective employee"],
+          "definition": "An individual who has applied for employment with a covered entity. Pre-offer applicants have more limited protections regarding medical inquiries.",
+          "source": "42 U.S.C. § 12112(a); 42 U.S.C. § 12112(d)(2)"
+        },
+        "former_employee": {
+          "canonical": "former_employee",
+          "aliases": ["ex-employee", "separated employee", "terminated employee"],
+          "definition": "An individual who was previously employed by the covered entity. May assert claims related to post-employment references or benefits.",
+          "source": "derived_from: 42 U.S.C. § 12112(a); EEOC v. Aramark Corp. line of cases confirming former employees can sue"
+        }
+      }
+    },
+
+    "disability_bases": {
+      "description": "The three statutory prongs under which an individual may establish disability status under the ADA, per 29 CFR § 1630.2(g).",
+      "terms": {
+        "actual_disability": {
+          "canonical": "actual_disability",
+          "aliases": ["first prong", "actual impairment", "physical or mental impairment"],
+          "definition": "A physical or mental impairment that substantially limits one or more major life activities. Must be established to obtain reasonable accommodation.",
+          "source": "29 CFR § 1630.2(g)(1)(i); EEOC-NVTA-2011-1 Q&A #5"
+        },
+        "record_of_disability": {
+          "canonical": "record_of_disability",
+          "aliases": ["second prong", "record of impairment", "history of disability", "has a record of"],
+          "definition": "A history of, or having been classified as having, a physical or mental impairment that substantially limited a major life activity. Must be established to obtain reasonable accommodation.",
+          "source": "29 CFR § 1630.2(g)(1)(ii), § 1630.2(k); EEOC-NVTA-2011-1 Q&A #5"
+        },
+        "regarded_as": {
+          "canonical": "regarded_as",
+          "aliases": ["third prong", "regarded as having", "perceived disability", "regarded as disabled"],
+          "definition": "Being subjected to an action prohibited by the ADA because of an actual or perceived impairment that is not both transitory (lasting ≤6 months) and minor. Does NOT entitle the individual to reasonable accommodation.",
+          "source": "42 U.S.C. § 12102(3) (post-ADAAA); 29 CFR § 1630.2(g)(1)(iii); 29 CFR § 1630.9(e)"
+        }
+      }
+    },
+
+    "impairment_types": {
+      "description": "Categories of physical and mental impairments recognized under 29 CFR § 1630.2(h). List is non-exhaustive per the regulation.",
+      "terms": {
+        "musculoskeletal": {
+          "canonical": "musculoskeletal",
+          "aliases": ["orthopedic", "bone disorder", "joint disorder", "muscle disorder", "spinal condition"],
+          "definition": "Physiological disorder or condition affecting the musculoskeletal body system, such as back injuries, arthritis, or limb loss.",
+          "source": "29 CFR § 1630.2(h)(1)"
+        },
+        "neurological": {
+          "canonical": "neurological",
+          "aliases": ["nervous system disorder", "brain disorder", "neurologic"],
+          "definition": "Physiological disorder or condition affecting the neurological body system, such as epilepsy, multiple sclerosis, cerebral palsy, or muscular dystrophy.",
+          "source": "29 CFR § 1630.2(h)(1); § 1630.2(j)(3)(iii)"
+        },
+        "cardiovascular": {
+          "canonical": "cardiovascular",
+          "aliases": ["heart condition", "circulatory disorder", "cardiac condition"],
+          "definition": "Physiological disorder or condition affecting the cardiovascular or circulatory body systems.",
+          "source": "29 CFR § 1630.2(h)(1)"
+        },
+        "sensory": {
+          "canonical": "sensory",
+          "aliases": ["special sense organs", "vision impairment", "hearing impairment", "blindness", "deafness"],
+          "definition": "Physiological disorder or condition affecting special sense organs, including vision and hearing impairments. Deafness substantially limits hearing; blindness substantially limits seeing per se.",
+          "source": "29 CFR § 1630.2(h)(1); § 1630.2(j)(3)(iii)"
+        },
+        "respiratory": {
+          "canonical": "respiratory",
+          "aliases": ["lung condition", "breathing disorder", "speech organ disorder"],
+          "definition": "Physiological disorder or condition affecting the respiratory body system, including speech organs.",
+          "source": "29 CFR § 1630.2(h)(1)"
+        },
+        "immune": {
+          "canonical": "immune",
+          "aliases": ["immune system disorder", "autoimmune condition", "HIV", "AIDS"],
+          "definition": "Physiological disorder or condition affecting the immune body system. HIV infection substantially limits immune function per se.",
+          "source": "29 CFR § 1630.2(h)(1); § 1630.2(j)(3)(iii)"
+        },
+        "endocrine": {
+          "canonical": "endocrine",
+          "aliases": ["hormonal disorder", "metabolic disorder", "diabetes", "thyroid condition"],
+          "definition": "Physiological disorder or condition affecting the endocrine body system. Diabetes substantially limits endocrine function per se.",
+          "source": "29 CFR § 1630.2(h)(1); § 1630.2(j)(3)(iii)"
+        },
+        "digestive": {
+          "canonical": "digestive",
+          "aliases": ["gastrointestinal", "GI disorder", "bowel disorder", "Crohn's disease"],
+          "definition": "Physiological disorder or condition affecting the digestive, genitourinary, bowel, or bladder body systems.",
+          "source": "29 CFR § 1630.2(h)(1)"
+        },
+        "reproductive": {
+          "canonical": "reproductive",
+          "aliases": ["reproductive disorder", "gynecological condition"],
+          "definition": "Physiological disorder or condition affecting the reproductive body system.",
+          "source": "29 CFR § 1630.2(h)(1)"
+        },
+        "hemic_lymphatic": {
+          "canonical": "hemic_lymphatic",
+          "aliases": ["blood disorder", "lymphatic disorder", "hematologic condition"],
+          "definition": "Physiological disorder or condition affecting the hemic or lymphatic body systems.",
+          "source": "29 CFR § 1630.2(h)(1)"
+        },
+        "skin": {
+          "canonical": "skin",
+          "aliases": ["dermatological condition", "skin disorder", "cosmetic disfigurement"],
+          "definition": "Physiological disorder, cosmetic disfigurement, or anatomical loss affecting the skin body system.",
+          "source": "29 CFR § 1630.2(h)(1)"
+        },
+        "intellectual_disability": {
+          "canonical": "intellectual_disability",
+          "aliases": ["cognitive disability", "mental retardation (former term)", "developmental disability"],
+          "definition": "Mental or psychological disorder formerly termed mental retardation; substantially limits brain function per se.",
+          "source": "29 CFR § 1630.2(h)(2); § 1630.2(j)(3)(iii)"
+        },
+        "mood_disorder": {
+          "canonical": "mood_disorder",
+          "aliases": ["depression", "major depressive disorder", "bipolar disorder", "depressive disorder"],
+          "definition": "Mental or psychological disorder affecting mood; major depressive disorder and bipolar disorder substantially limit brain function per se.",
+          "source": "29 CFR § 1630.2(h)(2); § 1630.2(j)(3)(iii)"
+        },
+        "anxiety_disorder": {
+          "canonical": "anxiety_disorder",
+          "aliases": ["PTSD", "post-traumatic stress disorder", "OCD", "obsessive compulsive disorder", "phobia"],
+          "definition": "Mental or psychological disorder involving anxiety or trauma-related symptoms; PTSD and OCD substantially limit brain function per se.",
+          "source": "29 CFR § 1630.2(h)(2); § 1630.2(j)(3)(iii)"
+        },
+        "psychotic_disorder": {
+          "canonical": "psychotic_disorder",
+          "aliases": ["schizophrenia", "schizoaffective disorder", "psychosis"],
+          "definition": "Mental or psychological disorder involving psychosis; schizophrenia substantially limits brain function per se.",
+          "source": "29 CFR § 1630.2(h)(2); § 1630.2(j)(3)(iii)"
+        },
+        "learning_disability": {
+          "canonical": "learning_disability",
+          "aliases": ["specific learning disability", "dyslexia", "ADHD", "attention deficit disorder"],
+          "definition": "Mental or psychological disorder categorized as a specific learning disability. May substantially limit major life activities such as learning, reading, or concentrating.",
+          "source": "29 CFR § 1630.2(h)(2)"
+        },
+        "organic_brain_syndrome": {
+          "canonical": "organic_brain_syndrome",
+          "aliases": ["traumatic brain injury", "TBI", "organic mental disorder"],
+          "definition": "Mental or psychological disorder caused by organic or physiological factors affecting the brain.",
+          "source": "29 CFR § 1630.2(h)(2)"
+        },
+        "cancer": {
+          "canonical": "cancer",
+          "aliases": ["malignant neoplasm", "tumor", "carcinoma"],
+          "definition": "Physiological condition substantially limiting normal cell growth per se.",
+          "source": "29 CFR § 1630.2(j)(3)(iii)"
+        },
+        "mobility_impairment": {
+          "canonical": "mobility_impairment",
+          "aliases": ["wheelchair user", "ambulatory impairment", "missing limb", "amputation"],
+          "definition": "Condition involving partially or completely missing limbs or requiring use of a wheelchair; substantially limits musculoskeletal function per se.",
+          "source": "29 CFR § 1630.2(j)(3)(iii)"
+        },
+        "autism_spectrum": {
+          "canonical": "autism_spectrum",
+          "aliases": ["autism", "ASD", "autism spectrum disorder", "Asperger syndrome"],
+          "definition": "Neurological/developmental condition; autism substantially limits brain function per se.",
+          "source": "29 CFR § 1630.2(j)(3)(iii)"
+        }
+      }
+    },
+
+    "major_life_activities": {
+      "description": "Activities and bodily functions recognized as major life activities under 42 U.S.C. § 12102(2) and 29 CFR § 1630.2(i). List is non-exhaustive.",
+      "terms": {
+        "caring_for_oneself": {
+          "canonical": "caring_for_oneself",
+          "aliases": ["self-care", "personal care", "activities of daily living"],
+          "definition": "The major life activity of caring for oneself, including personal hygiene and routine self-maintenance.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "performing_manual_tasks": {
+          "canonical": "performing_manual_tasks",
+          "aliases": ["manual tasks", "hand tasks", "dexterity tasks"],
+          "definition": "The major life activity of performing tasks requiring use of hands or manual dexterity.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "seeing": {
+          "canonical": "seeing",
+          "aliases": ["vision", "visual perception", "sight"],
+          "definition": "The major life activity of seeing. Blindness substantially limits seeing per se.",
+          "source": "29 CFR § 1630.2(i)(1)(i); § 1630.2(j)(3)(iii)"
+        },
+        "hearing": {
+          "canonical": "hearing",
+          "aliases": ["auditory perception", "listening"],
+          "definition": "The major life activity of hearing. Deafness substantially limits hearing per se.",
+          "source": "29 CFR § 1630.2(i)(1)(i); § 1630.2(j)(3)(iii)"
+        },
+        "eating": {
+          "canonical": "eating",
+          "aliases": ["food consumption", "swallowing"],
+          "definition": "The major life activity of eating.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "sleeping": {
+          "canonical": "sleeping",
+          "aliases": ["sleep", "rest"],
+          "definition": "The major life activity of sleeping.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "walking": {
+          "canonical": "walking",
+          "aliases": ["ambulation", "mobility"],
+          "definition": "The major life activity of walking.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "standing": {
+          "canonical": "standing",
+          "aliases": ["standing upright"],
+          "definition": "The major life activity of standing.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "sitting": {
+          "canonical": "sitting",
+          "aliases": ["seated posture"],
+          "definition": "The major life activity of sitting.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "reaching": {
+          "canonical": "reaching",
+          "aliases": ["overhead reach", "arm extension"],
+          "definition": "The major life activity of reaching.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "lifting": {
+          "canonical": "lifting",
+          "aliases": ["carrying", "lifting objects"],
+          "definition": "The major life activity of lifting.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "bending": {
+          "canonical": "bending",
+          "aliases": ["stooping", "crouching"],
+          "definition": "The major life activity of bending.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "speaking": {
+          "canonical": "speaking",
+          "aliases": ["speech", "verbal communication"],
+          "definition": "The major life activity of speaking.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "breathing": {
+          "canonical": "breathing",
+          "aliases": ["respiration"],
+          "definition": "The major life activity of breathing.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "learning": {
+          "canonical": "learning",
+          "aliases": ["acquiring knowledge", "cognitive learning"],
+          "definition": "The major life activity of learning.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "reading": {
+          "canonical": "reading",
+          "aliases": ["reading comprehension"],
+          "definition": "The major life activity of reading.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "concentrating": {
+          "canonical": "concentrating",
+          "aliases": ["concentration", "focus", "attention"],
+          "definition": "The major life activity of concentrating.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "thinking": {
+          "canonical": "thinking",
+          "aliases": ["cognitive function", "cognition", "reasoning"],
+          "definition": "The major life activity of thinking.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "communicating": {
+          "canonical": "communicating",
+          "aliases": ["communication", "expressing oneself"],
+          "definition": "The major life activity of communicating.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "interacting_with_others": {
+          "canonical": "interacting_with_others",
+          "aliases": ["social interaction", "interpersonal interaction", "getting along with others"],
+          "definition": "The major life activity of interacting with others.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "working": {
+          "canonical": "working",
+          "aliases": ["employment", "performing a job"],
+          "definition": "The major life activity of working. EEOC and courts treat this as a last resort — impairment should be evaluated against other major life activities first.",
+          "source": "29 CFR § 1630.2(i)(1)(i)"
+        },
+        "major_bodily_functions": {
+          "canonical": "major_bodily_functions",
+          "aliases": ["bodily functions", "physiological functions", "organ functions"],
+          "definition": "The operation of major bodily functions including: immune system, special sense organs and skin, normal cell growth, digestive, genitourinary, bowel, bladder, neurological, brain, respiratory, circulatory, cardiovascular, endocrine, hemic, lymphatic, musculoskeletal, and reproductive functions. Includes operation of an individual organ within a body system.",
+          "source": "42 U.S.C. § 12102(2)(B); 29 CFR § 1630.2(i)(1)(ii)"
+        }
+      }
+    },
+
+    "limitation_severities": {
+      "description": "Gradations of functional limitation severity used in assessing whether an impairment 'substantially limits' a major life activity under 29 CFR § 1630.2(j).",
+      "terms": {
+        "mild": {
+          "canonical": "mild",
+          "aliases": ["minor limitation", "slight impairment"],
+          "definition": "Functional limitation that is noticeable but does not meaningfully restrict performance of a major life activity compared to most people. Does not meet the 'substantially limits' threshold under current ADAAA standard.",
+          "source": "derived_from: 29 CFR § 1630.2(j)(1)(ii)"
+        },
+        "moderate": {
+          "canonical": "moderate",
+          "aliases": ["moderate limitation", "meaningful restriction"],
+          "definition": "Functional limitation that restricts performance of a major life activity in condition, manner, or duration compared to most people. May meet 'substantially limits' threshold depending on individualized assessment.",
+          "source": "derived_from: 29 CFR § 1630.2(j)(1)(i)-(ii), § 1630.2(j)(4)"
+        },
+        "substantial": {
+          "canonical": "substantial",
+          "aliases": ["substantially limiting", "significantly restricts", "considerable limitation"],
+          "definition": "Functional limitation meeting the 'substantially limits' standard — restricts the ability to perform a major life activity as compared to most people in the general population. Does not require prevention or severe restriction.",
+          "source": "29 CFR § 1630.2(j)(1)(i)-(ii)"
+        },
+        "severe": {
+          "canonical": "severe",
+          "aliases": ["severe limitation", "inability to perform", "total restriction"],
+          "definition": "Functional limitation that prevents or nearly prevents performance of a major life activity. Clearly meets the 'substantially limits' standard but is not required for ADA coverage.",
+          "source": "derived_from: 29 CFR § 1630.2(j)(1)(ii) (clarifying that prevention is not required)"
+        }
+      }
+    },
+
+    "limitation_durations": {
+      "description": "Duration categories for impairments, relevant to determining whether 'substantially limits' standard is met and whether the 'transitory and minor' defense applies.",
+      "terms": {
+        "temporary_minor": {
+          "canonical": "temporary_minor",
+          "aliases": ["transitory and minor", "short-term minor", "brief impairment"],
+          "definition": "Impairment lasting or expected to last six months or less AND minor in severity. Defense to 'regarded as' coverage under 29 CFR § 1630.15(f). Does NOT automatically preclude 'actual disability' or 'record of' coverage.",
+          "source": "29 CFR § 1630.15(f)"
+        },
+        "temporary_extended": {
+          "canonical": "temporary_extended",
+          "aliases": ["temporary substantial", "extended duration", "months-long impairment"],
+          "definition": "Impairment with a temporary or uncertain duration that is nonetheless substantially limiting when active. Short-term impairments can qualify under the ADAAA.",
+          "source": "derived_from: 29 CFR § 1630.2(j)(1)(ix); EEOC-NVTA-2011-1 Q&A (no per se exclusion for short duration)"
+        },
+        "long_term": {
+          "canonical": "long_term",
+          "aliases": ["chronic condition", "ongoing impairment", "long-duration impairment"],
+          "definition": "Impairment expected to persist for more than six months, potentially for years. Strongly supports 'substantially limits' finding.",
+          "source": "derived_from: 29 CFR § 1630.2(j)(1)"
+        },
+        "permanent": {
+          "canonical": "permanent",
+          "aliases": ["lifelong", "permanent impairment", "irreversible condition"],
+          "definition": "Impairment with no expected improvement or recovery. Definitively meets duration requirement for 'substantially limits' analysis.",
+          "source": "derived_from: 29 CFR § 1630.2(j)(1)"
+        }
+      }
+    },
+
+    "accommodation_types": {
+      "description": "Categories of modifications or adjustments that may constitute reasonable accommodations under 29 CFR § 1630.2(o) and EEOC Enforcement Guidance.",
+      "terms": {
+        "job_restructuring": {
+          "canonical": "job_restructuring",
+          "aliases": ["restructuring job duties", "reassigning marginal functions", "modifying job tasks"],
+          "definition": "Reallocating or redistributing marginal (non-essential) job functions to other employees. Employers are never required to eliminate essential functions.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § Types of Reasonable Accommodations; EEOC Pub. ADA Responsibilities"
+        },
+        "modified_schedule": {
+          "canonical": "modified_schedule",
+          "aliases": ["modified work schedule", "part-time schedule", "flexible schedule", "altered hours", "flex time"],
+          "definition": "Modifying when or how many hours an employee works, including part-time hours, modified shifts, or flexible start/end times.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § Modified or Part-Time Schedule; ADA National Network Fact Sheet"
+        },
+        "reassignment": {
+          "canonical": "reassignment",
+          "aliases": ["transfer", "reassignment to vacant position", "job transfer"],
+          "definition": "Placing the employee in a vacant position for which the employee is qualified when no effective accommodation exists in the current position. Employer need not create a new position or displace another employee.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § Reassignment; ADA National Network Fact Sheet"
+        },
+        "equipment_modification": {
+          "canonical": "equipment_modification",
+          "aliases": ["assistive technology", "adaptive equipment", "modified equipment", "acquiring equipment"],
+          "definition": "Acquiring or modifying equipment, tools, or assistive technology to enable performance of essential functions.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § General Principles; JAN Guide § I"
+        },
+        "policy_modification": {
+          "canonical": "policy_modification",
+          "aliases": ["modified workplace policy", "policy exception", "changing workplace rules"],
+          "definition": "Changing workplace rules, policies, or practices to remove a barrier. Includes exceptions to attendance, conduct, or leave policies.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § Modified Workplace Policies"
+        },
+        "reader_interpreter": {
+          "canonical": "reader_interpreter",
+          "aliases": ["sign language interpreter", "reader", "communication aide", "ASL interpreter"],
+          "definition": "Providing a qualified reader or interpreter to enable an employee with a sensory or communication impairment to perform job functions.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § General Principles; JAN Guide § I"
+        },
+        "leave_as_accommodation": {
+          "canonical": "leave_as_accommodation",
+          "aliases": ["medical leave", "leave of absence", "ADA leave", "unpaid leave accommodation"],
+          "definition": "Providing leave (paid or unpaid) for treatment, recovery, or management of a disability-related condition, beyond what FMLA or employer policy may otherwise provide.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § Leave"
+        },
+        "telework": {
+          "canonical": "telework",
+          "aliases": ["remote work", "work from home", "telecommuting", "WFH"],
+          "definition": "Permitting an employee to work from a location other than the employer's premises, where the essential functions can be performed remotely.",
+          "source": "derived_from: EEOC Enforcement Guidance No. 915.002 § Modified Workplace Policies; JAN Guide"
+        },
+        "facility_access": {
+          "canonical": "facility_access",
+          "aliases": ["accessible facilities", "physical access", "accessibility modification", "reserved parking"],
+          "definition": "Making existing facilities accessible, including reserved parking, accessible workstations, ramp access, or other physical modifications.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § General Principles; ADA National Network Fact Sheet"
+        },
+        "other": {
+          "canonical": "other",
+          "aliases": ["other accommodation", "alternative accommodation", "additional modification"],
+          "definition": "Any modification or adjustment not classifiable in the above categories that nonetheless enables the individual to enjoy equal employment opportunities.",
+          "source": "derived_from: 29 CFR § 1630.2(o)"
+        }
+      }
+    },
+
+    "accommodation_purposes": {
+      "description": "The three categories of purpose for which reasonable accommodation is required under 29 CFR § 1630.2(o) and EEOC guidance.",
+      "terms": {
+        "application_process": {
+          "canonical": "application_process",
+          "aliases": ["hiring process", "interview process", "application accommodation"],
+          "definition": "Modifications or adjustments to a job application process that enable a qualified applicant with a disability to be considered for the position.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § General Principles (citing 29 CFR § 1630.2(o)(1)(i))"
+        },
+        "performing_job_functions": {
+          "canonical": "performing_job_functions",
+          "aliases": ["job performance", "performing essential functions", "work accommodation"],
+          "definition": "Modifications or adjustments to the work environment or how the position is performed that enable a qualified individual with a disability to perform the essential functions of that position.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § General Principles (citing 29 CFR § 1630.2(o)(1)(ii))"
+        },
+        "accessing_benefits_privileges": {
+          "canonical": "accessing_benefits_privileges",
+          "aliases": ["equal benefits", "benefits accommodation", "privileges of employment"],
+          "definition": "Modifications or adjustments that enable an employee with a disability to enjoy equal benefits and privileges of employment as enjoyed by similarly situated employees without disabilities.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § General Principles (citing 29 CFR § 1630.2(o)(1)(iii))"
+        }
+      }
+    },
+
+    "undue_hardship_factors": {
+      "description": "Factors for determining whether an accommodation imposes an undue hardship under 29 CFR § 1630.2(p). All factors must be considered; no single factor is determinative.",
+      "terms": {
+        "net_cost": {
+          "canonical": "net_cost",
+          "aliases": ["cost of accommodation", "financial cost", "net accommodation cost"],
+          "definition": "The net cost of the accommodation to the covered entity, taking into account tax credits, deductions, and funding from outside sources (e.g., state vocational rehabilitation).",
+          "source": "29 CFR § 1630.2(p)(2)(i)"
+        },
+        "facility_resources": {
+          "canonical": "facility_resources",
+          "aliases": ["facility financial resources", "site resources", "location resources"],
+          "definition": "The overall financial resources of the specific facility involved in the accommodation, including the number of employees and the effect on expenses and resources.",
+          "source": "derived_from: 29 CFR § 1630.2(p)(2)(ii)"
+        },
+        "entity_resources": {
+          "canonical": "entity_resources",
+          "aliases": ["overall employer resources", "enterprise resources", "company financial resources"],
+          "definition": "The overall financial resources of the covered entity, the overall size of the business, and the number of employees.",
+          "source": "derived_from: 29 CFR § 1630.2(p)(2)(ii)"
+        },
+        "operation_type": {
+          "canonical": "operation_type",
+          "aliases": ["type of operation", "nature of business", "business type"],
+          "definition": "The type of operation(s) of the covered entity, including the composition, structure, and functions of the workforce.",
+          "source": "derived_from: 29 CFR § 1630.2(p)(2)(ii)"
+        },
+        "workforce_composition": {
+          "canonical": "workforce_composition",
+          "aliases": ["workforce structure", "employee composition"],
+          "definition": "The composition and structure of the covered entity's workforce, relevant to assessing operational impact of the accommodation.",
+          "source": "derived_from: 29 CFR § 1630.2(p)(2)(ii)"
+        },
+        "geographic_separateness": {
+          "canonical": "geographic_separateness",
+          "aliases": ["geographic separation", "physical separation of facilities", "multi-site employer"],
+          "definition": "The geographic separateness of the facility from the parent entity, relevant to assessing whether entity-level resources are reasonably available.",
+          "source": "derived_from: 29 CFR § 1630.2(p)(2)(iii)"
+        },
+        "administrative_relationship": {
+          "canonical": "administrative_relationship",
+          "aliases": ["fiscal relationship", "administrative independence", "parent-subsidiary relationship"],
+          "definition": "The degree to which the facility is administratively or fiscally separate from the parent entity.",
+          "source": "derived_from: 29 CFR § 1630.2(p)(2)(iii)"
+        },
+        "operational_impact": {
+          "canonical": "operational_impact",
+          "aliases": ["impact on operations", "business disruption", "operational burden"],
+          "definition": "The impact of the accommodation on the operation of the facility, including the impact on the ability to conduct business and provide services.",
+          "source": "derived_from: 29 CFR § 1630.2(p)(2)(ii)"
+        },
+        "impact_on_other_employees": {
+          "canonical": "impact_on_other_employees",
+          "aliases": ["coworker impact", "workforce disruption", "morale impact"],
+          "definition": "The impact of the accommodation on other employees, including whether the accommodation would require other employees to perform additional duties or work longer hours.",
+          "source": "derived_from: 29 CFR § 1630.2(p)(2)(ii)"
+        }
+      }
+    },
+
+    "direct_threat_factors": {
+      "description": "Factors for assessing whether an individual poses a direct threat under 29 CFR § 1630.2(r). All four factors must be assessed based on objective, individualized evidence.",
+      "terms": {
+        "risk_duration": {
+          "canonical": "risk_duration",
+          "aliases": ["duration of risk", "length of threat period", "how long the risk exists"],
+          "definition": "The duration of the risk — how long the potential threat to health or safety would exist.",
+          "source": "derived_from: 29 CFR § 1630.2(r)"
+        },
+        "harm_nature_severity": {
+          "canonical": "harm_nature_severity",
+          "aliases": ["nature of harm", "severity of harm", "type of harm"],
+          "definition": "The nature and severity of the potential harm — what kind of harm might result and how serious it would be.",
+          "source": "derived_from: 29 CFR § 1630.2(r)"
+        },
+        "harm_likelihood": {
+          "canonical": "harm_likelihood",
+          "aliases": ["likelihood of harm", "probability of harm", "risk probability"],
+          "definition": "The likelihood that potential harm will actually occur, assessed on the basis of objective, medical evidence rather than speculation or stereotypes.",
+          "source": "derived_from: 29 CFR § 1630.2(r)"
+        },
+        "harm_imminence": {
+          "canonical": "harm_imminence",
+          "aliases": ["imminence of harm", "immediacy of risk", "how soon harm could occur"],
+          "definition": "The imminence of the potential harm — how soon the harm might occur. Remote or speculative risks do not meet the direct threat standard.",
+          "source": "29 CFR § 1630.2(r)"
+        }
+      }
+    },
+
+    "interactive_process_steps": {
+      "description": "Sequential steps in the informal interactive process between employer and employee for identifying and implementing reasonable accommodations, per EEOC Enforcement Guidance and ADA National Network guidance.",
+      "terms": {
+        "request_received": {
+          "canonical": "request_received",
+          "aliases": ["accommodation request", "initial request", "disclosure received"],
+          "definition": "The employee or applicant notifies the employer (verbally, in writing, or through any communication) that an accommodation is needed. Requests need not use magic words.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § Requesting Reasonable Accommodation"
+        },
+        "acknowledgment": {
+          "canonical": "acknowledgment",
+          "aliases": ["request acknowledged", "employer confirms receipt"],
+          "definition": "The employer confirms receipt of the accommodation request and communicates the next steps to the employee. Failure to acknowledge does not relieve the obligation.",
+          "source": "derived_from: EEOC Enforcement Guidance No. 915.002; ADA National Network Fact Sheet"
+        },
+        "dialogue_initiated": {
+          "canonical": "dialogue_initiated",
+          "aliases": ["interactive dialogue", "interactive process begun", "conversation started"],
+          "definition": "The employer engages in an informal interactive dialogue to clarify the individual's needs, understand workplace barriers, and explore potential accommodations.",
+          "source": "EEOC Enforcement Guidance No. 915.002 (citing 29 CFR § 1630 Appendix); ADA National Network Fact Sheet"
+        },
+        "documentation_requested": {
+          "canonical": "documentation_requested",
+          "aliases": ["medical documentation requested", "employer requests documentation"],
+          "definition": "Where the disability or need for accommodation is not obvious or already known, the employer may request reasonable documentation from a healthcare provider. Employer may not request documentation that seeks more information than necessary.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § Requesting Reasonable Accommodation; EEOC-NVTA-2011-1"
+        },
+        "documentation_received": {
+          "canonical": "documentation_received",
+          "aliases": ["medical records received", "documentation submitted"],
+          "definition": "The employer has received sufficient documentation from the employee's healthcare provider to assess the disability and need for accommodation.",
+          "source": "derived_from: EEOC Enforcement Guidance No. 915.002"
+        },
+        "alternatives_explored": {
+          "canonical": "alternatives_explored",
+          "aliases": ["accommodation options explored", "alternatives considered", "options identified"],
+          "definition": "The employer and employee have considered multiple accommodation options, consulting resources such as JAN. Employer may choose among effective options.",
+          "source": "ADA National Network Fact Sheet § RA Process; EEOC Enforcement Guidance No. 915.002"
+        },
+        "written_response": {
+          "canonical": "written_response",
+          "aliases": ["written determination", "accommodation decision letter", "employer response"],
+          "definition": "The employer communicates its decision regarding the accommodation request, either granting, modifying, or denying the request with explanation.",
+          "source": "derived_from: EEOC Enforcement Guidance No. 915.002"
+        },
+        "implementation": {
+          "canonical": "implementation",
+          "aliases": ["accommodation implemented", "accommodation in place", "accommodation active"],
+          "definition": "The agreed-upon reasonable accommodation has been put into effect. Employer should follow up to confirm effectiveness.",
+          "source": "ADA National Network Fact Sheet § RA Process"
+        }
+      }
+    },
+
+    "inquiry_stages": {
+      "description": "The three stages of employment at which disability-related inquiries and medical examinations are regulated under 42 U.S.C. § 12112(d) and 29 CFR §§ 1630.13–1630.14.",
+      "terms": {
+        "pre_offer": {
+          "canonical": "pre_offer",
+          "aliases": ["pre-employment", "before job offer", "pre-offer stage"],
+          "definition": "Stage prior to a conditional offer of employment. No disability-related questions or medical examinations permitted, even if job-related.",
+          "source": "42 U.S.C. § 12112(d)(2); JAN Guide § II.B.1"
+        },
+        "post_offer": {
+          "canonical": "post_offer",
+          "aliases": ["post-offer", "after job offer", "conditional offer stage"],
+          "definition": "Stage after a conditional job offer but before commencement of employment. Employer may ask any disability-related questions and require medical examinations, provided all entering employees in the same job category are subject to the same requirements.",
+          "source": "42 U.S.C. § 12112(d)(3); JAN Guide § II.C.2"
+        },
+        "during_employment": {
+          "canonical": "during_employment",
+          "aliases": ["current employee inquiry", "employment stage", "during employment stage"],
+          "definition": "Stage after employment has commenced. Disability-related inquiries and medical examinations must be job-related and consistent with business necessity.",
+          "source": "42 U.S.C. § 12112(d)(4); JAN Guide § II"
+        }
+      }
+    },
+
+    "inquiry_types": {
+      "description": "Categories of disability-related inquiries and examinations regulated by 42 U.S.C. § 12112(d) and 29 CFR §§ 1630.13–1630.14.",
+      "terms": {
+        "disability_related_question": {
+          "canonical": "disability_related_question",
+          "aliases": ["medical question", "disability inquiry", "health question"],
+          "definition": "A question that is likely to elicit information about a disability — e.g., asking whether an employee has a disability, takes prescription medications, or has had a workers' compensation claim.",
+          "source": "EEOC Q&A on Disability-Related Inquiries (eeoc.gov/laws/guidance/questions-and-answers-enforcement-guidance-disability-related-inquiries)"
+        },
+        "medical_examination": {
+          "canonical": "medical_examination",
+          "aliases": ["physical exam", "medical exam", "fitness for duty exam"],
+          "definition": "A procedure or test usually given by a health care professional or in a medical setting that seeks information about an individual's physical or mental impairments or health.",
+          "source": "EEOC Q&A on Disability-Related Inquiries (eeoc.gov/laws/guidance/questions-and-answers-enforcement-guidance-disability-related-inquiries)"
+        },
+        "request_for_documentation": {
+          "canonical": "request_for_documentation",
+          "aliases": ["documentation request", "medical records request", "healthcare provider documentation"],
+          "definition": "A request for documentation from a healthcare provider to confirm the existence of a disability and the need for a specific accommodation. Permitted during the interactive process where disability or need is not obvious.",
+          "source": "EEOC Enforcement Guidance No. 915.002 § Requesting Reasonable Accommodation; EEOC-NVTA-2011-1"
+        }
+      }
+    },
+
+    "adverse_action_types": {
+      "description": "Categories of adverse employment actions that may constitute discrimination under 42 U.S.C. § 12112(a) if taken on the basis of disability.",
+      "terms": {
+        "termination": {
+          "canonical": "termination",
+          "aliases": ["firing", "discharge", "dismissal", "laid off"],
+          "definition": "Involuntary separation of employment. Expressly covered by 42 U.S.C. § 12112(a).",
+          "source": "42 U.S.C. § 12112(a); EEOC Pub. ADA: Your Responsibilities"
+        },
+        "demotion": {
+          "canonical": "demotion",
+          "aliases": ["reduction in rank", "downgrade", "reduced position"],
+          "definition": "Reduction in job title, responsibility, or status.",
+          "source": "derived_from: 42 U.S.C. § 12112(a) ('advancement')"
+        },
+        "failure_to_hire": {
+          "canonical": "failure_to_hire",
+          "aliases": ["refusal to hire", "not hired", "rejection of application"],
+          "definition": "Denial of employment to a qualified applicant on the basis of disability.",
+          "source": "42 U.S.C. § 12112(a)"
+        },
+        "failure_to_promote": {
+          "canonical": "failure_to_promote",
+          "aliases": ["denied promotion", "promotion denial"],
+          "definition": "Denial of advancement or promotion on the basis of disability.",
+          "source": "42 U.S.C. § 12112(a)"
+        },
+        "pay_reduction": {
+          "canonical": "pay_reduction",
+          "aliases": ["wage reduction", "compensation reduction", "salary cut"],
+          "definition": "Reduction in compensation on the basis of disability.",
+          "source": "42 U.S.C. § 12112(a) ('employee compensation')"
+        },
+        "unfavorable_transfer": {
+          "canonical": "unfavorable_transfer",
+          "aliases": ["adverse transfer", "forced transfer", "involuntary relocation"],
+          "definition": "Transfer to a less desirable position, location, or shift on the basis of disability.",
+          "source": "derived_from: 42 U.S.C. § 12112(a) ('terms, conditions, and privileges of employment')"
+        },
+        "exclusion_from_training": {
+          "canonical": "exclusion_from_training",
+          "aliases": ["denied training", "training exclusion", "professional development denied"],
+          "definition": "Exclusion from job training opportunities on the basis of disability.",
+          "source": "42 U.S.C. § 12112(a) ('job training')"
+        },
+        "discipline": {
+          "canonical": "discipline",
+          "aliases": ["disciplinary action", "written warning", "suspension", "PIP"],
+          "definition": "Imposition of disciplinary measures on the basis of disability-related conduct.",
+          "source": "derived_from: 42 U.S.C. § 12112(a) ('terms, conditions, and privileges of employment')"
+        },
+        "other": {
+          "canonical": "other",
+          "aliases": ["other adverse action", "adverse employment decision"],
+          "definition": "Any other adverse employment action not listed above that affects the terms, conditions, or privileges of employment.",
+          "source": "42 U.S.C. § 12112(a) ('other terms, conditions, and privileges of employment')"
+        }
+      }
+    },
+
+    "discrimination_types": {
+      "description": "Legal theories of discrimination under the ADA, per 29 CFR §§ 1630.4–1630.10 and 1630.15.",
+      "terms": {
+        "disparate_treatment": {
+          "canonical": "disparate_treatment",
+          "aliases": ["intentional discrimination", "differential treatment", "direct discrimination"],
+          "definition": "Treating a qualified individual less favorably because of disability. Defense: legitimate, nondiscriminatory reason. Governed by 29 CFR § 1630.15(a).",
+          "source": "29 CFR § 1630.15(a)"
+        },
+        "disparate_impact": {
+          "canonical": "disparate_impact",
+          "aliases": ["adverse impact", "neutral policy with discriminatory effect"],
+          "definition": "A neutral policy or practice that disproportionately excludes individuals with disabilities. Defense: job-related and consistent with business necessity, and cannot be accomplished with reasonable accommodation.",
+          "source": "29 CFR § 1630.15(b)-(c); 42 U.S.C. § 12112(b)(6)"
+        }
+      }
+    },
+
+    "harassment_types": {
+      "description": "Forms of disability-based harassment creating a hostile work environment under 42 U.S.C. § 12112(a).",
+      "terms": {
+        "verbal": {
+          "canonical": "verbal",
+          "aliases": ["verbal harassment", "name-calling", "offensive comments", "slurs"],
+          "definition": "Harassment through spoken or written words, including derogatory comments, slurs, or offensive jokes about disability.",
+          "source": "derived_from: 42 U.S.C. § 12112(a); EEOC harassment guidance"
+        },
+        "physical": {
+          "canonical": "physical",
+          "aliases": ["physical harassment", "unwanted physical contact", "physical intimidation"],
+          "definition": "Harassment through physical acts, including unwanted touching, interference with assistive devices, or physical intimidation.",
+          "source": "derived_from: 42 U.S.C. § 12112(a); EEOC harassment guidance"
+        },
+        "visual": {
+          "canonical": "visual",
+          "aliases": ["visual harassment", "offensive imagery", "hostile visual displays"],
+          "definition": "Harassment through visual displays, including offensive images, cartoons, or symbols related to disability.",
+          "source": "derived_from: 42 U.S.C. § 12112(a); EEOC harassment guidance"
+        },
+        "other": {
+          "canonical": "other",
+          "aliases": ["other harassment", "non-verbal harassment"],
+          "definition": "Harassment through other conduct not classifiable as verbal, physical, or visual, but that creates a hostile or abusive work environment.",
+          "source": "derived_from: 42 U.S.C. § 12112(a)"
+        }
+      }
+    },
+
+    "protected_activity_types": {
+      "description": "Activities protected from retaliation under 42 U.S.C. § 12203.",
+      "terms": {
+        "accommodation_request": {
+          "canonical": "accommodation_request",
+          "aliases": ["requesting accommodation", "RA request"],
+          "definition": "Requesting a reasonable accommodation from the employer. Protected from retaliation regardless of whether the underlying accommodation request is ultimately granted.",
+          "source": "derived_from: 42 U.S.C. § 12203; EEOC Pub. ADA: Your Responsibilities"
+        },
+        "eeoc_complaint": {
+          "canonical": "eeoc_complaint",
+          "aliases": ["filing a charge", "EEOC charge", "discrimination complaint"],
+          "definition": "Filing a charge of discrimination with the EEOC or a state/local fair employment agency.",
+          "source": "42 U.S.C. § 12203; EEOC Pub. ADA: Your Responsibilities"
+        },
+        "participation_in_investigation": {
+          "canonical": "participation_in_investigation",
+          "aliases": ["witness in investigation", "participating in EEOC proceeding", "testifying"],
+          "definition": "Participating in an investigation, proceeding, or hearing under the ADA.",
+          "source": "42 U.S.C. § 12203"
+        },
+        "opposition_to_discrimination": {
+          "canonical": "opposition_to_discrimination",
+          "aliases": ["opposing discrimination", "complaining to employer", "internal complaint"],
+          "definition": "Opposing any act or practice made unlawful by the ADA, including making an internal complaint to an employer about disability discrimination.",
+          "source": "42 U.S.C. § 12203"
+        }
+      }
+    },
+
+    "risk_levels": {
+      "description": "Ordinal risk ratings used in violation risk scoring across all modules.",
+      "terms": {
+        "minimal": {
+          "canonical": "minimal",
+          "aliases": ["negligible risk", "very low risk"],
+          "definition": "No identified legal exposure; employer conduct is clearly compliant.",
+          "source": "derived_from: Engine design — not a statutory term"
+        },
+        "low": {
+          "canonical": "low",
+          "aliases": ["low risk", "minor concern"],
+          "definition": "Minor procedural gap or ambiguity; unlikely to result in liability absent additional conduct.",
+          "source": "derived_from: Engine design — not a statutory term"
+        },
+        "moderate": {
+          "canonical": "moderate",
+          "aliases": ["moderate risk", "elevated concern"],
+          "definition": "Identifiable compliance gap; EEOC investigation likely if charge filed; settlement risk.",
+          "source": "derived_from: Engine design — not a statutory term"
+        },
+        "high": {
+          "canonical": "high",
+          "aliases": ["high risk", "significant exposure"],
+          "definition": "Clear violation or multiple compounding violations; substantial litigation risk.",
+          "source": "derived_from: Engine design — not a statutory term"
+        },
+        "critical": {
+          "canonical": "critical",
+          "aliases": ["critical risk", "severe exposure", "per se violation"],
+          "definition": "Per se violation or pattern of conduct presenting maximum legal exposure; immediate corrective action warranted.",
+          "source": "derived_from: Engine design — not a statutory term"
+        }
+      }
+    },
+
+    "determination_states": {
+      "description": "Boolean-plus states for decision engine output fields where a determination cannot always be made to yes/no.",
+      "terms": {
+        "yes": {
+          "canonical": "yes",
+          "aliases": ["true", "met", "established", "qualifies"],
+          "definition": "The condition, criterion, or threshold is satisfied based on available inputs.",
+          "source": "derived_from: Engine design"
+        },
+        "no": {
+          "canonical": "no",
+          "aliases": ["false", "not met", "not established", "does not qualify"],
+          "definition": "The condition, criterion, or threshold is not satisfied based on available inputs.",
+          "source": "derived_from: Engine design"
+        },
+        "indeterminate": {
+          "canonical": "indeterminate",
+          "aliases": ["unknown", "insufficient information", "cannot determine", "needs more information"],
+          "definition": "Insufficient information was provided to reach a yes/no determination; additional facts or documentation required.",
+          "source": "derived_from: Engine design"
+        }
+      }
+    },
+
+    "proximity_strengths": {
+      "description": "Temporal proximity ratings between an employee's protected activity and an adverse action, used in retaliation risk analysis.",
+      "terms": {
+        "strong": {
+          "canonical": "strong",
+          "aliases": ["very close in time", "immediate", "close temporal proximity"],
+          "definition": "Adverse action occurred within 30 days of protected activity. Courts generally find this sufficient alone to establish temporal proximity for retaliation inference.",
+          "source": "derived_from: Engine design; consistent with retaliation case law standards"
+        },
+        "moderate": {
+          "canonical": "moderate",
+          "aliases": ["somewhat close in time", "months after"],
+          "definition": "Adverse action occurred 31–90 days after protected activity. Temporal proximity still supportive but requires additional corroborating evidence.",
+          "source": "derived_from: Engine design; consistent with retaliation case law standards"
+        },
+        "weak": {
+          "canonical": "weak",
+          "aliases": ["distant in time", "several months after"],
+          "definition": "Adverse action occurred 91–180 days after protected activity. Temporal proximity alone unlikely to support retaliation inference; other evidence needed.",
+          "source": "derived_from: Engine design; consistent with retaliation case law standards"
+        },
+        "minimal": {
+          "canonical": "minimal",
+          "aliases": ["very distant in time", "more than six months after"],
+          "definition": "Adverse action occurred more than 180 days after protected activity. Temporal proximity factor disfavors retaliation inference; strong other evidence required.",
+          "source": "derived_from: Engine design; consistent with retaliation case law standards"
+        }
+      }
+    }
+
+  }
+}

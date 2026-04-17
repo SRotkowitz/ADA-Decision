@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "generated": "2026-04-17",
+    "phase": "Phase 1 — Source Ingestion",
+    "description": "Documents all URL substitutions and failed fetches during Phase 1 source ingestion"
+  },
+  "fallbacks": [
+    {
+      "source_number": "08",
+      "original_url": "https://www.eeoc.gov/laws/guidance/ada-amendments-act-2008-frequently-asked-questions",
+      "reason": "404 client error — URL does not exist on EEOC website",
+      "substitute_url": "https://www.eeoc.gov/laws/guidance/questions-and-answers-final-rule-implementing-ada-amendments-act-2008",
+      "substitute_status": "SUCCESS — full Q&A document retrieved",
+      "substitute_citation": "EEOC-NVTA-2011-1 (Mar. 25, 2011)",
+      "date_attempted": "2026-04-17",
+      "notes": "The substitute URL is the EEOC's definitive Q&A on the ADAAA final rule, which is the post-ADAAA FAQ equivalent and arguably a stronger source than the original target."
+    },
+    {
+      "source_number": "09",
+      "original_url": "https://www.eeoc.gov/laws/guidance/regulations-implement-amendments-act-2008",
+      "reason": "404 client error — URL does not exist on EEOC website",
+      "substitute_url": "https://www.law.cornell.edu/cfr/text/29/1630.2",
+      "substitute_status": "CONTENT COVERED — ADAAA implementing regulations are codified at 29 CFR Part 1630, already fetched as Source 03 (primary). Federal Register original (76 FR 16978, Mar. 25, 2011) not fetched separately.",
+      "substitute_citation": "29 C.F.R. § 1630.2 (current text reflects ADAAA amendments)",
+      "date_attempted": "2026-04-17",
+      "notes": "Cornell LII serves the current, post-amendment CFR text. Source 03 already contains all ADAAA regulatory content. No content gap."
+    },
+    {
+      "source_number": "11",
+      "original_url": "https://www.eeoc.gov/laws/guidance/disability-discrimination",
+      "reason": "URL redirected to EEOC Youth page (https://www.eeoc.gov/youth/disability-discrimination-01) — not the intended guidance document. Fallback attempt to https://www.eeoc.gov/eeoc-disability-related-resources returned navigation page only, no substantive text.",
+      "substitute_url": "N/A — content covered by Sources 01, 03, 06, 07",
+      "substitute_status": "COVERED BY OTHER SOURCES — no gap in vocabulary or module content",
+      "substitute_citation": "N/A",
+      "date_attempted": "2026-04-17",
+      "notes": "The EEOC has reorganized its website. The disability discrimination topic-level page now appears to be at https://www.eeoc.gov/eeoc-disability-related-resources but serves as a resource index, not substantive guidance. Operative content (what constitutes disability discrimination, harassment, retaliation) is fully covered by other fetched sources."
+    }
+  ],
+  "summary": {
+    "total_sources": 12,
+    "primary_fetched": 9,
+    "fallback_used": 1,
+    "covered_by_other_sources": 2,
+    "content_gaps": 0
+  }
+}
