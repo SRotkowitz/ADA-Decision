@@ -1,0 +1,512 @@
+{
+  "module": "ada_coverage_eligibility",
+  "version": "0.2",
+  "last_updated": "2026-04-17",
+  "description": "Rule-based and standards-based logic for Module 1 Coverage & Eligibility. All rules are deterministic: given identical inputs, identical outputs are produced. Standards-based components produce yes/no/indeterminate from enumerated factors in a fixed evaluation order.",
+  "execution_order": [
+    "employer_coverage",
+    "individual_status",
+    "disability_determination",
+    "qualified_individual"
+  ],
+  "execution_notes": "Components 1.1 and 1.2 must resolve before 1.3 and 1.4 are executed. If is_covered_employer is false OR is_covered_individual is false, components 1.3 and 1.4 should be flagged as 'not_reached' and the module should return early with a coverage failure. This avoids performing unnecessary disability analysis on uncovered parties.",
+  "rules": [
+
+    {
+      "rule_id": "R001",
+      "component": "employer_coverage",
+      "description": "State/local governments, employment agencies, labor organizations, and joint labor-management committees are categorically covered entities under ADA Title I regardless of employee count.",
+      "determination_type": "rule_based",
+      "condition": "employer_type IN ['state_local_government', 'employment_agency', 'labor_organization', 'joint_labor_management_committee']",
+      "result": {
+        "is_covered_employer": true,
+        "coverage_basis": "categorical_coverage"
+      },
+      "reasoning_template": "The employer is a {employer_type}, which is a categorically covered entity under 42 U.S.C. § 12111(5)(B) and 29 CFR § 1630.2(b). The 15-employee threshold does not apply to this entity type.",
+      "source_citation": "42 U.S.C. § 12111(5)(B); 29 CFR § 1630.2(b)"
+    },
+
+    {
+      "rule_id": "R002",
+      "component": "employer_coverage",
+      "description": "Private employer is covered if it had 15 or more employees for each working day in each of 20 or more calendar workweeks in the current or preceding calendar year.",
+      "determination_type": "rule_based",
+      "condition": "employer_type == 'private_employer' AND employer_employee_count >= 15 AND workweeks_with_fifteen_plus >= 20",
+      "result": {
+        "is_covered_employer": true,
+        "coverage_basis": "employee_threshold_met"
+      },
+      "reasoning_template": "The employer is a private employer with {employer_employee_count} employees and maintained 15 or more employees for {workweeks_with_fifteen_plus} workweeks, satisfying the threshold at 42 U.S.C. § 12111(5)(A) and 29 CFR § 1630.2(e)(1).",
+      "source_citation": "42 U.S.C. § 12111(5)(A); 29 CFR § 1630.2(e)(1)"
+    },
+
+    {
+      "rule_id": "R003",
+      "component": "employer_coverage",
+      "description": "Private employer is not covered if it had fewer than 15 employees, or maintained 15 or more employees for fewer than 20 workweeks.",
+      "determination_type": "rule_based",
+      "condition": "employer_type == 'private_employer' AND (employer_employee_count < 15 OR workweeks_with_fifteen_plus < 20)",
+      "result": {
+        "is_covered_employer": false,
+        "coverage_basis": "not_covered"
+      },
+      "reasoning_template": "The employer is a private employer that does not satisfy the 15-employee / 20-workweek threshold under 42 U.S.C. § 12111(5)(A). With {employer_employee_count} employees across {workweeks_with_fifteen_plus} qualifying workweeks, the employer falls below the coverage minimum. Note: state law may impose lower thresholds.",
+      "source_citation": "42 U.S.C. § 12111(5)(A); 29 CFR § 1630.2(e)(1)-(2)"
+    },
+
+    {
+      "rule_id": "R004",
+      "component": "employer_coverage",
+      "description": "Inputs missing or insufficient for private employer threshold determination — inputs required (employee_count and workweeks) must both be provided.",
+      "determination_type": "rule_based",
+      "condition": "employer_type == 'private_employer' AND (employer_employee_count IS NULL OR workweeks_with_fifteen_plus IS NULL)",
+      "result": {
+        "is_covered_employer": null,
+        "coverage_basis": "indeterminate_missing_inputs"
+      },
+      "reasoning_template": "Employer type is private_employer but required threshold inputs (employer_employee_count and/or workweeks_with_fifteen_plus) were not provided. Coverage cannot be determined without these inputs.",
+      "source_citation": "42 U.S.C. § 12111(5)(A); 29 CFR § 1630.2(e)(1)"
+    },
+
+    {
+      "rule_id": "R005",
+      "component": "individual_status",
+      "description": "Independent contractors are excluded from ADA Title I coverage regardless of their classification label.",
+      "determination_type": "rule_based",
+      "condition": "is_independent_contractor == true",
+      "result": {
+        "is_covered_individual": false,
+        "coverage_basis": "excluded_independent_contractor",
+        "coverage_limitations": ["Independent contractors are not employees under 29 CFR § 1630.2(f). ADA Title I protections do not extend to independent contractors. Applicable state law should be assessed separately."]
+      },
+      "reasoning_template": "The individual is classified as an independent contractor. Under 29 CFR § 1630.2(f), the term 'employee' means an individual employed by an employer. Independent contractors are not employees and therefore fall outside the scope of ADA Title I protections.",
+      "source_citation": "29 CFR § 1630.2(f)"
+    },
+
+    {
+      "rule_id": "R006",
+      "component": "individual_status",
+      "description": "Current employees are covered individuals under ADA Title I.",
+      "determination_type": "rule_based",
+      "condition": "is_independent_contractor == false AND individual_status == 'current_employee'",
+      "result": {
+        "is_covered_individual": true,
+        "coverage_basis": "current_employee_covered",
+        "coverage_limitations": []
+      },
+      "reasoning_template": "The individual is a current employee of the covered entity. Under 42 U.S.C. § 12112(a) and 29 CFR § 1630.4, the prohibition on discrimination applies to current employees in regard to all terms, conditions, and privileges of employment.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.2(f); 29 CFR § 1630.4"
+    },
+
+    {
+      "rule_id": "R007",
+      "component": "individual_status",
+      "description": "Job applicants are covered individuals under ADA Title I.",
+      "determination_type": "rule_based",
+      "condition": "is_independent_contractor == false AND individual_status == 'job_applicant'",
+      "result": {
+        "is_covered_individual": true,
+        "coverage_basis": "job_applicant_covered",
+        "coverage_limitations": []
+      },
+      "reasoning_template": "The individual is a job applicant. Under 42 U.S.C. § 12112(a), discrimination is prohibited 'in regard to job application procedures' and 'the hiring' of employees. Applicants are protected from discrimination in the application and hiring process.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4"
+    },
+
+    {
+      "rule_id": "R008",
+      "component": "individual_status",
+      "description": "Former employees have limited coverage — primarily for post-employment retaliation and claims arising from the employment relationship. Accommodation claims generally require current employment.",
+      "determination_type": "rule_based",
+      "condition": "is_independent_contractor == false AND individual_status == 'former_employee'",
+      "result": {
+        "is_covered_individual": true,
+        "coverage_basis": "former_employee_limited_coverage",
+        "coverage_limitations": [
+          "Former employee coverage is limited. Post-employment retaliation claims (e.g., adverse references, interference with successor employment) are covered under 42 U.S.C. § 12203.",
+          "Accommodation claims generally require current employment; a former employee cannot compel an accommodation for a position they no longer hold.",
+          "Claims for discriminatory termination arising from the employment relationship are covered."
+        ]
+      },
+      "reasoning_template": "The individual is a former employee. ADA Title I protections extend to former employees for claims arising from the employment relationship, including discriminatory termination and post-employment retaliation. However, the scope of coverage is more limited than for current employees. Claim type: {claim_type}.",
+      "source_citation": "42 U.S.C. § 12112(a); 42 U.S.C. § 12203; 29 CFR § 1630.4"
+    },
+
+    {
+      "rule_id": "R009",
+      "component": "disability_determination",
+      "description": "Per se substantially limiting impairment — actual disability prong. Certain impairments virtually always satisfy the substantially limits standard under 29 CFR § 1630.2(j)(3)(iii). When is_per_se_substantially_limiting is true AND disability_basis is actual_disability AND limitation_duration is not temporary_minor, the determination is YES without further factor analysis.",
+      "determination_type": "standards_based",
+      "condition": "disability_basis == 'actual_disability' AND is_per_se_substantially_limiting == true AND limitation_duration != 'temporary_minor'",
+      "result": {
+        "has_qualifying_disability": "yes",
+        "disability_type": "actual_disability",
+        "accommodation_rights_attach": true
+      },
+      "factors_for_template": [
+        "impairment_type is identified as per se substantially limiting under 29 CFR § 1630.2(j)(3)(iii)",
+        "limitation_duration is {limitation_duration} — meets duration requirement"
+      ],
+      "factors_against_template": [],
+      "reasoning_template": "Under 29 CFR § 1630.2(j)(3)(iii), {impairment_type} is among the class of impairments that will, in virtually all cases, be found to substantially limit a major life activity. The individualized assessment is straightforward. Duration is {limitation_duration}. Mitigating measures, if any, are not considered per 42 U.S.C. § 12102(4)(E) and 29 CFR § 1630.2(j)(1)(vi).",
+      "source_citation": "29 CFR § 1630.2(g)(1)(i); 29 CFR § 1630.2(j)(3)(iii); 42 U.S.C. § 12102(4)(E)"
+    },
+
+    {
+      "rule_id": "R010",
+      "component": "disability_determination",
+      "description": "Actual disability — clear YES. Non-per-se impairment with substantial or severe limitation, identified major life activity affected, and duration of temporary_extended, long_term, or permanent.",
+      "determination_type": "standards_based",
+      "condition": "disability_basis == 'actual_disability' AND is_per_se_substantially_limiting != true AND limitation_severity IN ['substantial', 'severe'] AND major_life_activities_affected IS NOT EMPTY AND limitation_duration IN ['temporary_extended', 'long_term', 'permanent']",
+      "result": {
+        "has_qualifying_disability": "yes",
+        "disability_type": "actual_disability",
+        "accommodation_rights_attach": true
+      },
+      "factors_for_template": [
+        "impairment substantially limits {major_life_activities_affected} — meets 'substantially limits' standard under 29 CFR § 1630.2(j)(1)(ii)",
+        "limitation_severity is {limitation_severity} — exceeds the broad but non-demanding threshold",
+        "limitation_duration is {limitation_duration} — not transitory and minor",
+        "major_life_activities_affected is populated with identified activity"
+      ],
+      "factors_against_template": [],
+      "reasoning_template": "Under 29 CFR § 1630.2(j)(1)(i), 'substantially limits' is construed broadly in favor of expansive coverage and is not a demanding standard. The impairment ({impairment_type}) substantially limits {major_life_activities_affected} at a {limitation_severity} severity level. Duration is {limitation_duration}. Mitigating measures, if any, are excluded from this assessment per 42 U.S.C. § 12102(4)(E).",
+      "source_citation": "42 U.S.C. § 12102(1)(A); 29 CFR § 1630.2(g)(1)(i); 29 CFR § 1630.2(j)(1)(i)-(ii)"
+    },
+
+    {
+      "rule_id": "R011",
+      "component": "disability_determination",
+      "description": "Actual disability — INDETERMINATE. Moderate severity with any qualifying duration, or conflicting inputs (e.g., mild severity but long-term duration).",
+      "determination_type": "standards_based",
+      "condition": "disability_basis == 'actual_disability' AND is_per_se_substantially_limiting != true AND limitation_severity == 'moderate' AND major_life_activities_affected IS NOT EMPTY",
+      "result": {
+        "has_qualifying_disability": "indeterminate",
+        "disability_type": "actual_disability",
+        "accommodation_rights_attach": null
+      },
+      "factors_for_template": [
+        "impairment affects identified major life activity ({major_life_activities_affected})",
+        "limitation_duration is {limitation_duration} — not temporary_minor",
+        "ADAAA standard construes substantially limits broadly: 29 CFR § 1630.2(j)(1)(i)"
+      ],
+      "factors_against_template": [
+        "limitation_severity is moderate — falls between clear substantial limitation and clear non-limitation",
+        "individualized assessment required; outcome depends on condition, manner, and duration analysis under 29 CFR § 1630.2(j)(4)"
+      ],
+      "key_uncertainties_template": [
+        "Whether moderate limitation in {major_life_activities_affected} constitutes 'substantial limitation' compared to most people in the general population under 29 CFR § 1630.2(j)(1)(ii)",
+        "Specific condition, manner, or duration analysis not yet conducted per 29 CFR § 1630.2(j)(4)(i)"
+      ],
+      "reasoning_template": "The impairment ({impairment_type}) affects {major_life_activities_affected} at a moderate severity level. Under 29 CFR § 1630.2(j)(1)(ii), an impairment need not prevent or significantly restrict a major life activity, but not every impairment is a disability. A moderate limitation requires individualized assessment under the condition/manner/duration framework of 29 CFR § 1630.2(j)(4) to resolve. Additional clinical documentation or functional assessment is needed.",
+      "source_citation": "29 CFR § 1630.2(g)(1)(i); 29 CFR § 1630.2(j)(1)(i)-(ii); 29 CFR § 1630.2(j)(4)"
+    },
+
+    {
+      "rule_id": "R012",
+      "component": "disability_determination",
+      "description": "Actual disability — clear NO. Mild severity with temporary_minor duration (transitory and minor). Does not qualify under actual_disability prong.",
+      "determination_type": "standards_based",
+      "condition": "disability_basis == 'actual_disability' AND limitation_severity == 'mild' AND limitation_duration == 'temporary_minor'",
+      "result": {
+        "has_qualifying_disability": "no",
+        "disability_type": "none",
+        "accommodation_rights_attach": false
+      },
+      "factors_for_template": [],
+      "factors_against_template": [
+        "limitation_severity is mild — below substantially limits threshold",
+        "limitation_duration is temporary_minor — impairment is transitory (≤6 months) and minor",
+        "Transitory and minor impairments do not substantially limit a major life activity under 29 CFR § 1630.2(j)(1)(ix)"
+      ],
+      "reasoning_template": "The impairment ({impairment_type}) is mild in severity and temporary_minor in duration. Under 29 CFR § 1630.2(j)(1)(ix), even under the broad ADAAA standard, an impairment that is both transitory (lasting or expected to last six months or less) and minor does not substantially limit a major life activity. The individual does not qualify under the actual_disability prong.",
+      "source_citation": "29 CFR § 1630.2(j)(1)(ii); 29 CFR § 1630.2(j)(1)(ix); 29 CFR § 1630.15(f)"
+    },
+
+    {
+      "rule_id": "R013",
+      "component": "disability_determination",
+      "description": "Actual disability — INDETERMINATE due to missing required inputs. major_life_activities_affected is empty or null when disability_basis is actual_disability.",
+      "determination_type": "standards_based",
+      "condition": "disability_basis == 'actual_disability' AND (major_life_activities_affected IS NULL OR major_life_activities_affected IS EMPTY)",
+      "result": {
+        "has_qualifying_disability": "indeterminate",
+        "disability_type": "actual_disability",
+        "accommodation_rights_attach": null
+      },
+      "factors_for_template": [
+        "impairment_type provided: {impairment_type}"
+      ],
+      "factors_against_template": [],
+      "key_uncertainties_template": [
+        "major_life_activities_affected not provided — cannot evaluate which major life activity is substantially limited",
+        "Without an identified major life activity, the substantial limitation analysis cannot proceed under 29 CFR § 1630.2(j)(1)"
+      ],
+      "reasoning_template": "The disability_basis is actual_disability but no major_life_activities_affected were provided. Under 29 CFR § 1630.2(g)(1)(i), an actual disability requires an impairment that substantially limits one or more major life activities. Without identifying the affected activity, the determination cannot proceed.",
+      "source_citation": "42 U.S.C. § 12102(1)(A); 29 CFR § 1630.2(g)(1)(i)"
+    },
+
+    {
+      "rule_id": "R014",
+      "component": "disability_determination",
+      "description": "Episodic or in-remission condition — qualifies as actual disability if it would substantially limit a major life activity when active.",
+      "determination_type": "standards_based",
+      "condition": "disability_basis == 'actual_disability' AND is_episodic_or_in_remission == true AND would_substantially_limit_when_active == true",
+      "result": {
+        "has_qualifying_disability": "yes",
+        "disability_type": "actual_disability",
+        "accommodation_rights_attach": true
+      },
+      "factors_for_template": [
+        "impairment is episodic or in remission — qualifies under 29 CFR § 1630.2(j)(1)(vii) if it would substantially limit when active",
+        "would_substantially_limit_when_active is true — statutory requirement satisfied",
+        "limitation_duration is {limitation_duration}"
+      ],
+      "factors_against_template": [],
+      "reasoning_template": "Under 29 CFR § 1630.2(j)(1)(vii), an impairment that is episodic or in remission is a disability if it would substantially limit a major life activity when active. The impairment ({impairment_type}) is episodic or in remission, and the input confirms it would substantially limit {major_life_activities_affected} when active. The current inactive or remission status does not defeat coverage.",
+      "source_citation": "42 U.S.C. § 12102(4)(D); 29 CFR § 1630.2(j)(1)(vii)"
+    },
+
+    {
+      "rule_id": "R015",
+      "component": "disability_determination",
+      "description": "Episodic or in-remission condition — INDETERMINATE when would_substantially_limit_when_active is not provided.",
+      "determination_type": "standards_based",
+      "condition": "disability_basis == 'actual_disability' AND is_episodic_or_in_remission == true AND would_substantially_limit_when_active IS NULL",
+      "result": {
+        "has_qualifying_disability": "indeterminate",
+        "disability_type": "actual_disability",
+        "accommodation_rights_attach": null
+      },
+      "factors_for_template": [
+        "impairment is episodic or in remission — may qualify under 29 CFR § 1630.2(j)(1)(vii)"
+      ],
+      "factors_against_template": [],
+      "key_uncertainties_template": [
+        "would_substantially_limit_when_active not provided — cannot determine whether the episodic condition qualifies under 29 CFR § 1630.2(j)(1)(vii)"
+      ],
+      "reasoning_template": "The impairment ({impairment_type}) is episodic or in remission. Under 29 CFR § 1630.2(j)(1)(vii), such impairments qualify as disabilities if they would substantially limit a major life activity when active. The field would_substantially_limit_when_active was not provided, so the determination cannot be completed.",
+      "source_citation": "29 CFR § 1630.2(j)(1)(vii)"
+    },
+
+    {
+      "rule_id": "R016",
+      "component": "disability_determination",
+      "description": "Record of disability — clear YES. Individual has a history of, or has been classified as having, a qualifying impairment.",
+      "determination_type": "standards_based",
+      "condition": "disability_basis == 'record_of_disability' AND major_life_activities_affected IS NOT EMPTY AND limitation_duration IN ['long_term', 'permanent', 'temporary_extended']",
+      "result": {
+        "has_qualifying_disability": "yes",
+        "disability_type": "record_of_disability",
+        "accommodation_rights_attach": true
+      },
+      "factors_for_template": [
+        "individual has a record of an impairment ({impairment_type}) that substantially limited {major_life_activities_affected}",
+        "historical limitation duration was {limitation_duration} — not transitory and minor",
+        "record_of_disability prong entitles individual to reasonable accommodation under 29 CFR § 1630.9(e)"
+      ],
+      "factors_against_template": [],
+      "reasoning_template": "Under 29 CFR § 1630.2(k), an individual has a record of a disability if they have a history of, or have been classified as having, a physical or mental impairment that substantially limited one or more major life activities. The individual has a record of {impairment_type} which historically substantially limited {major_life_activities_affected}. The record_of_disability prong supports a reasonable accommodation obligation under 29 CFR § 1630.9(e).",
+      "source_citation": "42 U.S.C. § 12102(1)(B); 29 CFR § 1630.2(g)(1)(ii); 29 CFR § 1630.2(k)"
+    },
+
+    {
+      "rule_id": "R017",
+      "component": "disability_determination",
+      "description": "Regarded as — clear YES. Employer perceived impairment AND took adverse action based on perception AND perceived impairment is not both transitory and minor.",
+      "determination_type": "standards_based",
+      "condition": "disability_basis == 'regarded_as' AND employer_perceived_impairment == true AND adverse_action_based_on_perception == true AND perceived_impairment_transitory_and_minor == false",
+      "result": {
+        "has_qualifying_disability": "yes",
+        "disability_type": "regarded_as",
+        "accommodation_rights_attach": false
+      },
+      "factors_for_template": [
+        "employer perceived the individual as having a physical or mental impairment",
+        "employer took adverse action based on that perception",
+        "perceived impairment is not both transitory and minor — exclusion at 29 CFR § 1630.15(f) does not apply"
+      ],
+      "factors_against_template": [],
+      "reasoning_template": "Under 42 U.S.C. § 12102(3) (post-ADAAA), 'regarded as' coverage applies when an individual has been subjected to a prohibited action because of an actual or perceived impairment that is not both transitory and minor. The employer perceived an impairment and took adverse action. The perceived impairment is not transitory and minor. IMPORTANT: Coverage under the regarded_as prong alone does NOT entitle the individual to reasonable accommodation. See 29 CFR § 1630.9(e).",
+      "source_citation": "42 U.S.C. § 12102(3); 29 CFR § 1630.2(g)(1)(iii); 29 CFR § 1630.9(e); 29 CFR § 1630.15(f)"
+    },
+
+    {
+      "rule_id": "R018",
+      "component": "disability_determination",
+      "description": "Regarded as — clear NO (transitory and minor exclusion). Perceived impairment is both transitory (≤6 months) and minor.",
+      "determination_type": "standards_based",
+      "condition": "disability_basis == 'regarded_as' AND perceived_impairment_transitory_and_minor == true",
+      "result": {
+        "has_qualifying_disability": "no",
+        "disability_type": "none",
+        "accommodation_rights_attach": false
+      },
+      "factors_for_template": [],
+      "factors_against_template": [
+        "perceived impairment is both transitory (lasting or expected to last ≤6 months) and minor — transitory and minor exclusion applies under 29 CFR § 1630.15(f)",
+        "employer may use transitory_and_minor as a defense — determined objectively, not by employer's subjective belief"
+      ],
+      "reasoning_template": "Under 29 CFR § 1630.15(f), it is a defense to a 'regarded as' claim that the actual or perceived impairment is both transitory (lasting or expected to last six months or less) and minor. Both conditions must be met. The impairment here meets this exclusion. The regarded_as prong does not apply. Note: this exclusion does NOT apply to actual_disability or record_of_disability prongs.",
+      "source_citation": "42 U.S.C. § 12102(3)(B); 29 CFR § 1630.15(f)"
+    },
+
+    {
+      "rule_id": "R019",
+      "component": "disability_determination",
+      "description": "Regarded as — INDETERMINATE when required inputs are missing.",
+      "determination_type": "standards_based",
+      "condition": "disability_basis == 'regarded_as' AND (employer_perceived_impairment IS NULL OR adverse_action_based_on_perception IS NULL OR perceived_impairment_transitory_and_minor IS NULL)",
+      "result": {
+        "has_qualifying_disability": "indeterminate",
+        "disability_type": "regarded_as",
+        "accommodation_rights_attach": null
+      },
+      "factors_for_template": [],
+      "factors_against_template": [],
+      "key_uncertainties_template": [
+        "One or more required regarded_as inputs missing: employer_perceived_impairment, adverse_action_based_on_perception, perceived_impairment_transitory_and_minor",
+        "All three fields are required for a deterministic regarded_as analysis under 42 U.S.C. § 12102(3) and 29 CFR § 1630.15(f)"
+      ],
+      "reasoning_template": "The disability_basis is regarded_as but one or more required inputs are missing. The regarded_as analysis requires: (1) employer perceived an impairment, (2) employer took adverse action based on perception, and (3) the impairment is not both transitory and minor. Without all three inputs, the determination is indeterminate.",
+      "source_citation": "42 U.S.C. § 12102(3); 29 CFR § 1630.2(g)(1)(iii); 29 CFR § 1630.15(f)"
+    },
+
+    {
+      "rule_id": "R020",
+      "component": "qualified_individual",
+      "description": "Clear NO — individual does not meet non-medical qualification requirements (skill, education, experience). Qualified individual status fails independent of disability analysis.",
+      "determination_type": "standards_based",
+      "condition": "meets_skill_education_experience_requirements == false",
+      "result": {
+        "is_qualified_individual": "no"
+      },
+      "factors_for_template": [],
+      "factors_against_template": [
+        "individual does not meet the non-medical qualification requirements (education, licensure, experience, skills) for the position",
+        "failure to meet non-medical requirements defeats qualified individual status regardless of accommodation availability under 29 CFR § 1630.2(m)"
+      ],
+      "reasoning_template": "Under 29 CFR § 1630.2(m), a qualified individual must satisfy the skill, experience, education, and other job-related requirements of the position. This individual does not meet those non-medical requirements. The ADA does not require employers to waive legitimate qualification standards. Qualified individual status is not established.",
+      "source_citation": "42 U.S.C. § 12111(8); 29 CFR § 1630.2(m)"
+    },
+
+    {
+      "rule_id": "R021",
+      "component": "qualified_individual",
+      "description": "Clear YES — individual meets non-medical requirements AND can perform all essential functions without accommodation.",
+      "determination_type": "standards_based",
+      "condition": "meets_skill_education_experience_requirements == true AND can_perform_essential_functions_without_accommodation == true",
+      "result": {
+        "is_qualified_individual": "yes"
+      },
+      "factors_for_template": [
+        "individual meets all non-medical qualification requirements for the position",
+        "individual can perform all listed essential functions without any accommodation",
+        "no accommodation required — individual is qualified on their own"
+      ],
+      "factors_against_template": [],
+      "reasoning_template": "Under 29 CFR § 1630.2(m), a qualified individual is one who satisfies job-related requirements and can perform essential functions with or without reasonable accommodation. This individual satisfies both requirements without accommodation. Qualified individual status is established.",
+      "source_citation": "42 U.S.C. § 12111(8); 29 CFR § 1630.2(m)-(n)"
+    },
+
+    {
+      "rule_id": "R022",
+      "component": "qualified_individual",
+      "description": "Clear YES — individual meets non-medical requirements AND can perform essential functions WITH accommodation (cannot perform without).",
+      "determination_type": "standards_based",
+      "condition": "meets_skill_education_experience_requirements == true AND can_perform_essential_functions_without_accommodation == false AND can_perform_essential_functions_with_accommodation == true",
+      "result": {
+        "is_qualified_individual": "yes"
+      },
+      "factors_for_template": [
+        "individual meets all non-medical qualification requirements",
+        "individual can perform all essential functions with reasonable accommodation",
+        "accommodation required but available — qualified individual status satisfied under 29 CFR § 1630.2(m)"
+      ],
+      "factors_against_template": [
+        "individual cannot perform essential functions without accommodation — accommodation dependency noted for Module 3 downstream"
+      ],
+      "reasoning_template": "Under 29 CFR § 1630.2(m), qualification includes the ability to perform essential functions 'with or without reasonable accommodation.' This individual requires accommodation but can perform essential functions with it. Qualified individual status is established. The specific accommodation obligation passes to Module 3 (Reasonable Accommodation).",
+      "source_citation": "42 U.S.C. § 12111(8); 29 CFR § 1630.2(m)"
+    },
+
+    {
+      "rule_id": "R023",
+      "component": "qualified_individual",
+      "description": "Clear NO — individual cannot perform essential functions even with accommodation, AND the functions at issue have multi-factor support for essential status.",
+      "determination_type": "standards_based",
+      "condition": "meets_skill_education_experience_requirements == true AND can_perform_essential_functions_with_accommodation == false AND functions_employee_cannot_perform IS NOT EMPTY AND (written_job_description_exists == true OR past_incumbents_performed_function == true OR position_exists_to_perform_function == true)",
+      "result": {
+        "is_qualified_individual": "no"
+      },
+      "factors_for_template": [],
+      "factors_against_template": [
+        "individual cannot perform {functions_employee_cannot_perform} even with accommodation",
+        "one or more of the following essential-function factors are met: written job description lists function, past incumbents performed it, position exists to perform it",
+        "employers are not required to eliminate essential functions as an accommodation under EEOC Enforcement Guidance No. 915.002"
+      ],
+      "reasoning_template": "Under 29 CFR § 1630.2(m)-(n), a qualified individual must be able to perform the essential functions of the position with or without reasonable accommodation. The individual cannot perform {functions_employee_cannot_perform} even with accommodation, and those functions have multi-factor support for essential status. The ADA does not require an employer to eliminate an essential function. Qualified individual status is not established.",
+      "source_citation": "42 U.S.C. § 12111(8); 29 CFR § 1630.2(m)-(n); EEOC Enforcement Guidance No. 915.002 § General Principles"
+    },
+
+    {
+      "rule_id": "R024",
+      "component": "qualified_individual",
+      "description": "INDETERMINATE — essential function status is disputed. Functions employee cannot perform are listed but essential function support factors are weak or absent (no written job description, past incumbents varied, high other-employee count, minimal time spent).",
+      "determination_type": "standards_based",
+      "condition": "meets_skill_education_experience_requirements == true AND can_perform_essential_functions_with_accommodation == false AND functions_employee_cannot_perform IS NOT EMPTY AND written_job_description_exists == false AND past_incumbents_performed_function != true AND position_exists_to_perform_function != true",
+      "result": {
+        "is_qualified_individual": "indeterminate"
+      },
+      "factors_for_template": [
+        "individual meets non-medical qualification requirements",
+        "disputed functions may be marginal — no written job description, past incumbents did not consistently perform the function, or position does not exist primarily to perform it"
+      ],
+      "factors_against_template": [
+        "individual cannot perform {functions_employee_cannot_perform} even with accommodation",
+        "employer has asserted these functions are essential"
+      ],
+      "key_uncertainties_template": [
+        "essential function status of {functions_employee_cannot_perform} is not established — insufficient supporting factors",
+        "no written job description predating the posting — a key evidentiary factor under 29 CFR § 1630.2(n)(3)(ii)",
+        "whether past incumbents in this position consistently performed the function is unknown or false"
+      ],
+      "reasoning_template": "Whether the individual is a qualified individual depends on whether {functions_employee_cannot_perform} are truly essential functions under 29 CFR § 1630.2(n). The employer's assertion that functions are essential carries weight, but is not conclusive. Several evidentiary factors supporting essential status are absent: no pre-posting written job description, unclear incumbent history, weak other-factor support. Additional documentation is needed to resolve essential function status.",
+      "source_citation": "42 U.S.C. § 12111(8); 29 CFR § 1630.2(m)-(n); 29 CFR § 1630.2(n)(3)"
+    },
+
+    {
+      "rule_id": "R025",
+      "component": "qualified_individual",
+      "description": "INDETERMINATE — accommodation has not been explored. Individual cannot perform without accommodation, and accommodation_explored is false.",
+      "determination_type": "standards_based",
+      "condition": "meets_skill_education_experience_requirements == true AND can_perform_essential_functions_without_accommodation == false AND accommodation_explored == false",
+      "result": {
+        "is_qualified_individual": "indeterminate"
+      },
+      "factors_for_template": [
+        "individual meets non-medical qualification requirements",
+        "individual cannot perform essential functions without accommodation — accommodation may be available"
+      ],
+      "factors_against_template": [
+        "accommodation has not been explored — cannot determine whether essential functions are performable with accommodation"
+      ],
+      "key_uncertainties_template": [
+        "no good-faith exploration of reasonable accommodation has occurred — cannot determine whether an effective accommodation exists",
+        "qualified individual status cannot be assessed without determining whether accommodation would enable performance of essential functions"
+      ],
+      "reasoning_template": "Under 29 CFR § 1630.2(m), qualified individual status includes those who can perform essential functions with reasonable accommodation. This individual cannot perform essential functions without accommodation, and no accommodation has been explored. The interactive process required by EEOC Enforcement Guidance No. 915.002 has not occurred. Qualified individual determination is indeterminate until accommodation options are assessed.",
+      "source_citation": "42 U.S.C. § 12111(8); 29 CFR § 1630.2(m); EEOC Enforcement Guidance No. 915.002 § General Principles"
+    }
+
+  ],
+  "rule_count_summary": {
+    "total_rules": 25,
+    "employer_coverage_rules": 4,
+    "individual_status_rules": 4,
+    "disability_determination_rules": 11,
+    "qualified_individual_rules": 6,
+    "rule_based_rules": 8,
+    "standards_based_rules": 17
+  }
+}

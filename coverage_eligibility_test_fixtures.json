@@ -1,0 +1,660 @@
+{
+  "module": "ada_coverage_eligibility",
+  "version": "0.2",
+  "last_updated": "2026-04-17",
+  "description": "Automated test fixtures for Module 1 Coverage & Eligibility. Each test case maps exactly to a scenario in coverage_eligibility_test_scenarios.md. Inputs conform to coverage_eligibility_schema.json. Expected outputs include all mandatory fields.",
+  "test_cases": [
+
+    {
+      "scenario_id": "CE-001",
+      "scenario_name": "Full Coverage — Covered Employer, Current Employee, MS (Per Se), Qualified with Accommodation",
+      "description": "All four components resolve YES. Private employer above threshold, current employee, neurological (MS) per se substantially limiting, qualified with stool accommodation.",
+      "outcome_type": "clear_yes",
+      "input": {
+        "employer_coverage": {
+          "employer_type": "private_employer",
+          "employer_employee_count": 28,
+          "workweeks_with_fifteen_plus": 52
+        },
+        "individual_status": {
+          "individual_status": "current_employee",
+          "is_independent_contractor": false
+        },
+        "disability_determination": {
+          "disability_basis": "actual_disability",
+          "impairment_type": "neurological",
+          "impairment_description": "Multiple sclerosis diagnosed 18 months ago, causing fatigue and difficulty standing for extended periods",
+          "major_life_activities_affected": ["standing", "major_bodily_functions"],
+          "limitation_severity": "substantial",
+          "limitation_duration": "long_term",
+          "is_episodic_or_in_remission": false,
+          "mitigating_measures_used": [],
+          "ordinary_eyeglasses_only": false,
+          "is_per_se_substantially_limiting": true
+        },
+        "qualified_individual": {
+          "job_title": "Registered Nurse",
+          "written_job_description_exists": true,
+          "job_description_predates_posting": true,
+          "essential_functions_listed": [
+            "patient assessment and documentation",
+            "administering medication",
+            "standing for shift duration for charting"
+          ],
+          "can_perform_essential_functions_without_accommodation": false,
+          "can_perform_essential_functions_with_accommodation": true,
+          "functions_employee_cannot_perform": ["standing for shift duration for charting"],
+          "time_spent_on_each_function": {"standing for shift duration for charting": 30},
+          "past_incumbents_performed_function": true,
+          "number_of_employees_who_can_perform": 0,
+          "position_exists_to_perform_function": false,
+          "meets_skill_education_experience_requirements": true,
+          "accommodation_explored": true
+        }
+      },
+      "expected_output": {
+        "employer_coverage": {
+          "is_covered_employer": true,
+          "coverage_basis": "employee_threshold_met",
+          "reasoning": "MedGroup LLC is a private employer with 28 employees maintained for 52 qualifying workweeks, satisfying the threshold at 42 U.S.C. § 12111(5)(A) and 29 CFR § 1630.2(e)(1).",
+          "sources_cited": ["42 U.S.C. § 12111(5)(A)", "29 CFR § 1630.2(e)(1)"]
+        },
+        "individual_status": {
+          "is_covered_individual": true,
+          "coverage_basis": "current_employee_covered",
+          "coverage_limitations": [],
+          "reasoning": "Maria Chen is a current employee. Under 42 U.S.C. § 12112(a), the prohibition on disability discrimination applies to current employees in all terms, conditions, and privileges of employment.",
+          "sources_cited": ["42 U.S.C. § 12112(a)", "29 CFR § 1630.2(f)", "29 CFR § 1630.4"]
+        },
+        "disability_determination": {
+          "has_qualifying_disability": "yes",
+          "disability_type": "actual_disability",
+          "accommodation_rights_attach": true,
+          "disability_analysis": {
+            "factors_for": [
+              "impairment_type is identified as per se substantially limiting under 29 CFR § 1630.2(j)(3)(iii)",
+              "limitation_duration is long_term — meets duration requirement"
+            ],
+            "factors_against": [],
+            "key_uncertainties": []
+          },
+          "reasoning": "Under 29 CFR § 1630.2(j)(3)(iii), multiple sclerosis (neurological) is among the class of impairments that will, in virtually all cases, substantially limit a major life activity. Duration is long_term. Mitigating measures, if any, are not considered per 42 U.S.C. § 12102(4)(E).",
+          "sources_cited": ["29 CFR § 1630.2(g)(1)(i)", "29 CFR § 1630.2(j)(3)(iii)", "42 U.S.C. § 12102(4)(E)"]
+        },
+        "qualified_individual": {
+          "is_qualified_individual": "yes",
+          "essential_functions_analysis": {
+            "functions_confirmed_essential": [
+              "patient assessment and documentation",
+              "administering medication",
+              "standing for shift duration for charting"
+            ],
+            "functions_possibly_marginal": [],
+            "factors_for": [
+              "individual meets all non-medical qualification requirements",
+              "individual can perform all essential functions with reasonable accommodation",
+              "accommodation required but available — qualified individual status satisfied under 29 CFR § 1630.2(m)"
+            ],
+            "factors_against": [
+              "individual cannot perform essential functions without accommodation — accommodation dependency noted for Module 3 downstream"
+            ],
+            "key_uncertainties": []
+          },
+          "reasoning": "Under 29 CFR § 1630.2(m), qualification includes the ability to perform essential functions with or without reasonable accommodation. Maria requires a stool accommodation but can perform all essential functions with it. Qualified individual status is established. The specific accommodation obligation passes to Module 3.",
+          "sources_cited": ["42 U.S.C. § 12111(8)", "29 CFR § 1630.2(m)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "CE-002",
+      "scenario_name": "Small Private Employer — Not Covered",
+      "description": "Private employer with 12 employees. Below 15-employee threshold. ADA does not apply.",
+      "outcome_type": "clear_no",
+      "input": {
+        "employer_coverage": {
+          "employer_type": "private_employer",
+          "employer_employee_count": 12,
+          "workweeks_with_fifteen_plus": 52
+        }
+      },
+      "expected_output": {
+        "employer_coverage": {
+          "is_covered_employer": false,
+          "coverage_basis": "not_covered",
+          "reasoning": "Green Thumb Lawn Care is a private employer with 12 employees, which does not satisfy the 15-employee threshold under 42 U.S.C. § 12111(5)(A). Federal ADA Title I does not apply. Note: state law may impose lower thresholds.",
+          "sources_cited": ["42 U.S.C. § 12111(5)(A)", "29 CFR § 1630.2(e)(1)-(2)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "CE-003",
+      "scenario_name": "Temporary Minor Impairment — No Qualifying Disability",
+      "description": "Broken wrist, 4-6 week recovery, mild severity. Temporary_minor duration. No qualifying disability under actual_disability prong.",
+      "outcome_type": "clear_no",
+      "input": {
+        "employer_coverage": {
+          "employer_type": "private_employer",
+          "employer_employee_count": 200,
+          "workweeks_with_fifteen_plus": 52
+        },
+        "individual_status": {
+          "individual_status": "current_employee",
+          "is_independent_contractor": false
+        },
+        "disability_determination": {
+          "disability_basis": "actual_disability",
+          "impairment_type": "musculoskeletal",
+          "impairment_description": "Broken wrist from recreational accident, expected full recovery in 4-6 weeks",
+          "major_life_activities_affected": ["performing_manual_tasks"],
+          "limitation_severity": "mild",
+          "limitation_duration": "temporary_minor",
+          "is_episodic_or_in_remission": false,
+          "mitigating_measures_used": ["cast"],
+          "ordinary_eyeglasses_only": false,
+          "is_per_se_substantially_limiting": false
+        }
+      },
+      "expected_output": {
+        "employer_coverage": {
+          "is_covered_employer": true,
+          "coverage_basis": "employee_threshold_met",
+          "reasoning": "TechCorp is a private employer with 200 employees for 52 qualifying workweeks, satisfying the threshold at 42 U.S.C. § 12111(5)(A).",
+          "sources_cited": ["42 U.S.C. § 12111(5)(A)", "29 CFR § 1630.2(e)(1)"]
+        },
+        "individual_status": {
+          "is_covered_individual": true,
+          "coverage_basis": "current_employee_covered",
+          "coverage_limitations": [],
+          "reasoning": "James Park is a current employee. Under 42 U.S.C. § 12112(a), the prohibition applies to current employees.",
+          "sources_cited": ["42 U.S.C. § 12112(a)", "29 CFR § 1630.2(f)"]
+        },
+        "disability_determination": {
+          "has_qualifying_disability": "no",
+          "disability_type": "none",
+          "accommodation_rights_attach": false,
+          "disability_analysis": {
+            "factors_for": [],
+            "factors_against": [
+              "limitation_severity is mild — below substantially limits threshold",
+              "limitation_duration is temporary_minor — impairment is transitory (≤6 months) and minor",
+              "Transitory and minor impairments do not substantially limit a major life activity under 29 CFR § 1630.2(j)(1)(ix)"
+            ],
+            "key_uncertainties": []
+          },
+          "reasoning": "Under 29 CFR § 1630.2(j)(1)(ix), a broken wrist with expected full recovery in 4–6 weeks is both mild in severity and temporary_minor in duration. Even under the broad ADAAA standard, this impairment does not substantially limit a major life activity. No qualifying disability under the actual_disability prong.",
+          "sources_cited": ["29 CFR § 1630.2(j)(1)(ii)", "29 CFR § 1630.2(j)(1)(ix)", "29 CFR § 1630.15(f)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "CE-004",
+      "scenario_name": "Moderate Severity Chronic Back Condition — Indeterminate Disability",
+      "description": "Chronic lumbar disc disease, moderate severity, long-term. Requires individualized condition/manner/duration analysis. Output: indeterminate.",
+      "outcome_type": "indeterminate",
+      "input": {
+        "employer_coverage": {
+          "employer_type": "private_employer",
+          "employer_employee_count": 85,
+          "workweeks_with_fifteen_plus": 52
+        },
+        "individual_status": {
+          "individual_status": "current_employee",
+          "is_independent_contractor": false
+        },
+        "disability_determination": {
+          "disability_basis": "actual_disability",
+          "impairment_type": "musculoskeletal",
+          "impairment_description": "Chronic lumbar disc disease, moderately limiting standing and lifting, persisting 3 years",
+          "major_life_activities_affected": ["standing", "lifting"],
+          "limitation_severity": "moderate",
+          "limitation_duration": "long_term",
+          "is_episodic_or_in_remission": false,
+          "mitigating_measures_used": ["physical therapy", "anti-inflammatory medication"],
+          "ordinary_eyeglasses_only": false,
+          "is_per_se_substantially_limiting": false
+        }
+      },
+      "expected_output": {
+        "employer_coverage": {
+          "is_covered_employer": true,
+          "coverage_basis": "employee_threshold_met",
+          "reasoning": "DistributeCo is a private employer with 85 employees for 52 qualifying workweeks, satisfying the threshold at 42 U.S.C. § 12111(5)(A).",
+          "sources_cited": ["42 U.S.C. § 12111(5)(A)", "29 CFR § 1630.2(e)(1)"]
+        },
+        "individual_status": {
+          "is_covered_individual": true,
+          "coverage_basis": "current_employee_covered",
+          "coverage_limitations": [],
+          "reasoning": "Sandra Williams is a current employee. Under 42 U.S.C. § 12112(a), the prohibition applies to current employees.",
+          "sources_cited": ["42 U.S.C. § 12112(a)", "29 CFR § 1630.2(f)"]
+        },
+        "disability_determination": {
+          "has_qualifying_disability": "indeterminate",
+          "disability_type": "actual_disability",
+          "accommodation_rights_attach": null,
+          "disability_analysis": {
+            "factors_for": [
+              "impairment affects identified major life activity (standing, lifting) — meets threshold identification step",
+              "limitation_duration is long_term — not temporary_minor",
+              "ADAAA standard construes substantially limits broadly: 29 CFR § 1630.2(j)(1)(i)"
+            ],
+            "factors_against": [
+              "limitation_severity is moderate — falls between clear substantial limitation and clear non-limitation",
+              "individualized assessment required; outcome depends on condition, manner, and duration analysis under 29 CFR § 1630.2(j)(4)"
+            ],
+            "key_uncertainties": [
+              "Whether moderate limitation in standing and lifting constitutes 'substantial limitation' compared to most people in the general population under 29 CFR § 1630.2(j)(1)(ii)",
+              "Specific condition, manner, or duration analysis not yet conducted per 29 CFR § 1630.2(j)(4)(i)"
+            ]
+          },
+          "reasoning": "The impairment (musculoskeletal — lumbar disc disease) affects standing and lifting at a moderate severity level. Under 29 CFR § 1630.2(j)(1)(i), 'substantially limits' is construed broadly. However, 29 CFR § 1630.2(j)(1)(ii) clarifies that not every impairment is a disability. A moderate limitation requires individualized assessment under the condition/manner/duration framework of 29 CFR § 1630.2(j)(4). Note: physical therapy and anti-inflammatory medication are mitigating measures excluded from this assessment per 42 U.S.C. § 12102(4)(E).",
+          "sources_cited": ["29 CFR § 1630.2(g)(1)(i)", "29 CFR § 1630.2(j)(1)(i)-(ii)", "29 CFR § 1630.2(j)(4)", "42 U.S.C. § 12102(4)(E)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "CE-005",
+      "scenario_name": "Regarded As — Perceived Mental Health Condition, Termination",
+      "description": "No actual diagnosis. Employer perceived mental instability and terminated. Not transitory and minor. Regarded_as prong YES. No RA obligation.",
+      "outcome_type": "clear_yes",
+      "input": {
+        "employer_coverage": {
+          "employer_type": "private_employer",
+          "employer_employee_count": 350,
+          "workweeks_with_fifteen_plus": 52
+        },
+        "individual_status": {
+          "individual_status": "former_employee",
+          "is_independent_contractor": false,
+          "employment_end_date": "2026-03-15",
+          "claim_type": "discriminatory_termination"
+        },
+        "disability_determination": {
+          "disability_basis": "regarded_as",
+          "impairment_type": "mood_disorder",
+          "impairment_description": "No diagnosed condition; employer perceived mental instability based on disclosure of therapy attendance",
+          "limitation_duration": "long_term",
+          "employer_perceived_impairment": true,
+          "adverse_action_based_on_perception": true,
+          "perceived_impairment_transitory_and_minor": false,
+          "is_per_se_substantially_limiting": false
+        }
+      },
+      "expected_output": {
+        "employer_coverage": {
+          "is_covered_employer": true,
+          "coverage_basis": "employee_threshold_met",
+          "reasoning": "BankCorp is a private employer with 350 employees for 52 qualifying workweeks, satisfying the threshold at 42 U.S.C. § 12111(5)(A).",
+          "sources_cited": ["42 U.S.C. § 12111(5)(A)", "29 CFR § 1630.2(e)(1)"]
+        },
+        "individual_status": {
+          "is_covered_individual": true,
+          "coverage_basis": "former_employee_limited_coverage",
+          "coverage_limitations": [
+            "Former employee coverage is limited. Post-employment retaliation claims (e.g., adverse references, interference with successor employment) are covered under 42 U.S.C. § 12203.",
+            "Accommodation claims generally require current employment; a former employee cannot compel an accommodation for a position they no longer hold.",
+            "Claims for discriminatory termination arising from the employment relationship are covered."
+          ],
+          "reasoning": "Kevin Torres is a former employee asserting a discriminatory_termination claim. ADA Title I protections extend to former employees for claims arising from the employment relationship. Claim type: discriminatory_termination.",
+          "sources_cited": ["42 U.S.C. § 12112(a)", "42 U.S.C. § 12203", "29 CFR § 1630.4"]
+        },
+        "disability_determination": {
+          "has_qualifying_disability": "yes",
+          "disability_type": "regarded_as",
+          "accommodation_rights_attach": false,
+          "disability_analysis": {
+            "factors_for": [
+              "employer perceived the individual as having a physical or mental impairment",
+              "employer took adverse action based on that perception",
+              "perceived impairment is not both transitory and minor — exclusion at 29 CFR § 1630.15(f) does not apply"
+            ],
+            "factors_against": [],
+            "key_uncertainties": []
+          },
+          "reasoning": "Under 42 U.S.C. § 12102(3) (post-ADAAA), regarded_as coverage applies when an individual has been subjected to a prohibited action because of an actual or perceived impairment that is not both transitory and minor. BankCorp perceived Kevin as mentally unstable and terminated him on that basis. The perceived impairment is not transitory and minor. IMPORTANT: Coverage under the regarded_as prong alone does NOT entitle the individual to reasonable accommodation. See 29 CFR § 1630.9(e).",
+          "sources_cited": ["42 U.S.C. § 12102(3)", "29 CFR § 1630.2(g)(1)(iii)", "29 CFR § 1630.9(e)", "29 CFR § 1630.15(f)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "CE-006",
+      "scenario_name": "Regarded As Excluded — Transitory and Minor (Respiratory Infection, 3 Weeks)",
+      "description": "Perceived seasonal illness, 3 weeks, full recovery. Both transitory and minor. Regarded_as prong does NOT apply.",
+      "outcome_type": "clear_no",
+      "input": {
+        "employer_coverage": {
+          "employer_type": "private_employer",
+          "employer_employee_count": 45,
+          "workweeks_with_fifteen_plus": 52
+        },
+        "individual_status": {
+          "individual_status": "current_employee",
+          "is_independent_contractor": false
+        },
+        "disability_determination": {
+          "disability_basis": "regarded_as",
+          "impairment_type": "respiratory",
+          "impairment_description": "Severe respiratory infection, 3 weeks duration, full recovery, no chronic condition",
+          "limitation_duration": "temporary_minor",
+          "employer_perceived_impairment": true,
+          "adverse_action_based_on_perception": true,
+          "perceived_impairment_transitory_and_minor": true,
+          "is_per_se_substantially_limiting": false
+        }
+      },
+      "expected_output": {
+        "employer_coverage": {
+          "is_covered_employer": true,
+          "coverage_basis": "employee_threshold_met",
+          "reasoning": "ConsultCo is a private employer with 45 employees for 52 qualifying workweeks, satisfying the threshold at 42 U.S.C. § 12111(5)(A).",
+          "sources_cited": ["42 U.S.C. § 12111(5)(A)", "29 CFR § 1630.2(e)(1)"]
+        },
+        "individual_status": {
+          "is_covered_individual": true,
+          "coverage_basis": "current_employee_covered",
+          "coverage_limitations": [],
+          "reasoning": "Lisa Nguyen is a current employee. Under 42 U.S.C. § 12112(a), the prohibition applies to current employees.",
+          "sources_cited": ["42 U.S.C. § 12112(a)", "29 CFR § 1630.2(f)"]
+        },
+        "disability_determination": {
+          "has_qualifying_disability": "no",
+          "disability_type": "none",
+          "accommodation_rights_attach": false,
+          "disability_analysis": {
+            "factors_for": [],
+            "factors_against": [
+              "perceived impairment is both transitory (lasting or expected to last ≤6 months) and minor — transitory and minor exclusion applies under 29 CFR § 1630.15(f)",
+              "employer may use transitory_and_minor as a defense — determined objectively, not by employer's subjective belief"
+            ],
+            "key_uncertainties": []
+          },
+          "reasoning": "Under 29 CFR § 1630.15(f), a perceived impairment that is both transitory (lasting or expected to last six months or less) AND minor is excluded from regarded_as coverage. A three-week respiratory infection with full recovery is objectively both transitory and minor. The regarded_as prong does not apply.",
+          "sources_cited": ["42 U.S.C. § 12102(3)(B)", "29 CFR § 1630.15(f)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "CE-007",
+      "scenario_name": "Qualified Individual Indeterminate — Essential Function Dispute, No Job Description",
+      "description": "Anxiety disorder (qualifying disability). No written job description. Incumbents varied on contested function. No accommodation explored. Qualified individual: indeterminate.",
+      "outcome_type": "indeterminate",
+      "input": {
+        "employer_coverage": {
+          "employer_type": "private_employer",
+          "employer_employee_count": 120,
+          "workweeks_with_fifteen_plus": 52
+        },
+        "individual_status": {
+          "individual_status": "current_employee",
+          "is_independent_contractor": false
+        },
+        "disability_determination": {
+          "disability_basis": "actual_disability",
+          "impairment_type": "anxiety_disorder",
+          "impairment_description": "Documented generalized anxiety disorder substantially limiting communicating and interacting with others",
+          "major_life_activities_affected": ["communicating", "interacting_with_others"],
+          "limitation_severity": "substantial",
+          "limitation_duration": "long_term",
+          "is_episodic_or_in_remission": false,
+          "is_per_se_substantially_limiting": false,
+          "mitigating_measures_used": ["anti-anxiety medication"],
+          "ordinary_eyeglasses_only": false
+        },
+        "qualified_individual": {
+          "job_title": "Customer Service Representative",
+          "written_job_description_exists": false,
+          "essential_functions_listed": [
+            "answer inbound customer calls",
+            "handle escalated complaints via telephone",
+            "process returns and exchanges"
+          ],
+          "can_perform_essential_functions_without_accommodation": false,
+          "can_perform_essential_functions_with_accommodation": false,
+          "functions_employee_cannot_perform": ["handle escalated complaints via telephone"],
+          "past_incumbents_performed_function": false,
+          "number_of_employees_who_can_perform": 3,
+          "position_exists_to_perform_function": false,
+          "meets_skill_education_experience_requirements": true,
+          "accommodation_explored": false
+        }
+      },
+      "expected_output": {
+        "disability_determination": {
+          "has_qualifying_disability": "yes",
+          "disability_type": "actual_disability",
+          "accommodation_rights_attach": true,
+          "disability_analysis": {
+            "factors_for": [
+              "impairment substantially limits communicating and interacting_with_others — meets 'substantially limits' standard under 29 CFR § 1630.2(j)(1)(ii)",
+              "limitation_severity is substantial — exceeds the broad but non-demanding threshold",
+              "limitation_duration is long_term — not transitory and minor",
+              "major_life_activities_affected is populated with identified activity"
+            ],
+            "factors_against": [],
+            "key_uncertainties": []
+          },
+          "reasoning": "Under 29 CFR § 1630.2(j)(1)(i), 'substantially limits' is construed broadly. Generalized anxiety disorder substantially limits communicating and interacting with others at a substantial severity level over a long_term duration. Anti-anxiety medication is a mitigating measure excluded from this assessment per 42 U.S.C. § 12102(4)(E).",
+          "sources_cited": ["42 U.S.C. § 12102(1)(A)", "29 CFR § 1630.2(g)(1)(i)", "29 CFR § 1630.2(j)(1)(i)-(ii)", "42 U.S.C. § 12102(4)(E)"]
+        },
+        "qualified_individual": {
+          "is_qualified_individual": "indeterminate",
+          "essential_functions_analysis": {
+            "functions_confirmed_essential": [
+              "answer inbound customer calls",
+              "process returns and exchanges"
+            ],
+            "functions_possibly_marginal": ["handle escalated complaints via telephone"],
+            "factors_for": [
+              "individual meets non-medical qualification requirements",
+              "disputed functions may be marginal — no written job description, past incumbents did not consistently perform the function"
+            ],
+            "factors_against": [
+              "individual cannot perform handle escalated complaints via telephone even with accommodation",
+              "employer has asserted this function is essential"
+            ],
+            "key_uncertainties": [
+              "essential function status of handle escalated complaints via telephone is not established — insufficient supporting factors",
+              "no written job description predating the posting — a key evidentiary factor under 29 CFR § 1630.2(n)(3)(ii)",
+              "whether past incumbents in this position consistently performed the function is unknown or false",
+              "no good-faith exploration of reasonable accommodation has occurred — cannot determine whether an effective accommodation exists"
+            ]
+          },
+          "reasoning": "Under 29 CFR § 1630.2(m)-(n), qualified individual status depends on both essential function status and accommodation availability. Two issues are indeterminate: (1) the telephone complaint-handling function lacks essential function support (no written job description, incumbents varied, employer's assertion alone insufficient), and (2) no accommodation has been explored. Interactive process required under EEOC Enforcement Guidance No. 915.002 has not occurred.",
+          "sources_cited": ["42 U.S.C. § 12111(8)", "29 CFR § 1630.2(m)-(n)", "29 CFR § 1630.2(n)(3)(ii)", "EEOC Enforcement Guidance No. 915.002 § General Principles"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "CE-008",
+      "scenario_name": "Epilepsy in Remission — Qualifies Under Episodic Rule",
+      "description": "Epilepsy controlled by medication, no recent seizures. Per se substantially limiting AND episodic rule both apply. Disability: yes.",
+      "outcome_type": "clear_yes",
+      "input": {
+        "employer_coverage": {
+          "employer_type": "private_employer",
+          "employer_employee_count": 75,
+          "workweeks_with_fifteen_plus": 52
+        },
+        "individual_status": {
+          "individual_status": "current_employee",
+          "is_independent_contractor": false
+        },
+        "disability_determination": {
+          "disability_basis": "actual_disability",
+          "impairment_type": "neurological",
+          "impairment_description": "Epilepsy, seizure-free for 2 years with medication management",
+          "major_life_activities_affected": ["major_bodily_functions"],
+          "limitation_severity": "severe",
+          "limitation_duration": "permanent",
+          "is_episodic_or_in_remission": true,
+          "would_substantially_limit_when_active": true,
+          "mitigating_measures_used": ["anti-seizure medication"],
+          "ordinary_eyeglasses_only": false,
+          "is_per_se_substantially_limiting": true
+        }
+      },
+      "expected_output": {
+        "employer_coverage": {
+          "is_covered_employer": true,
+          "coverage_basis": "employee_threshold_met",
+          "reasoning": "FinanceCorp is a private employer with 75 employees for 52 qualifying workweeks, satisfying the threshold at 42 U.S.C. § 12111(5)(A).",
+          "sources_cited": ["42 U.S.C. § 12111(5)(A)", "29 CFR § 1630.2(e)(1)"]
+        },
+        "individual_status": {
+          "is_covered_individual": true,
+          "coverage_basis": "current_employee_covered",
+          "coverage_limitations": [],
+          "reasoning": "Angela Davis is a current employee. Under 42 U.S.C. § 12112(a), the prohibition applies to current employees.",
+          "sources_cited": ["42 U.S.C. § 12112(a)", "29 CFR § 1630.2(f)"]
+        },
+        "disability_determination": {
+          "has_qualifying_disability": "yes",
+          "disability_type": "actual_disability",
+          "accommodation_rights_attach": true,
+          "disability_analysis": {
+            "factors_for": [
+              "impairment_type is identified as per se substantially limiting under 29 CFR § 1630.2(j)(3)(iii)",
+              "limitation_duration is permanent — meets duration requirement",
+              "impairment is episodic or in remission — qualifies under 29 CFR § 1630.2(j)(1)(vii) if it would substantially limit when active",
+              "would_substantially_limit_when_active is true — statutory requirement satisfied"
+            ],
+            "factors_against": [],
+            "key_uncertainties": []
+          },
+          "reasoning": "Under 29 CFR § 1630.2(j)(3)(iii), epilepsy (neurological) is per se substantially limiting. Additionally, under 29 CFR § 1630.2(j)(1)(vii), an impairment that is episodic or in remission qualifies as a disability if it would substantially limit a major life activity when active. Anti-seizure medication is a mitigating measure excluded from this assessment per 42 U.S.C. § 12102(4)(E). The current seizure-free status does not defeat coverage.",
+          "sources_cited": ["29 CFR § 1630.2(g)(1)(i)", "29 CFR § 1630.2(j)(3)(iii)", "42 U.S.C. § 12102(4)(D)", "29 CFR § 1630.2(j)(1)(vii)", "42 U.S.C. § 12102(4)(E)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "CE-009",
+      "scenario_name": "Mitigating Measures — Diabetes Controlled by Insulin, Disability Still Established",
+      "description": "Diabetes managed by insulin. Employer argues 'well-managed' = no disability. Mitigating measures excluded. Per se substantially limiting. Disability: yes.",
+      "outcome_type": "clear_yes",
+      "input": {
+        "employer_coverage": {
+          "employer_type": "private_employer",
+          "employer_employee_count": 200,
+          "workweeks_with_fifteen_plus": 52
+        },
+        "individual_status": {
+          "individual_status": "current_employee",
+          "is_independent_contractor": false
+        },
+        "disability_determination": {
+          "disability_basis": "actual_disability",
+          "impairment_type": "endocrine",
+          "impairment_description": "Type 2 diabetes managed with daily insulin injections; well-controlled but with periodic hypoglycemic episodes",
+          "major_life_activities_affected": ["major_bodily_functions"],
+          "limitation_severity": "substantial",
+          "limitation_duration": "permanent",
+          "is_episodic_or_in_remission": false,
+          "mitigating_measures_used": ["insulin therapy", "dietary management"],
+          "ordinary_eyeglasses_only": false,
+          "is_per_se_substantially_limiting": true
+        }
+      },
+      "expected_output": {
+        "employer_coverage": {
+          "is_covered_employer": true,
+          "coverage_basis": "employee_threshold_met",
+          "reasoning": "EngineerCorp is a private employer with 200 employees for 52 qualifying workweeks, satisfying the threshold at 42 U.S.C. § 12111(5)(A).",
+          "sources_cited": ["42 U.S.C. § 12111(5)(A)", "29 CFR § 1630.2(e)(1)"]
+        },
+        "individual_status": {
+          "is_covered_individual": true,
+          "coverage_basis": "current_employee_covered",
+          "coverage_limitations": [],
+          "reasoning": "Patricia Howard is a current employee. Under 42 U.S.C. § 12112(a), the prohibition applies to current employees.",
+          "sources_cited": ["42 U.S.C. § 12112(a)", "29 CFR § 1630.2(f)"]
+        },
+        "disability_determination": {
+          "has_qualifying_disability": "yes",
+          "disability_type": "actual_disability",
+          "accommodation_rights_attach": true,
+          "disability_analysis": {
+            "factors_for": [
+              "impairment_type (endocrine — diabetes) is identified as per se substantially limiting under 29 CFR § 1630.2(j)(3)(iii)",
+              "limitation_duration is permanent — meets duration requirement"
+            ],
+            "factors_against": [],
+            "key_uncertainties": []
+          },
+          "reasoning": "Under 29 CFR § 1630.2(j)(3)(iii), diabetes substantially limits endocrine function per se. Under 42 U.S.C. § 12102(4)(E) and 29 CFR § 1630.2(j)(1)(vi), mitigating measures — including insulin therapy and dietary management — are NOT considered when determining whether an impairment substantially limits a major life activity. The employer's 'well-managed' argument is legally incorrect. Disability is established.",
+          "sources_cited": ["29 CFR § 1630.2(g)(1)(i)", "29 CFR § 1630.2(j)(3)(iii)", "42 U.S.C. § 12102(4)(E)", "29 CFR § 1630.2(j)(1)(vi)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "CE-010",
+      "scenario_name": "Record of Disability — Cancer Survivor, No Current Limitation, Promotion Denied",
+      "description": "Hodgkin's lymphoma in full remission 5 years. No current limitations. Adverse action (promotion denial) based on medical history. Record of disability: yes. RA obligation attaches.",
+      "outcome_type": "clear_yes",
+      "input": {
+        "employer_coverage": {
+          "employer_type": "private_employer",
+          "employer_employee_count": 500,
+          "workweeks_with_fifteen_plus": 52
+        },
+        "individual_status": {
+          "individual_status": "current_employee",
+          "is_independent_contractor": false
+        },
+        "disability_determination": {
+          "disability_basis": "record_of_disability",
+          "impairment_type": "cancer",
+          "impairment_description": "Hodgkin's lymphoma, treated and in full remission for 5 years, no current limitations",
+          "major_life_activities_affected": ["major_bodily_functions"],
+          "limitation_duration": "long_term",
+          "is_episodic_or_in_remission": true,
+          "would_substantially_limit_when_active": true,
+          "mitigating_measures_used": ["chemotherapy (completed)", "radiation (completed)"],
+          "ordinary_eyeglasses_only": false,
+          "is_per_se_substantially_limiting": true
+        }
+      },
+      "expected_output": {
+        "employer_coverage": {
+          "is_covered_employer": true,
+          "coverage_basis": "employee_threshold_met",
+          "reasoning": "ManufactureCo is a private employer with 500 employees for 52 qualifying workweeks, satisfying the threshold at 42 U.S.C. § 12111(5)(A).",
+          "sources_cited": ["42 U.S.C. § 12111(5)(A)", "29 CFR § 1630.2(e)(1)"]
+        },
+        "individual_status": {
+          "is_covered_individual": true,
+          "coverage_basis": "current_employee_covered",
+          "coverage_limitations": [],
+          "reasoning": "Thomas Chen is a current employee. Under 42 U.S.C. § 12112(a), the prohibition applies to current employees.",
+          "sources_cited": ["42 U.S.C. § 12112(a)", "29 CFR § 1630.2(f)"]
+        },
+        "disability_determination": {
+          "has_qualifying_disability": "yes",
+          "disability_type": "record_of_disability",
+          "accommodation_rights_attach": true,
+          "disability_analysis": {
+            "factors_for": [
+              "individual has a record of an impairment (cancer) that substantially limited major_bodily_functions — normal cell growth",
+              "historical limitation duration was long_term — not transitory and minor",
+              "record_of_disability prong entitles individual to reasonable accommodation under 29 CFR § 1630.9(e)",
+              "cancer is per se substantially limiting under 29 CFR § 1630.2(j)(3)(iii) — record is of a qualifying impairment"
+            ],
+            "factors_against": [],
+            "key_uncertainties": []
+          },
+          "reasoning": "Under 29 CFR § 1630.2(k), an individual has a record of a disability if they have a history of a physical or mental impairment that substantially limited one or more major life activities. Cancer substantially limits normal cell growth (major_bodily_functions) per 29 CFR § 1630.2(j)(3)(iii). The record_of_disability prong does not require current limitation. RA obligation attaches under this prong per 29 CFR § 1630.9(e).",
+          "sources_cited": ["42 U.S.C. § 12102(1)(B)", "29 CFR § 1630.2(g)(1)(ii)", "29 CFR § 1630.2(k)", "29 CFR § 1630.2(j)(3)(iii)"]
+        }
+      }
+    }
+
+  ]
+}
