@@ -1,0 +1,842 @@
+{
+  "module": "ada_accommodation_analysis",
+  "version": "0.2",
+  "last_updated": "2026-04-17",
+  "description": "Automated test fixtures for Module 2 Accommodation Analysis. Each test case maps to a scenario in accommodation_analysis_test_scenarios.md. Module 1 dependency inputs are included inline, prefixed with module_1_inputs, to make each fixture self-contained and independently testable.",
+  "test_cases": [
+    {
+      "scenario_id": "AA-001",
+      "scenario_name": "Accommodation Required — Ergonomic Chair, Large Employer, No Hardship, No Threat",
+      "description": "All thresholds met, no defenses raised. Ergonomic chair at $400 for 2,400-employee employer. Accommodation required.",
+      "outcome_type": "yes",
+      "component_focus": "accommodation_determination",
+      "input": {
+        "module_1_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "has_qualifying_disability": "yes",
+          "accommodation_rights_attach": true,
+          "is_qualified_individual": "yes"
+        },
+        "accommodation_request": {
+          "accommodation_type_requested": "equipment_modification",
+          "accommodation_description": "Ergonomic chair with adjustable lumbar support",
+          "accommodation_request_date": "2026-03-01",
+          "request_made_by": "employee",
+          "accommodation_is_for": "performing_job_functions",
+          "functional_limitation_identified": true,
+          "accommodation_request_in_writing": true
+        },
+        "undue_hardship_analysis": {
+          "accommodation_gross_cost": 400,
+          "tax_credits_available": 0,
+          "outside_funding_available": 0,
+          "accommodation_net_cost": 400,
+          "accommodation_frequency": "one_time",
+          "facility_annual_revenue": 180000000,
+          "facility_employee_count": 2400,
+          "entity_annual_revenue": 180000000,
+          "entity_total_employees": 2400,
+          "entity_type": "single_facility",
+          "impact_on_operations": "none",
+          "impact_on_other_employees": "none",
+          "employer_asserts_hardship": false,
+          "employer_documented_hardship_analysis": false
+        },
+        "direct_threat_analysis": {
+          "direct_threat_claimed": false
+        }
+      },
+      "expected_output": {
+        "accommodation_request": {
+          "accommodation_request_valid": true,
+          "accommodation_category": "equipment_modification",
+          "request_validity_basis": "employee_request_with_limitation",
+          "reasoning": "The accommodation request was made by the employee and identified a functional limitation (extended sitting) requiring an adjustment to performing_job_functions. Under EEOC Enforcement Guidance No. 915.002, no magic words are required. This request meets the threshold for validity.",
+          "sources_cited": ["29 CFR § 1630.2(o)(1)", "EEOC Enforcement Guidance No. 915.002 § Requesting Reasonable Accommodation"]
+        },
+        "undue_hardship_analysis": {
+          "undue_hardship_applies": "no",
+          "undue_hardship_analysis": {
+            "cost_burden_ratio": 0.0,
+            "cost_burden_denominator_used": "facility_annual_revenue",
+            "factors_for_hardship": [],
+            "factors_against_hardship": ["employer has not asserted undue hardship — defense not raised"],
+            "key_uncertainties": []
+          },
+          "alternative_accommodations_available": false,
+          "alternative_accommodations_suggested": [],
+          "reasoning": "Employer has not asserted undue hardship. Under 42 U.S.C. § 12112(b)(5)(A), undue hardship is an affirmative defense that must be raised by the employer. Defense not raised; undue_hardship_applies is no.",
+          "sources_cited": ["42 U.S.C. § 12112(b)(5)(A)", "29 CFR § 1630.15(d)"]
+        },
+        "direct_threat_analysis": {
+          "direct_threat_exists": "no",
+          "direct_threat_analysis": {
+            "factors_for_threat": [],
+            "factors_against_threat": ["employer has not asserted direct threat defense"],
+            "mitigation_possible": null,
+            "assessment_methodology_adequate": null,
+            "key_uncertainties": []
+          },
+          "reasoning": "Employer has not asserted direct threat. direct_threat_exists is no.",
+          "sources_cited": ["42 U.S.C. § 12113(b)", "29 CFR § 1630.15(b)(2)"]
+        },
+        "accommodation_determination": {
+          "accommodation_required": "yes",
+          "accommodation_type_approved": "equipment_modification",
+          "denial_basis": null,
+          "factors_summary": {
+            "factors_for_accommodation": [
+              "covered employer and covered individual confirmed",
+              "qualifying disability with accommodation rights established",
+              "individual is qualified — can perform all essential functions with ergonomic chair",
+              "valid accommodation request — employee identified functional limitation",
+              "no undue hardship asserted",
+              "no direct threat claimed"
+            ],
+            "factors_against_accommodation": []
+          },
+          "recommended_actions": [
+            "Provide the ergonomic chair with adjustable lumbar support as requested",
+            "Document the accommodation in the interactive process file (not in the personnel file)",
+            "Follow up within 30 days to confirm accommodation is effective"
+          ],
+          "reasoning": "All threshold requirements are satisfied. No defenses apply. Under 42 U.S.C. § 12112(b)(5)(A) and 29 CFR § 1630.9(a), NatioTech Corp must provide the ergonomic chair. Net cost of $400 represents 0.00% of $180M annual revenue — a de minimis expense for this employer.",
+          "sources_cited": ["42 U.S.C. § 12112(b)(5)(A)", "29 CFR § 1630.9(a)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "AA-002",
+      "scenario_name": "Undue Hardship Established — Small Employer, $80,000 Elevator Installation",
+      "description": "18-employee employer, $80K one-time cost = 8.42% of operating budget. Moderate impact. Hardship established. Accommodation denied.",
+      "outcome_type": "no",
+      "component_focus": "undue_hardship_analysis",
+      "input": {
+        "module_1_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "has_qualifying_disability": "yes",
+          "accommodation_rights_attach": true,
+          "is_qualified_individual": "yes"
+        },
+        "accommodation_request": {
+          "accommodation_type_requested": "facility_access",
+          "accommodation_description": "Freight elevator installation for mezzanine access",
+          "accommodation_request_date": "2026-02-10",
+          "request_made_by": "employee",
+          "accommodation_is_for": "performing_job_functions",
+          "functional_limitation_identified": true,
+          "accommodation_request_in_writing": true
+        },
+        "undue_hardship_analysis": {
+          "accommodation_gross_cost": 80000,
+          "tax_credits_available": 0,
+          "outside_funding_available": 0,
+          "accommodation_net_cost": 80000,
+          "accommodation_frequency": "one_time",
+          "facility_annual_revenue": 1200000,
+          "facility_employee_count": 18,
+          "facility_operating_budget": 950000,
+          "entity_annual_revenue": 1200000,
+          "entity_total_employees": 18,
+          "entity_number_of_facilities": 1,
+          "entity_type": "single_facility",
+          "administrative_relationship": "decentralized",
+          "geographic_separateness": false,
+          "impact_on_operations": "moderate",
+          "impact_on_other_employees": "minor",
+          "impact_description": "Construction would temporarily block loading dock access for approximately 6 weeks",
+          "employer_asserts_hardship": true,
+          "employer_documented_hardship_analysis": true,
+          "alternative_accommodation_considered": false
+        },
+        "direct_threat_analysis": {
+          "direct_threat_claimed": false
+        }
+      },
+      "expected_output": {
+        "accommodation_request": {
+          "accommodation_request_valid": true,
+          "accommodation_category": "facility_access",
+          "request_validity_basis": "employee_request_with_limitation",
+          "sources_cited": ["29 CFR § 1630.2(o)(1)", "EEOC Enforcement Guidance No. 915.002 § Requesting Reasonable Accommodation"]
+        },
+        "undue_hardship_analysis": {
+          "undue_hardship_applies": "yes",
+          "undue_hardship_analysis": {
+            "cost_burden_ratio": 8.42,
+            "cost_burden_denominator_used": "facility_operating_budget",
+            "factors_for_hardship": [
+              "cost burden ratio exceeds 5% of facility_operating_budget (8.42%) — high cost relative to facility resources under 29 CFR § 1630.2(p)(2)(i)-(ii)",
+              "impact on facility operations is moderate — notable operational disruption weighs toward hardship under 29 CFR § 1630.2(p)(2)(ii)",
+              "small entity (18 employees) with gross accommodation cost of $80,000 — small employer size weighs toward hardship under 29 CFR § 1630.2(p)(2)(ii); NOTE: $5,000 threshold is an engine heuristic, not a statutory figure — flagged for review"
+            ],
+            "factors_against_hardship": [
+              "employer has not considered alternative lower-cost accommodations before asserting hardship — failure to explore alternatives weighs against hardship defense per EEOC Enforcement Guidance No. 915.002 § Undue Hardship"
+            ],
+            "key_uncertainties": []
+          },
+          "alternative_accommodations_available": true,
+          "alternative_accommodations_suggested": [
+            "Job restructuring to reassign mezzanine-only functions to other employees (marginal function analysis required)",
+            "Portable powered stair climber or lift equipment (approximate cost $3,000–$8,000)",
+            "Reorganize storage layout so all functions essential to Carlos's role are ground-floor accessible"
+          ],
+          "sources_cited": ["42 U.S.C. § 12111(10)", "29 CFR § 1630.2(p)(2)(i)-(iii)", "29 CFR § 1630.15(d)", "EEOC Enforcement Guidance No. 915.002 §§ 42–46"]
+        },
+        "direct_threat_analysis": {
+          "direct_threat_exists": "no",
+          "direct_threat_analysis": {
+            "factors_for_threat": [],
+            "factors_against_threat": ["employer has not asserted direct threat defense"],
+            "mitigation_possible": null,
+            "assessment_methodology_adequate": null,
+            "key_uncertainties": []
+          },
+          "sources_cited": ["42 U.S.C. § 12113(b)"]
+        },
+        "accommodation_determination": {
+          "accommodation_required": "no",
+          "accommodation_type_approved": null,
+          "denial_basis": "undue_hardship",
+          "factors_summary": {
+            "factors_for_accommodation": [
+              "covered employer and individual confirmed",
+              "qualifying disability with accommodation rights",
+              "valid accommodation request"
+            ],
+            "factors_against_accommodation": [
+              "undue hardship established: cost burden ratio 8.42% of operating budget for 18-employee entity",
+              "moderate operational disruption during construction"
+            ]
+          },
+          "recommended_actions": [
+            "Explore alternative lower-cost accommodations (portable lift, job restructuring, storage reorganization) before issuing final denial",
+            "Document the alternative accommodation exploration in the interactive process file",
+            "If alternatives are not effective, provide written explanation of the undue hardship determination with supporting documentation",
+            "Consider whether state vocational rehabilitation or tax credits (IRS Form 8826) may offset costs of alternative options"
+          ],
+          "sources_cited": ["42 U.S.C. § 12112(b)(5)(A)", "29 CFR § 1630.15(d)", "EEOC Enforcement Guidance No. 915.002 § Undue Hardship Issues"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "AA-003",
+      "scenario_name": "No Undue Hardship — Fortune 500 Employer, $50K Cost at 0.00% Revenue Ratio",
+      "description": "45,000-employee employer, $50K = 0.00% of $2.1B revenue. Five factors against hardship, zero for. Accommodation required.",
+      "outcome_type": "yes",
+      "component_focus": "undue_hardship_analysis",
+      "input": {
+        "module_1_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "has_qualifying_disability": "yes",
+          "accommodation_rights_attach": true,
+          "is_qualified_individual": "yes"
+        },
+        "accommodation_request": {
+          "accommodation_type_requested": "equipment_modification",
+          "accommodation_description": "Specialized caption software and hardware amplification system",
+          "accommodation_request_date": "2026-01-15",
+          "request_made_by": "employee",
+          "accommodation_is_for": "performing_job_functions",
+          "functional_limitation_identified": true,
+          "accommodation_request_in_writing": true
+        },
+        "undue_hardship_analysis": {
+          "accommodation_gross_cost": 50000,
+          "tax_credits_available": 0,
+          "outside_funding_available": 0,
+          "accommodation_net_cost": 50000,
+          "accommodation_frequency": "one_time",
+          "facility_annual_revenue": 2100000000,
+          "facility_employee_count": 45000,
+          "entity_annual_revenue": 2100000000,
+          "entity_total_employees": 45000,
+          "entity_number_of_facilities": 28,
+          "entity_type": "multi_facility_national",
+          "administrative_relationship": "centralized",
+          "geographic_separateness": false,
+          "impact_on_operations": "none",
+          "impact_on_other_employees": "none",
+          "employer_asserts_hardship": true,
+          "employer_documented_hardship_analysis": true,
+          "alternative_accommodation_considered": false
+        },
+        "direct_threat_analysis": {
+          "direct_threat_claimed": false
+        }
+      },
+      "expected_output": {
+        "undue_hardship_analysis": {
+          "undue_hardship_applies": "no",
+          "undue_hardship_analysis": {
+            "cost_burden_ratio": 0.0,
+            "cost_burden_denominator_used": "facility_annual_revenue",
+            "factors_for_hardship": [],
+            "factors_against_hardship": [
+              "cost burden ratio is 0.0% of facility_annual_revenue — low cost relative to facility resources weighs against hardship under 29 CFR § 1630.2(p)(2)(i)-(ii); NOTE: 1% threshold is an engine heuristic — flagged for review",
+              "employer has not considered alternative lower-cost accommodations before asserting hardship — failure to explore alternatives weighs against hardship defense per EEOC Enforcement Guidance No. 915.002 § Undue Hardship",
+              "impact on other employees is none — minimal employee disruption weighs against hardship under 29 CFR § 1630.2(p)(2)(ii)",
+              "large entity (45000 employees, $2100000000 annual revenue) — substantial resources weigh against hardship under 29 CFR § 1630.2(p)(2)(ii)",
+              "operational impact is none — minimal operations disruption weighs against hardship under 29 CFR § 1630.2(p)(2)(ii)"
+            ],
+            "key_uncertainties": []
+          },
+          "alternative_accommodations_available": false,
+          "alternative_accommodations_suggested": [],
+          "sources_cited": ["42 U.S.C. § 12111(10)", "29 CFR § 1630.2(p)(2)(i)-(iii)", "29 CFR § 1630.15(d)", "EEOC Enforcement Guidance No. 915.002 §§ 42–46"]
+        },
+        "accommodation_determination": {
+          "accommodation_required": "yes",
+          "accommodation_type_approved": "equipment_modification",
+          "denial_basis": null,
+          "sources_cited": ["42 U.S.C. § 12112(b)(5)(A)", "29 CFR § 1630.9(a)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "AA-004",
+      "scenario_name": "Indeterminate Undue Hardship — Mid-Size Employer, 0.34% Cost Ratio, Moderate Impact",
+      "description": "95-employee employer, $16,500 = 0.34% of operating budget. Moderate impact both directions. Incomplete documentation. Indeterminate.",
+      "outcome_type": "indeterminate",
+      "component_focus": "undue_hardship_analysis",
+      "input": {
+        "module_1_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "has_qualifying_disability": "yes",
+          "accommodation_rights_attach": true,
+          "is_qualified_individual": "yes"
+        },
+        "accommodation_request": {
+          "accommodation_type_requested": "equipment_modification",
+          "accommodation_description": "Screen magnification hardware and software system for laboratory workstation",
+          "accommodation_request_date": "2026-03-20",
+          "request_made_by": "employee",
+          "accommodation_is_for": "performing_job_functions",
+          "functional_limitation_identified": true,
+          "accommodation_request_in_writing": true
+        },
+        "undue_hardship_analysis": {
+          "accommodation_gross_cost": 16500,
+          "tax_credits_available": 0,
+          "outside_funding_available": 0,
+          "accommodation_net_cost": 16500,
+          "accommodation_frequency": "one_time",
+          "facility_annual_revenue": 5200000,
+          "facility_employee_count": 95,
+          "facility_operating_budget": 4800000,
+          "entity_annual_revenue": 5200000,
+          "entity_total_employees": 95,
+          "entity_number_of_facilities": 1,
+          "entity_type": "single_facility",
+          "administrative_relationship": "centralized",
+          "geographic_separateness": false,
+          "impact_on_operations": "moderate",
+          "impact_on_other_employees": "moderate",
+          "impact_description": "Other technicians require workflow adjustments during 2-week setup; some shared equipment temporarily unavailable",
+          "employer_asserts_hardship": true,
+          "employer_documented_hardship_analysis": true,
+          "alternative_accommodation_considered": false
+        },
+        "direct_threat_analysis": {
+          "direct_threat_claimed": false
+        }
+      },
+      "expected_output": {
+        "undue_hardship_analysis": {
+          "undue_hardship_applies": "indeterminate",
+          "undue_hardship_analysis": {
+            "cost_burden_ratio": 0.34,
+            "cost_burden_denominator_used": "facility_operating_budget",
+            "factors_for_hardship": [],
+            "factors_against_hardship": [
+              "employer has not considered alternative lower-cost accommodations before asserting hardship — failure to explore alternatives weighs against hardship defense per EEOC Enforcement Guidance No. 915.002 § Undue Hardship"
+            ],
+            "key_uncertainties": [
+              "cost burden ratio of 0.34% falls between the 1% (clear no) and 5% (clear yes) thresholds — individualized assessment required; neither factor UH-F01 nor UH-A01 fires",
+              "operational and employee impact rated moderate — falls between clear minor (factor against) and significant/severe (factor for); additional documentation of specific impacts needed",
+              "employer's documented analysis covers cost but not all 29 CFR § 1630.2(p) factors — burden of proof not fully satisfied pending complete factor documentation"
+            ]
+          },
+          "alternative_accommodations_available": true,
+          "alternative_accommodations_suggested": [
+            "Software-only screen magnification (e.g., ZoomText, MAGic) — estimated $500–$1,500, no hardware required",
+            "Tablet-based magnification solution — estimated $800–$2,000",
+            "State vocational rehabilitation funding may cover specialized equipment costs"
+          ],
+          "sources_cited": ["42 U.S.C. § 12111(10)", "29 CFR § 1630.2(p)(2)(i)-(iii)", "29 CFR § 1630.15(d)", "EEOC Enforcement Guidance No. 915.002 §§ 42–46"]
+        },
+        "accommodation_determination": {
+          "accommodation_required": "indeterminate",
+          "accommodation_type_approved": null,
+          "denial_basis": null,
+          "sources_cited": ["42 U.S.C. § 12112(b)(5)(A)", "29 CFR § 1630.9(a)", "29 CFR § 1630.15(d)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "AA-005",
+      "scenario_name": "Direct Threat Established — Uncontrolled Seizures, CDL Truck Driver, No Mitigation",
+      "description": "Individualized assessment, current medical knowledge, DOT disqualification. All four threat factors fire. Cannot mitigate. Direct threat YES.",
+      "outcome_type": "no",
+      "component_focus": "direct_threat_analysis",
+      "input": {
+        "module_1_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "has_qualifying_disability": "yes",
+          "accommodation_rights_attach": true,
+          "is_qualified_individual": "indeterminate"
+        },
+        "accommodation_request": {
+          "accommodation_type_requested": "policy_modification",
+          "accommodation_description": "Continued employment as long-haul commercial truck driver despite medical disqualification",
+          "accommodation_request_date": "2026-02-01",
+          "request_made_by": "employee",
+          "accommodation_is_for": "performing_job_functions",
+          "functional_limitation_identified": true,
+          "accommodation_request_in_writing": true
+        },
+        "undue_hardship_analysis": {
+          "accommodation_gross_cost": 0,
+          "accommodation_net_cost": 0,
+          "accommodation_frequency": "ongoing",
+          "facility_annual_revenue": 42000000,
+          "facility_employee_count": 380,
+          "entity_annual_revenue": 42000000,
+          "entity_total_employees": 380,
+          "impact_on_operations": "none",
+          "impact_on_other_employees": "none",
+          "employer_asserts_hardship": false,
+          "employer_documented_hardship_analysis": false
+        },
+        "direct_threat_analysis": {
+          "direct_threat_claimed": true,
+          "threat_to": "others",
+          "risk_duration": "ongoing",
+          "potential_harm_severity": "catastrophic",
+          "harm_likelihood": "highly_likely",
+          "harm_imminence": "imminent",
+          "individualized_assessment_performed": true,
+          "assessment_based_on_current_medical_knowledge": true,
+          "objective_evidence_exists": true,
+          "evidence_description": "Neurologist letter documenting uncontrolled tonic-clonic seizures averaging twice monthly despite medication; DOT CDL medical disqualification certificate",
+          "threat_can_be_mitigated_by_accommodation": false,
+          "assessment_relied_on_stereotypes": false
+        }
+      },
+      "expected_output": {
+        "direct_threat_analysis": {
+          "direct_threat_exists": "yes",
+          "direct_threat_analysis": {
+            "factors_for_threat": [
+              "assessment is supported by objective evidence and current medical knowledge — procedural requirements of 29 CFR § 1630.2(r) are satisfied",
+              "harm imminence is imminent — immediate risk of harm weighs toward direct threat under 29 CFR § 1630.2(r) factor 4",
+              "harm likelihood is highly_likely based on objective evidence — high probability of harm is a factor supporting direct threat under 29 CFR § 1630.2(r) factor 3",
+              "potential harm severity is catastrophic — catastrophic potential harm weighs strongly toward direct threat under 29 CFR § 1630.2(r) factor 2",
+              "risk duration is ongoing — continuous risk weighs toward direct threat under 29 CFR § 1630.2(r) factor 1"
+            ],
+            "factors_against_threat": [],
+            "mitigation_possible": false,
+            "assessment_methodology_adequate": true,
+            "key_uncertainties": []
+          },
+          "sources_cited": ["42 U.S.C. § 12113(b)", "29 CFR § 1630.2(r)", "29 CFR § 1630.15(b)(2)"]
+        },
+        "accommodation_determination": {
+          "accommodation_required": "no",
+          "accommodation_type_approved": null,
+          "denial_basis": "direct_threat",
+          "recommended_actions": [
+            "Exclude Robert from the CDL truck driver position based on established direct threat",
+            "Engage in interactive process to determine whether reassignment to a non-driving position is possible (direct threat applies only to this specific role)",
+            "Document the individualized assessment and basis for the direct threat determination in writing",
+            "Do not apply direct threat determination to other positions without conducting a separate individualized assessment for each"
+          ],
+          "sources_cited": ["42 U.S.C. § 12113(b)", "42 U.S.C. § 12112(b)(5)(A)", "29 CFR § 1630.2(r)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "AA-006",
+      "scenario_name": "Direct Threat Defense Fails — HIV Stereotype, No Individualized Assessment",
+      "description": "Employer asserts threat for HIV+ dietary aide. Assessment relied on stereotype (food contamination). Fatal procedural defect. Direct threat NO. Accommodation required.",
+      "outcome_type": "yes",
+      "component_focus": "direct_threat_analysis",
+      "input": {
+        "module_1_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "has_qualifying_disability": "yes",
+          "accommodation_rights_attach": true,
+          "is_qualified_individual": "yes"
+        },
+        "accommodation_request": {
+          "accommodation_type_requested": "policy_modification",
+          "accommodation_description": "Return to original patient food preparation duties",
+          "accommodation_request_date": "2026-03-10",
+          "request_made_by": "employee",
+          "accommodation_is_for": "performing_job_functions",
+          "functional_limitation_identified": true,
+          "accommodation_request_in_writing": false
+        },
+        "undue_hardship_analysis": {
+          "accommodation_gross_cost": 0,
+          "accommodation_net_cost": 0,
+          "accommodation_frequency": "ongoing",
+          "facility_annual_revenue": 85000000,
+          "facility_employee_count": 1200,
+          "entity_annual_revenue": 85000000,
+          "entity_total_employees": 1200,
+          "impact_on_operations": "none",
+          "impact_on_other_employees": "none",
+          "employer_asserts_hardship": false,
+          "employer_documented_hardship_analysis": false
+        },
+        "direct_threat_analysis": {
+          "direct_threat_claimed": true,
+          "threat_to": "others",
+          "risk_duration": "permanent",
+          "potential_harm_severity": "severe",
+          "harm_likelihood": "remote",
+          "harm_imminence": "not_imminent",
+          "individualized_assessment_performed": false,
+          "assessment_based_on_current_medical_knowledge": false,
+          "objective_evidence_exists": false,
+          "evidence_description": "No medical or public health documentation gathered; decision based on food services director's assumption",
+          "threat_can_be_mitigated_by_accommodation": false,
+          "assessment_relied_on_stereotypes": true
+        }
+      },
+      "expected_output": {
+        "direct_threat_analysis": {
+          "direct_threat_exists": "no",
+          "direct_threat_analysis": {
+            "factors_for_threat": [],
+            "factors_against_threat": [
+              "assessment relied on stereotypes or generalizations about the disability rather than individualized evaluation — fatal procedural defect under 29 CFR § 1630.2(r); this defeater applies regardless of substantive factors"
+            ],
+            "mitigation_possible": false,
+            "assessment_methodology_adequate": false,
+            "key_uncertainties": []
+          },
+          "sources_cited": ["29 CFR § 1630.2(r)", "EEOC Enforcement Guidance No. 915.002 §§ 36–41"]
+        },
+        "accommodation_determination": {
+          "accommodation_required": "yes",
+          "accommodation_type_approved": "policy_modification",
+          "denial_basis": null,
+          "recommended_actions": [
+            "Return Michael to his original food preparation duties immediately",
+            "Document that the prior reassignment was based on a legally invalid assessment",
+            "If the hospital genuinely believes a direct threat exists, conduct a proper individualized assessment using current CDC and public health guidance before taking any adverse action",
+            "Train food services management on ADA direct threat requirements and the prohibition on stereotype-based assessments"
+          ],
+          "sources_cited": ["42 U.S.C. § 12112(b)(5)(A)", "29 CFR § 1630.9(a)", "29 CFR § 1630.2(r)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "AA-007",
+      "scenario_name": "Direct Threat Mitigable — Diabetes, Safety-Sensitive Role, Monitoring Accommodation",
+      "description": "Employer conducts proper individualized assessment. Occupational physician concludes threat mitigable by monitoring protocol. R035 fires. Direct threat NO. Accommodation required.",
+      "outcome_type": "yes",
+      "component_focus": "direct_threat_analysis",
+      "input": {
+        "module_1_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "has_qualifying_disability": "yes",
+          "accommodation_rights_attach": true,
+          "is_qualified_individual": "yes"
+        },
+        "accommodation_request": {
+          "accommodation_type_requested": "policy_modification",
+          "accommodation_description": "Blood glucose monitoring before each shift and during breaks; permission to carry and consume fast-acting glucose tablets; 5-minute symptom-response break when needed",
+          "accommodation_request_date": "2026-01-28",
+          "request_made_by": "employee",
+          "accommodation_is_for": "performing_job_functions",
+          "functional_limitation_identified": true,
+          "accommodation_request_in_writing": true
+        },
+        "undue_hardship_analysis": {
+          "accommodation_gross_cost": 0,
+          "accommodation_net_cost": 0,
+          "accommodation_frequency": "ongoing",
+          "facility_annual_revenue": 28000000,
+          "facility_employee_count": 210,
+          "entity_annual_revenue": 28000000,
+          "entity_total_employees": 210,
+          "impact_on_operations": "minor",
+          "impact_on_other_employees": "none",
+          "employer_asserts_hardship": false,
+          "employer_documented_hardship_analysis": false
+        },
+        "direct_threat_analysis": {
+          "direct_threat_claimed": true,
+          "threat_to": "self",
+          "risk_duration": "ongoing",
+          "potential_harm_severity": "serious",
+          "harm_likelihood": "possible",
+          "harm_imminence": "somewhat_imminent",
+          "individualized_assessment_performed": true,
+          "assessment_based_on_current_medical_knowledge": true,
+          "objective_evidence_exists": true,
+          "evidence_description": "Occupational health physician assessment; 2 documented hypoglycemic incidents in 18 months; physician concludes risk is manageable with monitoring protocol",
+          "threat_can_be_mitigated_by_accommodation": true,
+          "mitigation_accommodation_description": "Pre-shift and break-time blood glucose monitoring, glucose tablets on person, 5-minute symptom-response break protocol",
+          "assessment_relied_on_stereotypes": false
+        }
+      },
+      "expected_output": {
+        "direct_threat_analysis": {
+          "direct_threat_exists": "no",
+          "direct_threat_analysis": {
+            "factors_for_threat": [],
+            "factors_against_threat": [
+              "threat can be eliminated or reduced to an acceptable level through reasonable accommodation — accommodation is required; exclusion is not permitted under 29 CFR § 1630.2(r)"
+            ],
+            "mitigation_possible": true,
+            "assessment_methodology_adequate": true,
+            "key_uncertainties": []
+          },
+          "sources_cited": ["29 CFR § 1630.2(r)", "42 U.S.C. § 12113(b)"]
+        },
+        "accommodation_determination": {
+          "accommodation_required": "yes",
+          "accommodation_type_approved": "policy_modification",
+          "denial_basis": null,
+          "sources_cited": ["42 U.S.C. § 12112(b)(5)(A)", "29 CFR § 1630.9(a)", "29 CFR § 1630.2(r)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "AA-008",
+      "scenario_name": "Reassignment as Last-Resort Accommodation — Vacant Equivalent Position Available",
+      "description": "Floor nurse cannot perform patient lifting even with accommodation. Vacant Medical Records Coordinator position exists; employee is qualified. Reassignment required.",
+      "outcome_type": "yes",
+      "component_focus": "accommodation_request",
+      "input": {
+        "module_1_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "has_qualifying_disability": "yes",
+          "accommodation_rights_attach": true,
+          "is_qualified_individual": "yes"
+        },
+        "accommodation_request": {
+          "accommodation_type_requested": "reassignment",
+          "accommodation_description": "Reassignment to vacant Medical Records Coordinator position at equivalent pay grade",
+          "accommodation_request_date": "2026-02-15",
+          "request_made_by": "employee",
+          "accommodation_is_for": "performing_job_functions",
+          "functional_limitation_identified": true,
+          "accommodation_request_in_writing": true
+        },
+        "undue_hardship_analysis": {
+          "accommodation_gross_cost": 0,
+          "accommodation_net_cost": 0,
+          "accommodation_frequency": "one_time",
+          "facility_annual_revenue": 320000000,
+          "facility_employee_count": 3200,
+          "entity_annual_revenue": 320000000,
+          "entity_total_employees": 3200,
+          "impact_on_operations": "minor",
+          "impact_on_other_employees": "none",
+          "employer_asserts_hardship": false,
+          "employer_documented_hardship_analysis": false
+        },
+        "direct_threat_analysis": {
+          "direct_threat_claimed": false
+        }
+      },
+      "expected_output": {
+        "accommodation_request": {
+          "accommodation_request_valid": true,
+          "accommodation_category": "reassignment",
+          "request_validity_basis": "employee_request_with_limitation",
+          "sources_cited": ["29 CFR § 1630.2(o)(2)(ii)", "EEOC Enforcement Guidance No. 915.002 § Reassignment"]
+        },
+        "accommodation_determination": {
+          "accommodation_required": "yes",
+          "accommodation_type_approved": "reassignment",
+          "denial_basis": null,
+          "recommended_actions": [
+            "Reassign Sandra to the Medical Records Coordinator position",
+            "Do not displace another employee to create the vacancy — reassignment applies only to existing vacancies per ADA National Network guidance",
+            "Confirm Sandra meets all qualification requirements for the Coordinator role before formalizing the transfer",
+            "Document the reassignment as an ADA accommodation in the interactive process file (not the personnel file)"
+          ],
+          "sources_cited": ["42 U.S.C. § 12112(b)(5)(A)", "29 CFR § 1630.9(a)", "EEOC Enforcement Guidance No. 915.002 § Reassignment", "ADA National Network Fact Sheet § Examples"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "AA-009",
+      "scenario_name": "Leave as Accommodation — 4-Week Treatment Leave, 30-Employee Company, Indeterminate",
+      "description": "Anxiety disorder. 4-week unpaid leave. Zero direct cost but moderate operational impact. No alternatives explored. Hardship indeterminate.",
+      "outcome_type": "indeterminate",
+      "component_focus": "undue_hardship_analysis",
+      "input": {
+        "module_1_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "has_qualifying_disability": "yes",
+          "accommodation_rights_attach": true,
+          "is_qualified_individual": "yes"
+        },
+        "accommodation_request": {
+          "accommodation_type_requested": "leave_as_accommodation",
+          "accommodation_description": "4 weeks unpaid leave for intensive outpatient anxiety treatment program",
+          "accommodation_request_date": "2026-04-01",
+          "request_made_by": "employee",
+          "accommodation_is_for": "performing_job_functions",
+          "functional_limitation_identified": true,
+          "accommodation_request_in_writing": true
+        },
+        "undue_hardship_analysis": {
+          "accommodation_gross_cost": 0,
+          "tax_credits_available": 0,
+          "outside_funding_available": 0,
+          "accommodation_net_cost": 0,
+          "accommodation_frequency": "one_time",
+          "facility_annual_revenue": 3500000,
+          "facility_employee_count": 30,
+          "entity_annual_revenue": 3500000,
+          "entity_total_employees": 30,
+          "entity_type": "single_facility",
+          "impact_on_operations": "moderate",
+          "impact_on_other_employees": "moderate",
+          "impact_description": "Junior employee would cover duties; some client deadlines may be affected during 4-week absence",
+          "employer_asserts_hardship": true,
+          "employer_documented_hardship_analysis": true,
+          "alternative_accommodation_considered": false
+        },
+        "direct_threat_analysis": {
+          "direct_threat_claimed": false
+        }
+      },
+      "expected_output": {
+        "undue_hardship_analysis": {
+          "undue_hardship_applies": "indeterminate",
+          "undue_hardship_analysis": {
+            "cost_burden_ratio": 0.0,
+            "cost_burden_denominator_used": "facility_annual_revenue",
+            "factors_for_hardship": [],
+            "factors_against_hardship": [
+              "employer has not considered alternative lower-cost accommodations before asserting hardship — failure to explore alternatives weighs against hardship defense per EEOC Enforcement Guidance No. 915.002 § Undue Hardship"
+            ],
+            "key_uncertainties": [
+              "zero direct monetary cost but employer asserts operational hardship — operational impact analysis requires more specificity: which client deliverables, what deadlines, what actual consequences of delay",
+              "impact rated moderate for both operations and employees — falls between clear minor (factor against) and significant/severe (factor for); insufficient to resolve without more detail",
+              "employer has not documented whether temporary staffing, cross-training, or other coverage alternatives are feasible or were considered"
+            ]
+          },
+          "alternative_accommodations_available": true,
+          "alternative_accommodations_suggested": [
+            "Temporary contractor or staffing agency placement for 4-week period",
+            "Co-worker cross-training for critical tasks prior to leave start",
+            "Phased or reduced-hour intensive outpatient program that allows partial work hours"
+          ],
+          "sources_cited": ["42 U.S.C. § 12111(10)", "29 CFR § 1630.2(p)(2)(i)-(iii)", "29 CFR § 1630.15(d)", "EEOC Enforcement Guidance No. 915.002 § Leave"]
+        },
+        "accommodation_determination": {
+          "accommodation_required": "indeterminate",
+          "accommodation_type_approved": null,
+          "denial_basis": null,
+          "sources_cited": ["42 U.S.C. § 12112(b)(5)(A)", "29 CFR § 1630.9(a)", "29 CFR § 1630.15(d)"]
+        }
+      }
+    },
+
+    {
+      "scenario_id": "AA-010",
+      "scenario_name": "Telework Denied by Blanket Policy — Peers Telework, No Documented Hardship Analysis",
+      "description": "RA for intermittent telework. Zero cost. Employer asserts hardship via blanket policy. No individualized analysis. 8 of 12 peers already telework. R030 fires. Indeterminate.",
+      "outcome_type": "indeterminate",
+      "component_focus": "undue_hardship_analysis",
+      "input": {
+        "module_1_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "has_qualifying_disability": "yes",
+          "accommodation_rights_attach": true,
+          "is_qualified_individual": "yes"
+        },
+        "accommodation_request": {
+          "accommodation_type_requested": "telework",
+          "accommodation_description": "Work from home on an as-needed basis during rheumatoid arthritis flare-ups, estimated 3-5 days per month",
+          "accommodation_request_date": "2026-03-05",
+          "request_made_by": "employee",
+          "accommodation_is_for": "performing_job_functions",
+          "functional_limitation_identified": true,
+          "accommodation_request_in_writing": true
+        },
+        "undue_hardship_analysis": {
+          "accommodation_gross_cost": 0,
+          "tax_credits_available": 0,
+          "outside_funding_available": 0,
+          "accommodation_net_cost": 0,
+          "accommodation_frequency": "occasional",
+          "facility_annual_revenue": 95000000,
+          "facility_employee_count": 650,
+          "entity_annual_revenue": 95000000,
+          "entity_total_employees": 650,
+          "entity_type": "single_facility",
+          "impact_on_operations": "none",
+          "impact_on_other_employees": "none",
+          "impact_description": "8 of 12 developers in the same team already work full-time remotely; Lisa's role is software development performed on a laptop with no in-person collaboration requirement",
+          "employer_asserts_hardship": true,
+          "employer_documented_hardship_analysis": false,
+          "alternative_accommodation_considered": false
+        },
+        "direct_threat_analysis": {
+          "direct_threat_claimed": false
+        }
+      },
+      "expected_output": {
+        "undue_hardship_analysis": {
+          "undue_hardship_applies": "indeterminate",
+          "undue_hardship_analysis": {
+            "cost_burden_ratio": 0.0,
+            "cost_burden_denominator_used": "facility_annual_revenue",
+            "factors_for_hardship": [],
+            "factors_against_hardship": [
+              "employer asserts hardship but has not produced documented, individualized analysis — burden of proof not met under 29 CFR § 1630.15(d)"
+            ],
+            "key_uncertainties": [
+              "employer has asserted undue hardship but has not documented the factor-by-factor analysis required to meet the burden of proof under 29 CFR § 1630.15(d) — determination is indeterminate until documentation is produced",
+              "employer's blanket policy against remote work appears inconsistently applied — 8 of 12 developers in the same role already telework full-time, which strongly undermines any operational impact claim"
+            ]
+          },
+          "alternative_accommodations_available": false,
+          "alternative_accommodations_suggested": [],
+          "sources_cited": ["42 U.S.C. § 12111(10)", "29 CFR § 1630.2(p)(2)(i)-(iii)", "29 CFR § 1630.15(d)", "EEOC Enforcement Guidance No. 915.002 § Modified Workplace Policies"]
+        },
+        "accommodation_determination": {
+          "accommodation_required": "indeterminate",
+          "accommodation_type_approved": null,
+          "denial_basis": null,
+          "recommended_actions": [
+            "Produce a documented, individualized undue hardship analysis under all 29 CFR § 1630.2(p) factors — blanket policy citation is legally insufficient",
+            "Address specifically why the accommodation cannot be granted given that 8 of 12 peers already telework in the same role",
+            "If no documented hardship can be demonstrated, approve the as-needed telework accommodation",
+            "Do not deny based on blanket policy alone — EEOC guidance requires individualized assessment of each accommodation request"
+          ],
+          "sources_cited": ["42 U.S.C. § 12112(b)(5)(A)", "29 CFR § 1630.9(a)", "29 CFR § 1630.15(d)"]
+        }
+      }
+    }
+  ]
+}
