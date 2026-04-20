@@ -1,0 +1,601 @@
+{
+  "metadata": {
+    "module_name": "ada_violation_risk",
+    "version": "0.1",
+    "last_updated": "2026-04-20",
+    "description": "Evaluates employer exposure across four ADA Title I claim types — failure to accommodate, disability discrimination, harassment, and retaliation — and produces an overall violation risk level. Consumes outputs from Modules 1, 2, and 3. Does not re-evaluate any upstream determination.",
+    "legal_domain": "Americans with Disabilities Act — Title I (Employment)",
+    "governing_law": [
+      "42 U.S.C. §§ 12111–12117",
+      "29 CFR Part 1630"
+    ],
+    "enforcing_agency": "EEOC",
+    "source_documents": [
+      "https://www.law.cornell.edu/uscode/text/42/12112",
+      "https://www.law.cornell.edu/uscode/text/42/12203",
+      "https://www.law.cornell.edu/cfr/text/29/part-1630",
+      "https://www.law.cornell.edu/cfr/text/29/1630.9",
+      "https://www.law.cornell.edu/cfr/text/29/1630.15",
+      "https://www.eeoc.gov/laws/guidance/enforcement-guidance-reasonable-accommodation-and-undue-hardship-under-ada"
+    ],
+    "vocabulary_reference": "../vocabulary/ada_vocabulary.json",
+    "module_dependencies": [
+      "ada_coverage_eligibility",
+      "ada_accommodation_analysis",
+      "ada_employer_obligations"
+    ]
+  },
+
+  "dependency_inputs": {
+    "description": "Fields consumed from Module 1 (ada_coverage_eligibility), Module 2 (ada_accommodation_analysis), and Module 3 (ada_employer_obligations) outputs. Module 4 does not re-evaluate any upstream determination.",
+    "fields": {
+      "is_covered_employer": {
+        "name": "is_covered_employer",
+        "data_type": "boolean",
+        "source_module": "ada_coverage_eligibility",
+        "source_component": "employer_coverage",
+        "required": true,
+        "description": "Whether the employer is a covered entity under 29 CFR § 1630.2(b). Required for all four claim type evaluations."
+      },
+      "has_qualifying_disability": {
+        "name": "has_qualifying_disability",
+        "data_type": "string",
+        "allowed_values": ["yes", "no", "indeterminate"],
+        "vocabulary_reference": "determination_states",
+        "source_module": "ada_coverage_eligibility",
+        "source_component": "disability_determination",
+        "required": true,
+        "description": "Whether the individual has a qualifying disability under the ADA. Only 'yes' satisfies prima facie element 2 of failure to accommodate (4.1). 'indeterminate' is treated as element not met for 4.1 risk counting."
+      },
+      "is_covered_individual_with_disability": {
+        "name": "is_covered_individual_with_disability",
+        "data_type": "boolean",
+        "source_module": "ada_coverage_eligibility",
+        "source_component": "disability_determination",
+        "required": true,
+        "description": "Whether the individual has a qualifying disability or record of disability (first or second prong). Used in disability discrimination (4.2) and harassment (4.3) elements. Regarded-as prong also satisfies this field for discrimination and harassment purposes."
+      },
+      "is_qualified_individual": {
+        "name": "is_qualified_individual",
+        "data_type": "string",
+        "allowed_values": ["yes", "no", "indeterminate"],
+        "vocabulary_reference": "determination_states",
+        "source_module": "ada_coverage_eligibility",
+        "source_component": "qualified_individual",
+        "required": true,
+        "description": "Preliminary qualified individual determination from Module 1 component 1.4b. Used in 4.1 and 4.2. Only 'yes' satisfies the element. 'indeterminate' treated as element not met for risk counting."
+      },
+      "accommodation_request_valid": {
+        "name": "accommodation_request_valid",
+        "data_type": "boolean",
+        "source_module": "ada_accommodation_analysis",
+        "source_component": "accommodation_request",
+        "required": true,
+        "description": "Whether a valid accommodation request was made, per Module 2 component 2.1."
+      },
+      "accommodation_required": {
+        "name": "accommodation_required",
+        "data_type": "string",
+        "allowed_values": ["yes", "no", "indeterminate"],
+        "vocabulary_reference": "determination_states",
+        "source_module": "ada_accommodation_analysis",
+        "source_component": "accommodation_determination",
+        "required": true,
+        "description": "Whether accommodation was required but not provided. Only 'yes' satisfies prima facie element 5 of failure to accommodate (4.1)."
+      },
+      "interactive_process_compliant": {
+        "name": "interactive_process_compliant",
+        "data_type": "string",
+        "allowed_values": ["yes", "no", "indeterminate"],
+        "vocabulary_reference": "determination_states",
+        "source_module": "ada_employer_obligations",
+        "source_component": "interactive_process",
+        "required": true,
+        "description": "Whether the employer conducted the interactive process in compliance with ADA obligations, per Module 3 component 3.1c. 'indeterminate' reflects genuine uncertainty and must not be treated as equivalent to 'no' in risk derivation."
+      },
+      "undue_hardship_applies": {
+        "name": "undue_hardship_applies",
+        "data_type": "string",
+        "allowed_values": ["yes", "no", "indeterminate"],
+        "vocabulary_reference": "determination_states",
+        "source_module": "ada_accommodation_analysis",
+        "source_component": "undue_hardship",
+        "required": true,
+        "description": "Whether a documented undue hardship finding exists, per Module 2 component 2.2. 'yes' contributes to documented legitimate denial for 4.1 risk level shift."
+      },
+      "direct_threat_exists": {
+        "name": "direct_threat_exists",
+        "data_type": "string",
+        "allowed_values": ["yes", "no", "indeterminate"],
+        "vocabulary_reference": "determination_states",
+        "source_module": "ada_accommodation_analysis",
+        "source_component": "direct_threat",
+        "required": true,
+        "description": "Whether a documented direct threat finding exists, per Module 2 component 2.3. 'yes' contributes to documented legitimate denial for 4.1 risk level shift."
+      }
+    }
+  },
+
+  "components": {
+
+    "failure_to_accommodate": {
+      "component_id": "4.1",
+      "component_name": "failure_to_accommodate",
+      "determination_type": "composite",
+      "description": "Evaluates employer exposure for failure to provide a reasonable accommodation. Based on five prima facie elements and modified by interactive process compliance and employee participation in the interactive process.",
+      "source_citation": "42 U.S.C. § 12112(b)(5)(A); 29 CFR § 1630.9(a); EEOC Enforcement Guidance No. 915.002 § 1",
+
+      "inputs": {
+        "employee_interactive_process_participation": {
+          "name": "employee_interactive_process_participation",
+          "data_type": "string",
+          "required": true,
+          "allowed_values": ["good_faith", "partial", "refused", "abandoned"],
+          "description": "The quality of the employee's participation in the interactive process. 'refused' or 'abandoned' with documented basis shifts the derived risk level one tier downward."
+        },
+        "employee_nonparticipation_documented": {
+          "name": "employee_nonparticipation_documented",
+          "data_type": "boolean",
+          "required": false,
+          "description": "Whether the employer has contemporaneous documentation that the employee refused or abandoned the interactive process. Required for the one-tier downward shift to apply when participation is 'refused' or 'abandoned'."
+        }
+      },
+
+      "computed_fields": {
+        "prima_facie_elements_present": {
+          "name": "prima_facie_elements_present",
+          "data_type": "integer",
+          "minimum": 0,
+          "maximum": 5,
+          "description": "Count of the five prima facie elements that are satisfied. Elements: (1) is_covered_employer=true, (2) has_qualifying_disability=yes, (3) is_qualified_individual=yes, (4) accommodation_request_valid=true, (5) accommodation_required=yes."
+        },
+        "documented_legitimate_denial": {
+          "name": "documented_legitimate_denial",
+          "data_type": "boolean",
+          "description": "True when undue_hardship_applies=yes OR direct_threat_exists=yes. A documented legitimate denial is a complete affirmative defense to failure to accommodate."
+        }
+      },
+
+      "outputs": {
+        "fta_element_1_met": {
+          "name": "fta_element_1_met",
+          "data_type": "boolean",
+          "description": "Covered employer element satisfied. Sourced from is_covered_employer."
+        },
+        "fta_element_2_met": {
+          "name": "fta_element_2_met",
+          "data_type": "boolean",
+          "description": "Qualifying disability element satisfied. True only when has_qualifying_disability=yes."
+        },
+        "fta_element_3_met": {
+          "name": "fta_element_3_met",
+          "data_type": "boolean",
+          "description": "Qualified individual element satisfied. True only when is_qualified_individual=yes."
+        },
+        "fta_element_4_met": {
+          "name": "fta_element_4_met",
+          "data_type": "boolean",
+          "description": "Valid accommodation request element satisfied. Sourced from accommodation_request_valid."
+        },
+        "fta_element_5_met": {
+          "name": "fta_element_5_met",
+          "data_type": "boolean",
+          "description": "Accommodation required but not provided element satisfied. True only when accommodation_required=yes."
+        },
+        "risk_level_pre_weighting": {
+          "name": "risk_level_pre_weighting",
+          "data_type": "string",
+          "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+          "vocabulary_reference": "risk_levels",
+          "description": "Derived risk level before applying employee non-participation weighting."
+        },
+        "employee_participation_shift_applied": {
+          "name": "employee_participation_shift_applied",
+          "data_type": "boolean",
+          "description": "Whether the one-tier downward shift was applied due to employee refusal or abandonment of the interactive process with documentation."
+        },
+        "fta_risk_level": {
+          "name": "fta_risk_level",
+          "data_type": "string",
+          "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+          "vocabulary_reference": "risk_levels",
+          "description": "Final failure to accommodate risk level after all applicable weighting."
+        },
+        "reasoning": {
+          "name": "reasoning",
+          "data_type": "string",
+          "description": "Plain-language explanation of the risk determination, citing element count, process compliance status, and any weighting applied."
+        },
+        "rules_fired": {
+          "name": "rules_fired",
+          "data_type": "array",
+          "items": { "data_type": "string" },
+          "description": "Ordered list of rule IDs applied in this component."
+        }
+      }
+    },
+
+    "disability_discrimination": {
+      "component_id": "4.2",
+      "component_name": "disability_discrimination",
+      "determination_type": "composite",
+      "description": "Evaluates employer exposure for disability discrimination under the McDonnell Douglas four-element framework adapted for ADA Title I.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; McDonnell Douglas Corp. v. Green, 411 U.S. 792 (1973) as adapted for ADA",
+
+      "inputs": {
+        "adverse_action_taken": {
+          "name": "adverse_action_taken",
+          "data_type": "boolean",
+          "required": true,
+          "description": "Whether the employer took an adverse employment action against the individual."
+        },
+        "adverse_action_type": {
+          "name": "adverse_action_type",
+          "data_type": "string",
+          "required": false,
+          "allowed_values": ["termination", "demotion", "failure_to_hire", "failure_to_promote", "reduction_in_pay", "suspension", "involuntary_transfer", "disciplinary_action", "other"],
+          "vocabulary_reference": "adverse_action_types",
+          "description": "The category of adverse action taken."
+        },
+        "causal_nexus_present": {
+          "name": "causal_nexus_present",
+          "data_type": "string",
+          "required": true,
+          "allowed_values": ["yes", "no", "indeterminate"],
+          "vocabulary_reference": "determination_states",
+          "description": "Whether circumstances suggest disability was a but-for or motivating cause of the adverse action. Standards-based input."
+        },
+        "discriminatory_intent_evidence": {
+          "name": "discriminatory_intent_evidence",
+          "data_type": "string",
+          "required": true,
+          "allowed_values": ["direct", "circumstantial", "none"],
+          "description": "Quality of evidence suggesting discriminatory intent. 'direct' includes statements or documents showing animus; 'circumstantial' includes comparator evidence, timing, or shifting rationales."
+        },
+        "legitimate_nondiscriminatory_reason_documented": {
+          "name": "legitimate_nondiscriminatory_reason_documented",
+          "data_type": "boolean",
+          "required": true,
+          "description": "Whether the employer has documented a legitimate, non-discriminatory reason for the adverse action. Satisfies the employer's burden under McDonnell Douglas step two."
+        }
+      },
+
+      "computed_fields": {
+        "discrimination_elements_present": {
+          "name": "discrimination_elements_present",
+          "data_type": "integer",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "Count of the four McDonnell Douglas elements satisfied: (1) is_covered_individual_with_disability=true, (2) is_qualified_individual=yes, (3) adverse_action_taken=true, (4) causal_nexus_present=yes."
+        }
+      },
+
+      "outputs": {
+        "dd_element_1_met": {
+          "name": "dd_element_1_met",
+          "data_type": "boolean",
+          "description": "Covered individual with disability element satisfied."
+        },
+        "dd_element_2_met": {
+          "name": "dd_element_2_met",
+          "data_type": "boolean",
+          "description": "Qualified individual element satisfied. True only when is_qualified_individual=yes."
+        },
+        "dd_element_3_met": {
+          "name": "dd_element_3_met",
+          "data_type": "boolean",
+          "description": "Adverse action element satisfied."
+        },
+        "dd_element_4_met": {
+          "name": "dd_element_4_met",
+          "data_type": "boolean",
+          "description": "Causal nexus element satisfied. True only when causal_nexus_present=yes."
+        },
+        "discrimination_risk_level": {
+          "name": "discrimination_risk_level",
+          "data_type": "string",
+          "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+          "vocabulary_reference": "risk_levels",
+          "description": "Disability discrimination risk level."
+        },
+        "reasoning": {
+          "name": "reasoning",
+          "data_type": "string",
+          "description": "Plain-language explanation of the discrimination risk determination."
+        },
+        "rules_fired": {
+          "name": "rules_fired",
+          "data_type": "array",
+          "items": { "data_type": "string" },
+          "description": "Ordered list of rule IDs applied in this component."
+        }
+      }
+    },
+
+    "harassment": {
+      "component_id": "4.3",
+      "component_name": "harassment",
+      "determination_type": "composite",
+      "description": "Evaluates employer exposure for disability-based hostile work environment harassment under a four-element framework.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; EEOC Enforcement Guidance on Harassment (1999) §§ II.A, II.B",
+
+      "inputs": {
+        "unwelcome_conduct_occurred": {
+          "name": "unwelcome_conduct_occurred",
+          "data_type": "boolean",
+          "required": true,
+          "description": "Whether unwelcome conduct related to the individual's disability occurred in the workplace."
+        },
+        "conduct_severity": {
+          "name": "conduct_severity",
+          "data_type": "string",
+          "required": true,
+          "allowed_values": ["isolated_minor", "repeated_minor", "isolated_severe", "repeated_severe"],
+          "description": "Assessment of the severity and pervasiveness of the harassing conduct. Drives risk level within the four-element derivation."
+        },
+        "employer_knew_or_should_have_known": {
+          "name": "employer_knew_or_should_have_known",
+          "data_type": "boolean",
+          "required": true,
+          "description": "Whether the employer had actual or constructive notice of the harassing conduct."
+        },
+        "conduct_types": {
+          "name": "conduct_types",
+          "data_type": "array",
+          "required": false,
+          "items": {
+            "data_type": "string",
+            "allowed_values": ["verbal", "physical", "visual", "other"],
+            "vocabulary_reference": "harassment_conduct_types"
+          },
+          "description": "Categories of harassing conduct that occurred. Non-exhaustive; used in reasoning output."
+        }
+      },
+
+      "computed_fields": {
+        "harassment_elements_present": {
+          "name": "harassment_elements_present",
+          "data_type": "integer",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "Count of the four hostile work environment elements satisfied: (1) individual_in_protected_class=true (from is_covered_individual_with_disability), (2) unwelcome_conduct_occurred=true, (3) conduct_severity is any valid value, (4) employer_knew_or_should_have_known=true."
+        }
+      },
+
+      "outputs": {
+        "harassment_element_1_met": {
+          "name": "harassment_element_1_met",
+          "data_type": "boolean",
+          "description": "Individual in protected class element satisfied. Sourced from is_covered_individual_with_disability."
+        },
+        "harassment_element_2_met": {
+          "name": "harassment_element_2_met",
+          "data_type": "boolean",
+          "description": "Unwelcome conduct element satisfied."
+        },
+        "harassment_element_3_met": {
+          "name": "harassment_element_3_met",
+          "data_type": "boolean",
+          "description": "Conduct severity element satisfied. True when conduct_severity is any of the four allowed values."
+        },
+        "harassment_element_4_met": {
+          "name": "harassment_element_4_met",
+          "data_type": "boolean",
+          "description": "Employer knew or should have known element satisfied."
+        },
+        "harassment_risk_level": {
+          "name": "harassment_risk_level",
+          "data_type": "string",
+          "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+          "vocabulary_reference": "risk_levels",
+          "description": "Harassment risk level."
+        },
+        "reasoning": {
+          "name": "reasoning",
+          "data_type": "string",
+          "description": "Plain-language explanation of the harassment risk determination."
+        },
+        "rules_fired": {
+          "name": "rules_fired",
+          "data_type": "array",
+          "items": { "data_type": "string" },
+          "description": "Ordered list of rule IDs applied in this component."
+        }
+      }
+    },
+
+    "retaliation": {
+      "component_id": "4.4",
+      "component_name": "retaliation",
+      "determination_type": "composite",
+      "description": "Evaluates employer exposure for retaliation under a four-element framework plus temporal proximity strength derived from day-count between protected activity and adverse action.",
+      "source_citation": "42 U.S.C. § 12203; 29 CFR § 1630.9(c); EEOC Enforcement Guidance on Retaliation and Related Issues (2016)",
+
+      "inputs": {
+        "engaged_in_protected_activity": {
+          "name": "engaged_in_protected_activity",
+          "data_type": "boolean",
+          "required": true,
+          "description": "Whether the individual engaged in activity protected from retaliation under 42 U.S.C. § 12203."
+        },
+        "protected_activity_type": {
+          "name": "protected_activity_type",
+          "data_type": "string",
+          "required": false,
+          "allowed_values": ["accommodation_request", "eeoc_complaint", "participation_in_investigation", "opposition_to_discrimination"],
+          "vocabulary_reference": "protected_activity_types",
+          "description": "The category of protected activity engaged in."
+        },
+        "employer_aware_of_activity": {
+          "name": "employer_aware_of_activity",
+          "data_type": "boolean",
+          "required": true,
+          "description": "Whether the employer knew of the protected activity at the time of the adverse action."
+        },
+        "adverse_action_taken": {
+          "name": "adverse_action_taken",
+          "data_type": "boolean",
+          "required": true,
+          "description": "Whether the employer took an adverse action after the individual's protected activity."
+        },
+        "causal_nexus_present": {
+          "name": "causal_nexus_present",
+          "data_type": "string",
+          "required": true,
+          "allowed_values": ["yes", "no", "indeterminate"],
+          "vocabulary_reference": "determination_states",
+          "description": "Whether circumstances suggest a retaliation nexus between the protected activity and the adverse action."
+        },
+        "days_between_activity_and_action": {
+          "name": "days_between_activity_and_action",
+          "data_type": "integer",
+          "required": false,
+          "minimum": 0,
+          "description": "Number of days between the protected activity and the adverse action. If not provided, risk defaults to 'high' when all four elements are present. Day-count thresholds are engine-defined heuristics, not statutory deadlines."
+        }
+      },
+
+      "computed_fields": {
+        "retaliation_elements_present": {
+          "name": "retaliation_elements_present",
+          "data_type": "integer",
+          "minimum": 0,
+          "maximum": 4,
+          "description": "Count of the four retaliation elements satisfied: (1) engaged_in_protected_activity=true, (2) employer_aware_of_activity=true, (3) adverse_action_taken=true, (4) causal_nexus_present=yes."
+        },
+        "proximity_strength": {
+          "name": "proximity_strength",
+          "data_type": "string",
+          "allowed_values": ["strong", "moderate", "weak", "minimal", "not_provided"],
+          "vocabulary_reference": "proximity_strengths",
+          "description": "Temporal proximity strength derived from days_between_activity_and_action. 'strong' ≤30 days; 'moderate' 31–90 days; 'weak' 91–180 days; 'minimal' >180 days; 'not_provided' when days_between_activity_and_action is absent. Thresholds are engine-defined heuristics per heuristic_basis: engine_defined."
+        }
+      },
+
+      "outputs": {
+        "retaliation_element_1_met": {
+          "name": "retaliation_element_1_met",
+          "data_type": "boolean",
+          "description": "Protected activity element satisfied."
+        },
+        "retaliation_element_2_met": {
+          "name": "retaliation_element_2_met",
+          "data_type": "boolean",
+          "description": "Employer awareness element satisfied."
+        },
+        "retaliation_element_3_met": {
+          "name": "retaliation_element_3_met",
+          "data_type": "boolean",
+          "description": "Adverse action element satisfied."
+        },
+        "retaliation_element_4_met": {
+          "name": "retaliation_element_4_met",
+          "data_type": "boolean",
+          "description": "Causal nexus element satisfied. True only when causal_nexus_present=yes."
+        },
+        "retaliation_risk_level": {
+          "name": "retaliation_risk_level",
+          "data_type": "string",
+          "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+          "vocabulary_reference": "risk_levels",
+          "description": "Retaliation risk level."
+        },
+        "reasoning": {
+          "name": "reasoning",
+          "data_type": "string",
+          "description": "Plain-language explanation of the retaliation risk determination, including proximity strength rationale."
+        },
+        "rules_fired": {
+          "name": "rules_fired",
+          "data_type": "array",
+          "items": { "data_type": "string" },
+          "description": "Ordered list of rule IDs applied in this component."
+        }
+      }
+    },
+
+    "overall_violation_risk": {
+      "component_id": "4.5",
+      "component_name": "overall_violation_risk",
+      "determination_type": "composite",
+      "description": "Aggregates component risk levels from 4.1–4.4 into a single overall violation risk level using maximum-level logic. Tiebreak order: failure_to_accommodate > disability_discrimination > harassment > retaliation.",
+      "source_citation": "42 U.S.C. §§ 12112–12117; 42 U.S.C. § 12203; 29 CFR Part 1630",
+
+      "aggregation_logic": {
+        "method": "maximum",
+        "description": "overall_risk_level equals the maximum risk level across components 4.1, 4.2, 4.3, and 4.4. Risk level ordinal order: minimal < low < moderate < high < critical.",
+        "tiebreak_order": ["failure_to_accommodate", "disability_discrimination", "harassment", "retaliation"],
+        "tiebreak_description": "When two or more components produce the same maximum risk level, the tiebreak order determines which component is surfaced as primary_claim_basis. All tied components are listed in contributing_claims."
+      },
+
+      "outputs": {
+        "overall_risk_level": {
+          "name": "overall_risk_level",
+          "data_type": "string",
+          "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+          "vocabulary_reference": "risk_levels",
+          "description": "The maximum risk level across all four claim type components."
+        },
+        "primary_claim_basis": {
+          "name": "primary_claim_basis",
+          "data_type": "string",
+          "allowed_values": ["failure_to_accommodate", "disability_discrimination", "harassment", "retaliation"],
+          "description": "The component ID of the claim type that produced the maximum risk level. When tied, the tiebreak winner per tiebreak_order."
+        },
+        "contributing_claims": {
+          "name": "contributing_claims",
+          "data_type": "array",
+          "items": {
+            "data_type": "string",
+            "allowed_values": ["failure_to_accommodate", "disability_discrimination", "harassment", "retaliation"]
+          },
+          "description": "All component IDs that produced the maximum risk level, including the primary claim basis."
+        },
+        "component_risk_levels": {
+          "name": "component_risk_levels",
+          "data_type": "object",
+          "description": "Object mapping each component ID to its risk level.",
+          "subfields": {
+            "failure_to_accommodate": {
+              "data_type": "string",
+              "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+              "vocabulary_reference": "risk_levels"
+            },
+            "disability_discrimination": {
+              "data_type": "string",
+              "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+              "vocabulary_reference": "risk_levels"
+            },
+            "harassment": {
+              "data_type": "string",
+              "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+              "vocabulary_reference": "risk_levels"
+            },
+            "retaliation": {
+              "data_type": "string",
+              "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+              "vocabulary_reference": "risk_levels"
+            }
+          }
+        },
+        "reasoning": {
+          "name": "reasoning",
+          "data_type": "string",
+          "description": "Plain-language summary citing the primary claim basis, the overall risk level, and any contributing claims that tied for the maximum level."
+        },
+        "recommended_actions": {
+          "name": "recommended_actions",
+          "data_type": "array",
+          "items": { "data_type": "string" },
+          "description": "Array of plain-language recommended actions based on overall risk level and primary claim basis. Populated by R091–R095."
+        },
+        "rules_fired": {
+          "name": "rules_fired",
+          "data_type": "array",
+          "items": { "data_type": "string" },
+          "description": "Ordered list of rule IDs applied in this component."
+        }
+      }
+    }
+  }
+}

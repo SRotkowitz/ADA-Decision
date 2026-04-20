@@ -1,0 +1,828 @@
+{
+  "module": "ada_violation_risk",
+  "version": "0.1",
+  "last_updated": "2026-04-20",
+  "description": "Test fixtures for Module 4 (Violation Risk) of the ADA Reasonable Accommodation Decision Engine. One fixture per scenario (VR-001 through VR-008). Expected outputs match the test scenario documents exactly.",
+  "test_cases": [
+    {
+      "test_id": "VR-001",
+      "description": "Critical — All FTA elements present, interactive process non-compliant, no documented legitimate denial, employee participated in good faith. Single critical contributor.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "has_qualifying_disability": "yes",
+          "is_covered_individual_with_disability": true,
+          "is_qualified_individual": "yes",
+          "accommodation_request_valid": true,
+          "accommodation_required": "yes",
+          "interactive_process_compliant": "no",
+          "undue_hardship_applies": "no",
+          "direct_threat_exists": "no"
+        },
+        "components": {
+          "failure_to_accommodate": {
+            "employee_interactive_process_participation": "good_faith",
+            "employee_nonparticipation_documented": false
+          },
+          "disability_discrimination": {
+            "adverse_action_taken": false,
+            "causal_nexus_present": "no",
+            "discriminatory_intent_evidence": "none",
+            "legitimate_nondiscriminatory_reason_documented": false
+          },
+          "harassment": {
+            "unwelcome_conduct_occurred": false,
+            "conduct_severity": "isolated_minor",
+            "employer_knew_or_should_have_known": false
+          },
+          "retaliation": {
+            "engaged_in_protected_activity": false,
+            "employer_aware_of_activity": false,
+            "adverse_action_taken": false,
+            "causal_nexus_present": "no",
+            "days_between_activity_and_action": null
+          }
+        }
+      },
+      "expected_output": {
+        "components": {
+          "failure_to_accommodate": {
+            "fta_element_1_met": true,
+            "fta_element_2_met": true,
+            "fta_element_3_met": true,
+            "fta_element_4_met": true,
+            "fta_element_5_met": true,
+            "prima_facie_elements_present": 5,
+            "documented_legitimate_denial": false,
+            "risk_level_pre_weighting": "critical",
+            "employee_participation_shift_applied": false,
+            "fta_risk_level": "critical"
+          },
+          "disability_discrimination": {
+            "dd_element_1_met": true,
+            "dd_element_2_met": true,
+            "dd_element_3_met": false,
+            "dd_element_4_met": false,
+            "discrimination_elements_present": 2,
+            "discrimination_risk_level": "low"
+          },
+          "harassment": {
+            "harassment_element_1_met": true,
+            "harassment_element_2_met": false,
+            "harassment_element_3_met": false,
+            "harassment_element_4_met": false,
+            "harassment_elements_present": 1,
+            "harassment_risk_level": "minimal"
+          },
+          "retaliation": {
+            "retaliation_element_1_met": false,
+            "retaliation_element_2_met": false,
+            "retaliation_element_3_met": false,
+            "retaliation_element_4_met": false,
+            "retaliation_elements_present": 0,
+            "proximity_strength": "not_provided",
+            "retaliation_risk_level": "minimal"
+          }
+        },
+        "overall_violation_risk": {
+          "component_risk_levels": {
+            "failure_to_accommodate": "critical",
+            "disability_discrimination": "low",
+            "harassment": "minimal",
+            "retaliation": "minimal"
+          },
+          "overall_risk_level": "critical",
+          "primary_claim_basis": "failure_to_accommodate",
+          "contributing_claims": ["failure_to_accommodate"],
+          "reasoning": "Overall risk level is critical driven by failure to accommodate. All five prima facie elements are present, the employer did not conduct a compliant interactive process, and no documented legitimate denial exists.",
+          "recommended_actions": [
+            "Engage employment counsel immediately — do not take further adverse action without legal review.",
+            "Preserve all documentation related to the accommodation request, interactive process, adverse action, and any complaints.",
+            "Conduct an internal investigation to assess whether the conduct can be remediated prior to an EEOC charge.",
+            "Evaluate whether corrective action (accommodation provision, reinstatement, or similar) can reduce exposure.",
+            "Review and update ADA reasonable accommodation policies and training."
+          ]
+        }
+      },
+      "rules_fired": ["R068", "R069", "R077", "R078", "R083", "R085", "R090", "R091", "R096", "R103", "R104", "R105", "R106"]
+    },
+
+    {
+      "test_id": "VR-002",
+      "description": "High — All FTA elements present, interactive process indeterminate (not equivalent to non-compliant), no documented legitimate denial.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "has_qualifying_disability": "yes",
+          "is_covered_individual_with_disability": true,
+          "is_qualified_individual": "yes",
+          "accommodation_request_valid": true,
+          "accommodation_required": "yes",
+          "interactive_process_compliant": "indeterminate",
+          "undue_hardship_applies": "no",
+          "direct_threat_exists": "no"
+        },
+        "components": {
+          "failure_to_accommodate": {
+            "employee_interactive_process_participation": "good_faith",
+            "employee_nonparticipation_documented": false
+          },
+          "disability_discrimination": {
+            "adverse_action_taken": false,
+            "causal_nexus_present": "no",
+            "discriminatory_intent_evidence": "none",
+            "legitimate_nondiscriminatory_reason_documented": false
+          },
+          "harassment": {
+            "unwelcome_conduct_occurred": false,
+            "conduct_severity": "isolated_minor",
+            "employer_knew_or_should_have_known": false
+          },
+          "retaliation": {
+            "engaged_in_protected_activity": false,
+            "employer_aware_of_activity": false,
+            "adverse_action_taken": false,
+            "causal_nexus_present": "no",
+            "days_between_activity_and_action": null
+          }
+        }
+      },
+      "expected_output": {
+        "components": {
+          "failure_to_accommodate": {
+            "fta_element_1_met": true,
+            "fta_element_2_met": true,
+            "fta_element_3_met": true,
+            "fta_element_4_met": true,
+            "fta_element_5_met": true,
+            "prima_facie_elements_present": 5,
+            "documented_legitimate_denial": false,
+            "risk_level_pre_weighting": "high",
+            "employee_participation_shift_applied": false,
+            "fta_risk_level": "high"
+          },
+          "disability_discrimination": {
+            "dd_element_1_met": true,
+            "dd_element_2_met": true,
+            "dd_element_3_met": false,
+            "dd_element_4_met": false,
+            "discrimination_elements_present": 2,
+            "discrimination_risk_level": "low"
+          },
+          "harassment": {
+            "harassment_element_1_met": true,
+            "harassment_element_2_met": false,
+            "harassment_element_3_met": false,
+            "harassment_element_4_met": false,
+            "harassment_elements_present": 1,
+            "harassment_risk_level": "minimal"
+          },
+          "retaliation": {
+            "retaliation_element_1_met": false,
+            "retaliation_element_2_met": false,
+            "retaliation_element_3_met": false,
+            "retaliation_element_4_met": false,
+            "retaliation_elements_present": 0,
+            "proximity_strength": "not_provided",
+            "retaliation_risk_level": "minimal"
+          }
+        },
+        "overall_violation_risk": {
+          "component_risk_levels": {
+            "failure_to_accommodate": "high",
+            "disability_discrimination": "low",
+            "harassment": "minimal",
+            "retaliation": "minimal"
+          },
+          "overall_risk_level": "high",
+          "primary_claim_basis": "failure_to_accommodate",
+          "contributing_claims": ["failure_to_accommodate"],
+          "reasoning": "Overall risk level is high driven by failure to accommodate. All five prima facie elements are present. Interactive process compliance is indeterminate — reflecting genuine uncertainty, not a finding of non-compliance. No documented legitimate denial exists.",
+          "recommended_actions": [
+            "Consult employment counsel promptly to evaluate exposure and remediation options.",
+            "Preserve all documentation related to the accommodation request, interactive process, and adverse action.",
+            "Assess whether the interactive process can be reopened or corrective steps taken.",
+            "Review ADA reasonable accommodation procedures for systemic gaps."
+          ]
+        }
+      },
+      "rules_fired": ["R068", "R070", "R077", "R078", "R083", "R085", "R090", "R091", "R096", "R103", "R104", "R105", "R107"]
+    },
+
+    {
+      "test_id": "VR-003",
+      "description": "High (overall critical via retaliation) — All retaliation elements present with strong temporal proximity (21 days). Retaliation is the sole critical contributor.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "has_qualifying_disability": "yes",
+          "is_covered_individual_with_disability": true,
+          "is_qualified_individual": "yes",
+          "accommodation_request_valid": true,
+          "accommodation_required": "no",
+          "interactive_process_compliant": "yes",
+          "undue_hardship_applies": "no",
+          "direct_threat_exists": "no"
+        },
+        "components": {
+          "failure_to_accommodate": {
+            "employee_interactive_process_participation": "good_faith",
+            "employee_nonparticipation_documented": false
+          },
+          "disability_discrimination": {
+            "adverse_action_taken": true,
+            "adverse_action_type": "termination",
+            "causal_nexus_present": "yes",
+            "discriminatory_intent_evidence": "circumstantial",
+            "legitimate_nondiscriminatory_reason_documented": true
+          },
+          "harassment": {
+            "unwelcome_conduct_occurred": false,
+            "conduct_severity": "isolated_minor",
+            "employer_knew_or_should_have_known": false
+          },
+          "retaliation": {
+            "engaged_in_protected_activity": true,
+            "protected_activity_type": "eeoc_complaint",
+            "employer_aware_of_activity": true,
+            "adverse_action_taken": true,
+            "causal_nexus_present": "yes",
+            "days_between_activity_and_action": 21
+          }
+        }
+      },
+      "expected_output": {
+        "components": {
+          "failure_to_accommodate": {
+            "fta_element_1_met": true,
+            "fta_element_2_met": true,
+            "fta_element_3_met": true,
+            "fta_element_4_met": true,
+            "fta_element_5_met": false,
+            "prima_facie_elements_present": 4,
+            "documented_legitimate_denial": false,
+            "risk_level_pre_weighting": "moderate",
+            "employee_participation_shift_applied": false,
+            "fta_risk_level": "moderate"
+          },
+          "disability_discrimination": {
+            "dd_element_1_met": true,
+            "dd_element_2_met": true,
+            "dd_element_3_met": true,
+            "dd_element_4_met": true,
+            "discrimination_elements_present": 4,
+            "discrimination_risk_level": "moderate"
+          },
+          "harassment": {
+            "harassment_element_1_met": true,
+            "harassment_element_2_met": false,
+            "harassment_element_3_met": false,
+            "harassment_element_4_met": false,
+            "harassment_elements_present": 1,
+            "harassment_risk_level": "minimal"
+          },
+          "retaliation": {
+            "retaliation_element_1_met": true,
+            "retaliation_element_2_met": true,
+            "retaliation_element_3_met": true,
+            "retaliation_element_4_met": true,
+            "retaliation_elements_present": 4,
+            "proximity_strength": "strong",
+            "retaliation_risk_level": "critical"
+          }
+        },
+        "overall_violation_risk": {
+          "component_risk_levels": {
+            "failure_to_accommodate": "moderate",
+            "disability_discrimination": "moderate",
+            "harassment": "minimal",
+            "retaliation": "critical"
+          },
+          "overall_risk_level": "critical",
+          "primary_claim_basis": "retaliation",
+          "contributing_claims": ["retaliation"],
+          "reasoning": "Overall risk level is critical driven by retaliation. All four retaliation elements are present and the adverse action occurred 21 days after the protected activity (strong temporal proximity). FTA and discrimination are each moderate.",
+          "recommended_actions": [
+            "Engage employment counsel immediately — do not take further adverse action without legal review.",
+            "Preserve all documentation related to the accommodation request, interactive process, adverse action, and any complaints.",
+            "Conduct an internal investigation to assess whether the conduct can be remediated prior to an EEOC charge.",
+            "Evaluate whether corrective action (accommodation provision, reinstatement, or similar) can reduce exposure.",
+            "Review and update ADA reasonable accommodation policies and training."
+          ]
+        }
+      },
+      "rules_fired": ["R068", "R073", "R077", "R078", "R081", "R085", "R090", "R091", "R092", "R097", "R104", "R105", "R106"]
+    },
+
+    {
+      "test_id": "VR-004",
+      "description": "Moderate — 4 FTA elements present (accommodation not yet denied, element 5 missing). Process compliant and ongoing.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "has_qualifying_disability": "yes",
+          "is_covered_individual_with_disability": true,
+          "is_qualified_individual": "yes",
+          "accommodation_request_valid": true,
+          "accommodation_required": "no",
+          "interactive_process_compliant": "yes",
+          "undue_hardship_applies": "no",
+          "direct_threat_exists": "no"
+        },
+        "components": {
+          "failure_to_accommodate": {
+            "employee_interactive_process_participation": "good_faith",
+            "employee_nonparticipation_documented": false
+          },
+          "disability_discrimination": {
+            "adverse_action_taken": false,
+            "causal_nexus_present": "no",
+            "discriminatory_intent_evidence": "none",
+            "legitimate_nondiscriminatory_reason_documented": false
+          },
+          "harassment": {
+            "unwelcome_conduct_occurred": false,
+            "conduct_severity": "isolated_minor",
+            "employer_knew_or_should_have_known": false
+          },
+          "retaliation": {
+            "engaged_in_protected_activity": false,
+            "employer_aware_of_activity": false,
+            "adverse_action_taken": false,
+            "causal_nexus_present": "no",
+            "days_between_activity_and_action": null
+          }
+        }
+      },
+      "expected_output": {
+        "components": {
+          "failure_to_accommodate": {
+            "fta_element_1_met": true,
+            "fta_element_2_met": true,
+            "fta_element_3_met": true,
+            "fta_element_4_met": true,
+            "fta_element_5_met": false,
+            "prima_facie_elements_present": 4,
+            "documented_legitimate_denial": false,
+            "risk_level_pre_weighting": "moderate",
+            "employee_participation_shift_applied": false,
+            "fta_risk_level": "moderate"
+          },
+          "disability_discrimination": {
+            "dd_element_1_met": true,
+            "dd_element_2_met": true,
+            "dd_element_3_met": false,
+            "dd_element_4_met": false,
+            "discrimination_elements_present": 2,
+            "discrimination_risk_level": "low"
+          },
+          "harassment": {
+            "harassment_element_1_met": true,
+            "harassment_element_2_met": false,
+            "harassment_element_3_met": false,
+            "harassment_element_4_met": false,
+            "harassment_elements_present": 1,
+            "harassment_risk_level": "minimal"
+          },
+          "retaliation": {
+            "retaliation_element_1_met": false,
+            "retaliation_element_2_met": false,
+            "retaliation_element_3_met": false,
+            "retaliation_element_4_met": false,
+            "retaliation_elements_present": 0,
+            "proximity_strength": "not_provided",
+            "retaliation_risk_level": "minimal"
+          }
+        },
+        "overall_violation_risk": {
+          "component_risk_levels": {
+            "failure_to_accommodate": "moderate",
+            "disability_discrimination": "low",
+            "harassment": "minimal",
+            "retaliation": "minimal"
+          },
+          "overall_risk_level": "moderate",
+          "primary_claim_basis": "failure_to_accommodate",
+          "contributing_claims": ["failure_to_accommodate"],
+          "reasoning": "Overall risk level is moderate driven by failure to accommodate. Four of five prima facie elements are present; accommodation has not yet been denied so element five is not satisfied. The interactive process is ongoing.",
+          "recommended_actions": [
+            "Review the accommodation process and documentation for gaps identified in the analysis.",
+            "Consider consulting employment counsel if the identified gaps are not easily remediated.",
+            "Document all steps taken in the interactive process going forward.",
+            "Ensure supervisor and HR training on ADA obligations is current."
+          ]
+        }
+      },
+      "rules_fired": ["R068", "R073", "R077", "R078", "R083", "R085", "R090", "R091", "R096", "R103", "R104", "R105", "R108"]
+    },
+
+    {
+      "test_id": "VR-005",
+      "description": "Moderate — All 4 DD McDonnell Douglas elements present, employer has documented legitimate non-discriminatory reason. FTA is low (3 elements only, no request made).",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "has_qualifying_disability": "yes",
+          "is_covered_individual_with_disability": true,
+          "is_qualified_individual": "yes",
+          "accommodation_request_valid": false,
+          "accommodation_required": "no",
+          "interactive_process_compliant": "yes",
+          "undue_hardship_applies": "no",
+          "direct_threat_exists": "no"
+        },
+        "components": {
+          "failure_to_accommodate": {
+            "employee_interactive_process_participation": "good_faith",
+            "employee_nonparticipation_documented": false
+          },
+          "disability_discrimination": {
+            "adverse_action_taken": true,
+            "adverse_action_type": "failure_to_promote",
+            "causal_nexus_present": "yes",
+            "discriminatory_intent_evidence": "circumstantial",
+            "legitimate_nondiscriminatory_reason_documented": true
+          },
+          "harassment": {
+            "unwelcome_conduct_occurred": false,
+            "conduct_severity": "isolated_minor",
+            "employer_knew_or_should_have_known": false
+          },
+          "retaliation": {
+            "engaged_in_protected_activity": false,
+            "employer_aware_of_activity": false,
+            "adverse_action_taken": false,
+            "causal_nexus_present": "no",
+            "days_between_activity_and_action": null
+          }
+        }
+      },
+      "expected_output": {
+        "components": {
+          "failure_to_accommodate": {
+            "fta_element_1_met": true,
+            "fta_element_2_met": true,
+            "fta_element_3_met": true,
+            "fta_element_4_met": false,
+            "fta_element_5_met": false,
+            "prima_facie_elements_present": 3,
+            "documented_legitimate_denial": false,
+            "risk_level_pre_weighting": "low",
+            "employee_participation_shift_applied": false,
+            "fta_risk_level": "low"
+          },
+          "disability_discrimination": {
+            "dd_element_1_met": true,
+            "dd_element_2_met": true,
+            "dd_element_3_met": true,
+            "dd_element_4_met": true,
+            "discrimination_elements_present": 4,
+            "discrimination_risk_level": "moderate"
+          },
+          "harassment": {
+            "harassment_element_1_met": true,
+            "harassment_element_2_met": false,
+            "harassment_element_3_met": false,
+            "harassment_element_4_met": false,
+            "harassment_elements_present": 1,
+            "harassment_risk_level": "minimal"
+          },
+          "retaliation": {
+            "retaliation_element_1_met": false,
+            "retaliation_element_2_met": false,
+            "retaliation_element_3_met": false,
+            "retaliation_element_4_met": false,
+            "retaliation_elements_present": 0,
+            "proximity_strength": "not_provided",
+            "retaliation_risk_level": "minimal"
+          }
+        },
+        "overall_violation_risk": {
+          "component_risk_levels": {
+            "failure_to_accommodate": "low",
+            "disability_discrimination": "moderate",
+            "harassment": "minimal",
+            "retaliation": "minimal"
+          },
+          "overall_risk_level": "moderate",
+          "primary_claim_basis": "disability_discrimination",
+          "contributing_claims": ["disability_discrimination"],
+          "reasoning": "Overall risk level is moderate driven by disability discrimination. All four McDonnell Douglas elements are present; however, the employer has documented a legitimate non-discriminatory reason for the adverse action, satisfying step-two burden. The claimant would need to show pretext.",
+          "recommended_actions": [
+            "Review the accommodation process and documentation for gaps identified in the analysis.",
+            "Consider consulting employment counsel if the identified gaps are not easily remediated.",
+            "Document all steps taken in the interactive process going forward.",
+            "Ensure supervisor and HR training on ADA obligations is current."
+          ]
+        }
+      },
+      "rules_fired": ["R068", "R074", "R077", "R078", "R081", "R085", "R090", "R091", "R096", "R103", "R104", "R105", "R108"]
+    },
+
+    {
+      "test_id": "VR-006",
+      "description": "Low — 3 FTA elements present, 2 DD elements, no harassment, no retaliation. FTA and DD both low; tiebreak fires (failure_to_accommodate wins).",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "has_qualifying_disability": "yes",
+          "is_covered_individual_with_disability": true,
+          "is_qualified_individual": "yes",
+          "accommodation_request_valid": false,
+          "accommodation_required": "no",
+          "interactive_process_compliant": "yes",
+          "undue_hardship_applies": "no",
+          "direct_threat_exists": "no"
+        },
+        "components": {
+          "failure_to_accommodate": {
+            "employee_interactive_process_participation": "good_faith",
+            "employee_nonparticipation_documented": false
+          },
+          "disability_discrimination": {
+            "adverse_action_taken": false,
+            "causal_nexus_present": "no",
+            "discriminatory_intent_evidence": "none",
+            "legitimate_nondiscriminatory_reason_documented": false
+          },
+          "harassment": {
+            "unwelcome_conduct_occurred": false,
+            "conduct_severity": "isolated_minor",
+            "employer_knew_or_should_have_known": false
+          },
+          "retaliation": {
+            "engaged_in_protected_activity": false,
+            "employer_aware_of_activity": false,
+            "adverse_action_taken": false,
+            "causal_nexus_present": "no",
+            "days_between_activity_and_action": null
+          }
+        }
+      },
+      "expected_output": {
+        "components": {
+          "failure_to_accommodate": {
+            "fta_element_1_met": true,
+            "fta_element_2_met": true,
+            "fta_element_3_met": true,
+            "fta_element_4_met": false,
+            "fta_element_5_met": false,
+            "prima_facie_elements_present": 3,
+            "documented_legitimate_denial": false,
+            "risk_level_pre_weighting": "low",
+            "employee_participation_shift_applied": false,
+            "fta_risk_level": "low"
+          },
+          "disability_discrimination": {
+            "dd_element_1_met": true,
+            "dd_element_2_met": true,
+            "dd_element_3_met": false,
+            "dd_element_4_met": false,
+            "discrimination_elements_present": 2,
+            "discrimination_risk_level": "low"
+          },
+          "harassment": {
+            "harassment_element_1_met": true,
+            "harassment_element_2_met": false,
+            "harassment_element_3_met": false,
+            "harassment_element_4_met": false,
+            "harassment_elements_present": 1,
+            "harassment_risk_level": "minimal"
+          },
+          "retaliation": {
+            "retaliation_element_1_met": false,
+            "retaliation_element_2_met": false,
+            "retaliation_element_3_met": false,
+            "retaliation_element_4_met": false,
+            "retaliation_elements_present": 0,
+            "proximity_strength": "not_provided",
+            "retaliation_risk_level": "minimal"
+          }
+        },
+        "overall_violation_risk": {
+          "component_risk_levels": {
+            "failure_to_accommodate": "low",
+            "disability_discrimination": "low",
+            "harassment": "minimal",
+            "retaliation": "minimal"
+          },
+          "overall_risk_level": "low",
+          "primary_claim_basis": "failure_to_accommodate",
+          "contributing_claims": ["failure_to_accommodate", "disability_discrimination"],
+          "reasoning": "Overall risk level is low. Failure to accommodate and disability discrimination are both low; tiebreak selects failure to accommodate as primary. No accommodation request has been made and no adverse action has occurred. Coverage is established but no active compliance gap exists.",
+          "recommended_actions": [
+            "Monitor the situation and document the basis for any accommodation-related decisions.",
+            "Ensure the accommodation process is complete and documented if still ongoing.",
+            "No immediate legal consultation required, but note the flagged gaps."
+          ]
+        }
+      },
+      "rules_fired": ["R068", "R074", "R077", "R078", "R083", "R085", "R090", "R091", "R096", "R103", "R104", "R105", "R109"]
+    },
+
+    {
+      "test_id": "VR-007",
+      "description": "Minimal — No elements present across all four claim types. Employer not a covered entity; individual does not have a qualifying disability.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": false,
+          "has_qualifying_disability": "no",
+          "is_covered_individual_with_disability": false,
+          "is_qualified_individual": "no",
+          "accommodation_request_valid": false,
+          "accommodation_required": "no",
+          "interactive_process_compliant": "yes",
+          "undue_hardship_applies": "no",
+          "direct_threat_exists": "no"
+        },
+        "components": {
+          "failure_to_accommodate": {
+            "employee_interactive_process_participation": "good_faith",
+            "employee_nonparticipation_documented": false
+          },
+          "disability_discrimination": {
+            "adverse_action_taken": false,
+            "causal_nexus_present": "no",
+            "discriminatory_intent_evidence": "none",
+            "legitimate_nondiscriminatory_reason_documented": false
+          },
+          "harassment": {
+            "unwelcome_conduct_occurred": false,
+            "conduct_severity": "isolated_minor",
+            "employer_knew_or_should_have_known": false
+          },
+          "retaliation": {
+            "engaged_in_protected_activity": false,
+            "employer_aware_of_activity": false,
+            "adverse_action_taken": false,
+            "causal_nexus_present": "no",
+            "days_between_activity_and_action": null
+          }
+        }
+      },
+      "expected_output": {
+        "components": {
+          "failure_to_accommodate": {
+            "fta_element_1_met": false,
+            "fta_element_2_met": false,
+            "fta_element_3_met": false,
+            "fta_element_4_met": false,
+            "fta_element_5_met": false,
+            "prima_facie_elements_present": 0,
+            "documented_legitimate_denial": false,
+            "risk_level_pre_weighting": "minimal",
+            "employee_participation_shift_applied": false,
+            "fta_risk_level": "minimal"
+          },
+          "disability_discrimination": {
+            "dd_element_1_met": false,
+            "dd_element_2_met": false,
+            "dd_element_3_met": false,
+            "dd_element_4_met": false,
+            "discrimination_elements_present": 0,
+            "discrimination_risk_level": "minimal"
+          },
+          "harassment": {
+            "harassment_element_1_met": false,
+            "harassment_element_2_met": false,
+            "harassment_element_3_met": false,
+            "harassment_element_4_met": false,
+            "harassment_elements_present": 0,
+            "harassment_risk_level": "minimal"
+          },
+          "retaliation": {
+            "retaliation_element_1_met": false,
+            "retaliation_element_2_met": false,
+            "retaliation_element_3_met": false,
+            "retaliation_element_4_met": false,
+            "retaliation_elements_present": 0,
+            "proximity_strength": "not_provided",
+            "retaliation_risk_level": "minimal"
+          }
+        },
+        "overall_violation_risk": {
+          "component_risk_levels": {
+            "failure_to_accommodate": "minimal",
+            "disability_discrimination": "minimal",
+            "harassment": "minimal",
+            "retaliation": "minimal"
+          },
+          "overall_risk_level": "minimal",
+          "primary_claim_basis": "failure_to_accommodate",
+          "contributing_claims": ["failure_to_accommodate", "disability_discrimination", "harassment", "retaliation"],
+          "reasoning": "Overall risk level is minimal. No ADA compliance exposure identified. The employer is not a covered entity and the individual does not have a qualifying disability. No adverse action, harassment, or protected activity is present.",
+          "recommended_actions": [
+            "No immediate action required. Employer conduct appears compliant based on available information.",
+            "Continue standard ADA compliance practices and documentation."
+          ]
+        }
+      },
+      "rules_fired": ["R068", "R075", "R077", "R078", "R084", "R085", "R090", "R091", "R096", "R103", "R104", "R105", "R110"]
+    },
+
+    {
+      "test_id": "VR-008",
+      "description": "Tiebreak — FTA critical and retaliation critical simultaneously. Tiebreak selects failure_to_accommodate as primary_claim_basis. Both appear in contributing_claims.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "has_qualifying_disability": "yes",
+          "is_covered_individual_with_disability": true,
+          "is_qualified_individual": "yes",
+          "accommodation_request_valid": true,
+          "accommodation_required": "yes",
+          "interactive_process_compliant": "no",
+          "undue_hardship_applies": "no",
+          "direct_threat_exists": "no"
+        },
+        "components": {
+          "failure_to_accommodate": {
+            "employee_interactive_process_participation": "good_faith",
+            "employee_nonparticipation_documented": false
+          },
+          "disability_discrimination": {
+            "adverse_action_taken": true,
+            "adverse_action_type": "termination",
+            "causal_nexus_present": "yes",
+            "discriminatory_intent_evidence": "circumstantial",
+            "legitimate_nondiscriminatory_reason_documented": false
+          },
+          "harassment": {
+            "unwelcome_conduct_occurred": false,
+            "conduct_severity": "isolated_minor",
+            "employer_knew_or_should_have_known": false
+          },
+          "retaliation": {
+            "engaged_in_protected_activity": true,
+            "protected_activity_type": "opposition_to_discrimination",
+            "employer_aware_of_activity": true,
+            "adverse_action_taken": true,
+            "causal_nexus_present": "yes",
+            "days_between_activity_and_action": 14
+          }
+        }
+      },
+      "expected_output": {
+        "components": {
+          "failure_to_accommodate": {
+            "fta_element_1_met": true,
+            "fta_element_2_met": true,
+            "fta_element_3_met": true,
+            "fta_element_4_met": true,
+            "fta_element_5_met": true,
+            "prima_facie_elements_present": 5,
+            "documented_legitimate_denial": false,
+            "risk_level_pre_weighting": "critical",
+            "employee_participation_shift_applied": false,
+            "fta_risk_level": "critical"
+          },
+          "disability_discrimination": {
+            "dd_element_1_met": true,
+            "dd_element_2_met": true,
+            "dd_element_3_met": true,
+            "dd_element_4_met": true,
+            "discrimination_elements_present": 4,
+            "discrimination_risk_level": "high"
+          },
+          "harassment": {
+            "harassment_element_1_met": true,
+            "harassment_element_2_met": false,
+            "harassment_element_3_met": false,
+            "harassment_element_4_met": false,
+            "harassment_elements_present": 1,
+            "harassment_risk_level": "minimal"
+          },
+          "retaliation": {
+            "retaliation_element_1_met": true,
+            "retaliation_element_2_met": true,
+            "retaliation_element_3_met": true,
+            "retaliation_element_4_met": true,
+            "retaliation_elements_present": 4,
+            "proximity_strength": "strong",
+            "retaliation_risk_level": "critical"
+          }
+        },
+        "overall_violation_risk": {
+          "component_risk_levels": {
+            "failure_to_accommodate": "critical",
+            "disability_discrimination": "high",
+            "harassment": "minimal",
+            "retaliation": "critical"
+          },
+          "overall_risk_level": "critical",
+          "primary_claim_basis": "failure_to_accommodate",
+          "contributing_claims": ["failure_to_accommodate", "retaliation"],
+          "reasoning": "Overall risk level is critical. Both failure to accommodate and retaliation produced critical risk levels. Tiebreak order selects failure to accommodate as the primary claim basis. FTA: all five prima facie elements present, no compliant interactive process, no documented legitimate denial. Retaliation: all four elements present, 14-day proximity (strong). Disability discrimination is high.",
+          "recommended_actions": [
+            "Engage employment counsel immediately — do not take further adverse action without legal review.",
+            "Preserve all documentation related to the accommodation request, interactive process, adverse action, and any complaints.",
+            "Conduct an internal investigation to assess whether the conduct can be remediated prior to an EEOC charge.",
+            "Evaluate whether corrective action (accommodation provision, reinstatement, or similar) can reduce exposure.",
+            "Review and update ADA reasonable accommodation policies and training."
+          ]
+        }
+      },
+      "rules_fired": ["R068", "R069", "R077", "R078", "R080", "R085", "R090", "R091", "R092", "R097", "R104", "R105", "R106"]
+    }
+  ]
+}

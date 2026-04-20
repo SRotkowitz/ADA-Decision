@@ -1,0 +1,710 @@
+{
+  "module": "ada_violation_risk",
+  "version": "0.1",
+  "last_updated": "2026-04-20",
+  "description": "Logic file for Module 4 of the ADA Reasonable Accommodation Decision Engine. Evaluates employer exposure across four ADA Title I claim types — failure to accommodate, disability discrimination, harassment, and retaliation — and produces an overall violation risk level. Rules start at R068.",
+  "execution_order": [
+    "failure_to_accommodate",
+    "disability_discrimination",
+    "harassment",
+    "retaliation",
+    "overall_violation_risk"
+  ],
+  "execution_notes": "Components 4.1 through 4.4 execute independently and in any order. Component 4.5 must execute last as it depends on all four component outputs. Within each component, rules fire in priority order (lower integer fires first). The first matching rule wins within each risk derivation tier.",
+  "tiebreak_order": [
+    "failure_to_accommodate",
+    "disability_discrimination",
+    "harassment",
+    "retaliation"
+  ],
+  "rules": [
+
+    {
+      "rule_id": "R068",
+      "component": "failure_to_accommodate",
+      "description": "Compute failure to accommodate prima facie element flags from dependency inputs.",
+      "determination_type": "rule_based",
+      "priority": 1,
+      "condition": "Always fires first in component 4.1.",
+      "result": {
+        "fta_element_1_met": "true when is_covered_employer = true",
+        "fta_element_2_met": "true when has_qualifying_disability = 'yes' (not 'indeterminate' or 'no')",
+        "fta_element_3_met": "true when is_qualified_individual = 'yes' (not 'indeterminate' or 'no')",
+        "fta_element_4_met": "true when accommodation_request_valid = true",
+        "fta_element_5_met": "true when accommodation_required = 'yes' (not 'indeterminate' or 'no')",
+        "prima_facie_elements_present": "count of elements where condition above is true (0–5)",
+        "documented_legitimate_denial": "true when undue_hardship_applies = 'yes' OR direct_threat_exists = 'yes'"
+      },
+      "reasoning_template": "Prima facie element flags computed. Elements met: {prima_facie_elements_present}/5. Documented legitimate denial: {documented_legitimate_denial}.",
+      "source_citation": "42 U.S.C. § 12112(b)(5)(A); 29 CFR § 1630.9(a); EEOC Enforcement Guidance No. 915.002 § 1"
+    },
+
+    {
+      "rule_id": "R069",
+      "component": "failure_to_accommodate",
+      "description": "All 5 FTA prima facie elements present AND interactive_process_compliant = no AND no documented legitimate denial → risk level critical.",
+      "determination_type": "rule_based",
+      "priority": 10,
+      "condition": "prima_facie_elements_present = 5 AND interactive_process_compliant = 'no' AND documented_legitimate_denial = false",
+      "result": {
+        "risk_level_pre_weighting": "critical"
+      },
+      "reasoning_template": "All five failure to accommodate prima facie elements are present. The employer did not conduct a compliant interactive process and has no documented legitimate denial (no undue hardship or direct threat finding). This presents the highest failure to accommodate exposure.",
+      "source_citation": "42 U.S.C. § 12112(b)(5)(A); 29 CFR § 1630.9(a); EEOC Enforcement Guidance No. 915.002 §§ 1, 5, 20"
+    },
+
+    {
+      "rule_id": "R070",
+      "component": "failure_to_accommodate",
+      "description": "All 5 FTA elements present AND interactive_process_compliant = indeterminate AND no documented legitimate denial → risk level high. NOTE: indeterminate is genuine uncertainty about process compliance — it is not equivalent to non-compliant ('no'). Indeterminate reduces the risk one tier below the non-compliant scenario but does not eliminate exposure.",
+      "determination_type": "rule_based",
+      "priority": 11,
+      "condition": "prima_facie_elements_present = 5 AND interactive_process_compliant = 'indeterminate' AND documented_legitimate_denial = false",
+      "result": {
+        "risk_level_pre_weighting": "high"
+      },
+      "reasoning_template": "All five failure to accommodate prima facie elements are present. Interactive process compliance is indeterminate — this reflects genuine uncertainty, not a finding of non-compliance. The employer has no documented legitimate denial. Risk is elevated but below critical because indeterminate process compliance is not treated as equivalent to non-compliant.",
+      "indeterminate_handling_note": "indeterminate is NOT equivalent to 'no'. It reflects insufficient evidence to determine compliance either way. Treating indeterminate as non-compliant would fabricate a finding against the employer not supported by the record.",
+      "source_citation": "42 U.S.C. § 12112(b)(5)(A); 29 CFR § 1630.9(a); EEOC Enforcement Guidance No. 915.002 §§ 1, 5"
+    },
+
+    {
+      "rule_id": "R071",
+      "component": "failure_to_accommodate",
+      "description": "All 5 FTA elements present AND interactive_process_compliant = yes AND no documented legitimate denial → risk level high. Process compliance is mitigating but does not eliminate risk when accommodation was required and not provided.",
+      "determination_type": "rule_based",
+      "priority": 12,
+      "condition": "prima_facie_elements_present = 5 AND interactive_process_compliant = 'yes' AND documented_legitimate_denial = false",
+      "result": {
+        "risk_level_pre_weighting": "high"
+      },
+      "reasoning_template": "All five failure to accommodate prima facie elements are present. The employer conducted a compliant interactive process, which is a mitigating factor. However, process compliance does not constitute a complete defense when accommodation was ultimately required and not provided. Risk remains high.",
+      "source_citation": "42 U.S.C. § 12112(b)(5)(A); 29 CFR § 1630.9(a); EEOC Enforcement Guidance No. 915.002 §§ 1, 5, 20"
+    },
+
+    {
+      "rule_id": "R072",
+      "component": "failure_to_accommodate",
+      "description": "All 5 FTA elements present AND documented legitimate denial exists → risk level low. Undue hardship or direct threat is a complete affirmative defense.",
+      "determination_type": "rule_based",
+      "priority": 9,
+      "condition": "prima_facie_elements_present = 5 AND documented_legitimate_denial = true",
+      "result": {
+        "risk_level_pre_weighting": "low"
+      },
+      "reasoning_template": "All five failure to accommodate prima facie elements are present. However, a documented legitimate denial exists ({denial_basis}). Undue hardship and direct threat are complete affirmative defenses under 29 CFR § 1630.15. Residual low risk reflects possibility that the defense may not be sustained if the documentation is challenged.",
+      "source_citation": "42 U.S.C. § 12112(b)(5)(A); 29 CFR § 1630.15(a)–(b); EEOC Enforcement Guidance No. 915.002 §§ 25, 35"
+    },
+
+    {
+      "rule_id": "R073",
+      "component": "failure_to_accommodate",
+      "description": "Exactly 4 FTA prima facie elements present → risk level moderate.",
+      "determination_type": "rule_based",
+      "priority": 20,
+      "condition": "prima_facie_elements_present = 4",
+      "result": {
+        "risk_level_pre_weighting": "moderate"
+      },
+      "reasoning_template": "Four of five failure to accommodate prima facie elements are present. One element is not established, which prevents a complete prima facie case but indicates significant compliance gaps.",
+      "source_citation": "42 U.S.C. § 12112(b)(5)(A); 29 CFR § 1630.9(a); EEOC Enforcement Guidance No. 915.002 § 1"
+    },
+
+    {
+      "rule_id": "R074",
+      "component": "failure_to_accommodate",
+      "description": "Exactly 3 FTA prima facie elements present → risk level low.",
+      "determination_type": "rule_based",
+      "priority": 21,
+      "condition": "prima_facie_elements_present = 3",
+      "result": {
+        "risk_level_pre_weighting": "low"
+      },
+      "reasoning_template": "Three of five failure to accommodate prima facie elements are present. A prima facie case cannot be established without all five elements, but the presence of three elements indicates some compliance exposure.",
+      "source_citation": "42 U.S.C. § 12112(b)(5)(A); 29 CFR § 1630.9(a); EEOC Enforcement Guidance No. 915.002 § 1"
+    },
+
+    {
+      "rule_id": "R075",
+      "component": "failure_to_accommodate",
+      "description": "Fewer than 3 FTA prima facie elements present → risk level minimal.",
+      "determination_type": "rule_based",
+      "priority": 22,
+      "condition": "prima_facie_elements_present < 3",
+      "result": {
+        "risk_level_pre_weighting": "minimal"
+      },
+      "reasoning_template": "Fewer than three of five failure to accommodate prima facie elements are present ({prima_facie_elements_present} of 5). Failure to accommodate exposure is minimal.",
+      "source_citation": "42 U.S.C. § 12112(b)(5)(A); 29 CFR § 1630.9(a); EEOC Enforcement Guidance No. 915.002 § 1"
+    },
+
+    {
+      "rule_id": "R076",
+      "component": "failure_to_accommodate",
+      "description": "Employee non-participation weighting: when employee_interactive_process_participation is 'refused' or 'abandoned' AND employee_nonparticipation_documented = true, shift derived risk level one tier downward. This is a weighting factor only, not a floor-to-minimal rule.",
+      "determination_type": "rule_based",
+      "priority": 30,
+      "weighting_basis": "one_tier_shift",
+      "condition": "employee_interactive_process_participation IN ('refused', 'abandoned') AND employee_nonparticipation_documented = true",
+      "result": {
+        "employee_participation_shift_applied": true,
+        "fta_risk_level": "risk_level_pre_weighting shifted one tier downward: critical→high, high→moderate, moderate→low, low→minimal. NOTE: this shift cannot reduce risk below minimal, but it does not floor at minimal — it applies the full one-tier reduction. Risk level of 'minimal' is not further reduced.",
+        "note": "This rule is not a floor-to-minimal rule. It applies a one-tier downward shift to whatever tier was derived by R069–R075. The shift reflects that an employer's exposure is diminished when an employee refuses or abandons the interactive process with documentation, because courts have held that an employer cannot be held liable for a breakdown in the process it did not cause."
+      },
+      "reasoning_template": "Employee non-participation weighting applied. Employee {participation_status} the interactive process, and this was documented. Pre-weighting risk level was {risk_level_pre_weighting}; adjusted risk level is {fta_risk_level} (one-tier downward shift per documented employee non-participation).",
+      "source_citation": "29 CFR § 1630.9(a); EEOC Enforcement Guidance No. 915.002 § 8 (employer not responsible for breakdown attributable to employee failure to cooperate)"
+    },
+
+    {
+      "rule_id": "R077",
+      "component": "failure_to_accommodate",
+      "description": "No employee non-participation shift applicable: employee_interactive_process_participation is 'good_faith' or 'partial', OR employee_nonparticipation_documented = false. Risk level pre-weighting carries forward unchanged.",
+      "determination_type": "rule_based",
+      "priority": 31,
+      "condition": "employee_interactive_process_participation IN ('good_faith', 'partial') OR employee_nonparticipation_documented = false OR employee_nonparticipation_documented IS NULL",
+      "result": {
+        "employee_participation_shift_applied": false,
+        "fta_risk_level": "equals risk_level_pre_weighting"
+      },
+      "reasoning_template": "No employee non-participation weighting applied. Employee participation was {participation_status}. Final failure to accommodate risk level: {fta_risk_level}.",
+      "source_citation": "29 CFR § 1630.9(a); EEOC Enforcement Guidance No. 915.002 § 8"
+    },
+
+    {
+      "rule_id": "R078",
+      "component": "disability_discrimination",
+      "description": "Compute disability discrimination McDonnell Douglas element flags from dependency inputs.",
+      "determination_type": "rule_based",
+      "priority": 1,
+      "condition": "Always fires first in component 4.2.",
+      "result": {
+        "dd_element_1_met": "true when is_covered_individual_with_disability = true",
+        "dd_element_2_met": "true when is_qualified_individual = 'yes'",
+        "dd_element_3_met": "true when adverse_action_taken = true",
+        "dd_element_4_met": "true when causal_nexus_present = 'yes'",
+        "discrimination_elements_present": "count of elements where condition above is true (0–4)"
+      },
+      "reasoning_template": "Disability discrimination McDonnell Douglas element flags computed. Elements met: {discrimination_elements_present}/4.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; McDonnell Douglas Corp. v. Green, 411 U.S. 792 (1973)"
+    },
+
+    {
+      "rule_id": "R079",
+      "component": "disability_discrimination",
+      "description": "All 4 McDonnell Douglas elements present AND direct evidence of discriminatory intent → risk level critical.",
+      "determination_type": "rule_based",
+      "priority": 10,
+      "condition": "discrimination_elements_present = 4 AND discriminatory_intent_evidence = 'direct'",
+      "result": {
+        "discrimination_risk_level": "critical"
+      },
+      "reasoning_template": "All four McDonnell Douglas elements are satisfied and direct evidence of discriminatory intent exists (e.g., statements or documents showing disability-based animus). Direct evidence eliminates the need for the burden-shifting framework and establishes maximum exposure.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; Trans World Airlines, Inc. v. Thurston, 469 U.S. 111 (1985)"
+    },
+
+    {
+      "rule_id": "R080",
+      "component": "disability_discrimination",
+      "description": "All 4 McDonnell Douglas elements present AND circumstantial evidence of discriminatory intent AND no documented legitimate non-discriminatory reason → risk level high.",
+      "determination_type": "rule_based",
+      "priority": 11,
+      "condition": "discrimination_elements_present = 4 AND discriminatory_intent_evidence = 'circumstantial' AND legitimate_nondiscriminatory_reason_documented = false",
+      "result": {
+        "discrimination_risk_level": "high"
+      },
+      "reasoning_template": "All four McDonnell Douglas elements are satisfied. Circumstantial evidence of discriminatory intent exists (e.g., comparator evidence, timing, or shifting rationales). The employer has not documented a legitimate non-discriminatory reason for the adverse action.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; McDonnell Douglas Corp. v. Green, 411 U.S. 792 (1973)"
+    },
+
+    {
+      "rule_id": "R081",
+      "component": "disability_discrimination",
+      "description": "All 4 elements present AND employer has documented legitimate non-discriminatory reason → risk level moderate. Employer satisfies step-two burden; claimant must show pretext.",
+      "determination_type": "rule_based",
+      "priority": 12,
+      "condition": "discrimination_elements_present = 4 AND legitimate_nondiscriminatory_reason_documented = true",
+      "result": {
+        "discrimination_risk_level": "moderate"
+      },
+      "reasoning_template": "All four McDonnell Douglas elements are satisfied. However, the employer has documented a legitimate, non-discriminatory reason for the adverse action, satisfying the employer's step-two burden. Residual moderate risk reflects the possibility that the claimant could show the stated reason is pretextual.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; McDonnell Douglas Corp. v. Green, 411 U.S. 792 (1973); Texas Dep't of Community Affairs v. Burdine, 450 U.S. 248 (1981)"
+    },
+
+    {
+      "rule_id": "R082",
+      "component": "disability_discrimination",
+      "description": "Exactly 3 McDonnell Douglas elements present → risk level moderate.",
+      "determination_type": "rule_based",
+      "priority": 20,
+      "condition": "discrimination_elements_present = 3",
+      "result": {
+        "discrimination_risk_level": "moderate"
+      },
+      "reasoning_template": "Three of four McDonnell Douglas elements are present. A complete prima facie case requires all four elements, but three elements indicates elevated compliance concern.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; McDonnell Douglas Corp. v. Green, 411 U.S. 792 (1973)"
+    },
+
+    {
+      "rule_id": "R083",
+      "component": "disability_discrimination",
+      "description": "Exactly 2 McDonnell Douglas elements present → risk level low.",
+      "determination_type": "rule_based",
+      "priority": 21,
+      "condition": "discrimination_elements_present = 2",
+      "result": {
+        "discrimination_risk_level": "low"
+      },
+      "reasoning_template": "Two of four McDonnell Douglas elements are present. A prima facie discrimination case cannot be established without all four elements.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; McDonnell Douglas Corp. v. Green, 411 U.S. 792 (1973)"
+    },
+
+    {
+      "rule_id": "R084",
+      "component": "disability_discrimination",
+      "description": "Fewer than 2 McDonnell Douglas elements present → risk level minimal.",
+      "determination_type": "rule_based",
+      "priority": 22,
+      "condition": "discrimination_elements_present < 2",
+      "result": {
+        "discrimination_risk_level": "minimal"
+      },
+      "reasoning_template": "Fewer than two of four McDonnell Douglas elements are present ({discrimination_elements_present} of 4). Disability discrimination exposure is minimal.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4"
+    },
+
+    {
+      "rule_id": "R085",
+      "component": "harassment",
+      "description": "Compute harassment hostile work environment element flags from dependency inputs and component inputs.",
+      "determination_type": "rule_based",
+      "priority": 1,
+      "condition": "Always fires first in component 4.3.",
+      "result": {
+        "harassment_element_1_met": "true when is_covered_individual_with_disability = true",
+        "harassment_element_2_met": "true when unwelcome_conduct_occurred = true",
+        "harassment_element_3_met": "true when conduct_severity is any of: isolated_minor, repeated_minor, isolated_severe, repeated_severe",
+        "harassment_element_4_met": "true when employer_knew_or_should_have_known = true",
+        "harassment_elements_present": "count of elements where condition above is true (0–4)"
+      },
+      "reasoning_template": "Harassment hostile work environment element flags computed. Elements met: {harassment_elements_present}/4.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; EEOC Enforcement Guidance on Harassment (1999) §§ II.A–II.B"
+    },
+
+    {
+      "rule_id": "R086",
+      "component": "harassment",
+      "description": "All 4 harassment elements present AND conduct_severity = repeated_severe → risk level critical.",
+      "determination_type": "rule_based",
+      "priority": 10,
+      "condition": "harassment_elements_present = 4 AND conduct_severity = 'repeated_severe'",
+      "result": {
+        "harassment_risk_level": "critical"
+      },
+      "reasoning_template": "All four hostile work environment elements are present and the conduct is both severe and pervasive. Repeated severe conduct satisfying all four elements presents maximum harassment exposure.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; Harris v. Forklift Systems, Inc., 510 U.S. 17 (1993); EEOC Enforcement Guidance on Harassment (1999) § II.B"
+    },
+
+    {
+      "rule_id": "R087",
+      "component": "harassment",
+      "description": "All 4 harassment elements present AND conduct_severity = isolated_severe → risk level high.",
+      "determination_type": "rule_based",
+      "priority": 11,
+      "condition": "harassment_elements_present = 4 AND conduct_severity = 'isolated_severe'",
+      "result": {
+        "harassment_risk_level": "high"
+      },
+      "reasoning_template": "All four hostile work environment elements are present. A single severe incident can constitute actionable harassment when sufficiently egregious. Exposure is high but below critical absent the pervasiveness element.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; Harris v. Forklift Systems, Inc., 510 U.S. 17 (1993); EEOC Enforcement Guidance on Harassment (1999) § II.B"
+    },
+
+    {
+      "rule_id": "R088",
+      "component": "harassment",
+      "description": "All 4 harassment elements present AND conduct_severity = repeated_minor → risk level moderate.",
+      "determination_type": "rule_based",
+      "priority": 12,
+      "condition": "harassment_elements_present = 4 AND conduct_severity = 'repeated_minor'",
+      "result": {
+        "harassment_risk_level": "moderate"
+      },
+      "reasoning_template": "All four hostile work environment elements are present. The conduct is repeated but not severe. Repeated minor conduct satisfying all elements may cross the pervasiveness threshold; liability depends on cumulative impact.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; Harris v. Forklift Systems, Inc., 510 U.S. 17 (1993); EEOC Enforcement Guidance on Harassment (1999) § II.B"
+    },
+
+    {
+      "rule_id": "R089",
+      "component": "harassment",
+      "description": "All 4 harassment elements present AND conduct_severity = isolated_minor → risk level low.",
+      "determination_type": "rule_based",
+      "priority": 13,
+      "condition": "harassment_elements_present = 4 AND conduct_severity = 'isolated_minor'",
+      "result": {
+        "harassment_risk_level": "low"
+      },
+      "reasoning_template": "All four hostile work environment elements are present. However, isolated minor conduct generally does not satisfy the severe or pervasive standard. Exposure is low but not eliminated because employer awareness triggers a remediation obligation.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; Oncale v. Sundowner Offshore Servs., Inc., 523 U.S. 75 (1998); EEOC Enforcement Guidance on Harassment (1999) § II.B"
+    },
+
+    {
+      "rule_id": "R090",
+      "component": "harassment",
+      "description": "Fewer than 4 harassment elements present → risk level minimal.",
+      "determination_type": "rule_based",
+      "priority": 20,
+      "condition": "harassment_elements_present < 4",
+      "result": {
+        "harassment_risk_level": "minimal"
+      },
+      "reasoning_template": "Fewer than four hostile work environment elements are present ({harassment_elements_present} of 4). Harassment exposure is minimal.",
+      "source_citation": "42 U.S.C. § 12112(a); 29 CFR § 1630.4; EEOC Enforcement Guidance on Harassment (1999) § II.A"
+    },
+
+    {
+      "rule_id": "R091",
+      "component": "retaliation",
+      "description": "Compute retaliation element flags and temporal proximity strength from inputs.",
+      "determination_type": "rule_based",
+      "priority": 1,
+      "condition": "Always fires first in component 4.4.",
+      "result": {
+        "retaliation_element_1_met": "true when engaged_in_protected_activity = true",
+        "retaliation_element_2_met": "true when employer_aware_of_activity = true",
+        "retaliation_element_3_met": "true when adverse_action_taken = true",
+        "retaliation_element_4_met": "true when causal_nexus_present = 'yes'",
+        "retaliation_elements_present": "count of elements where condition above is true (0–4)",
+        "proximity_strength": "derived by R092–R096"
+      },
+      "reasoning_template": "Retaliation element flags computed. Elements met: {retaliation_elements_present}/4.",
+      "source_citation": "42 U.S.C. § 12203; 29 CFR § 1630.9(c); EEOC Enforcement Guidance on Retaliation and Related Issues (2016) § II.A"
+    },
+
+    {
+      "rule_id": "R092",
+      "component": "retaliation",
+      "description": "Temporal proximity: days_between_activity_and_action ≤ 30 → proximity_strength = strong.",
+      "determination_type": "rule_based",
+      "priority": 5,
+      "heuristic_basis": "engine_defined",
+      "condition": "days_between_activity_and_action IS NOT NULL AND days_between_activity_and_action <= 30",
+      "result": {
+        "proximity_strength": "strong"
+      },
+      "reasoning_template": "Adverse action occurred within 30 days of protected activity ({days_between_activity_and_action} days). Temporal proximity is strong. NOTE: The 30-day threshold is an engine-defined heuristic consistent with retaliation case law; it is not a statutory deadline.",
+      "source_citation": "42 U.S.C. § 12203; EEOC Enforcement Guidance on Retaliation and Related Issues (2016) § II.C.3 (temporal proximity as circumstantial evidence)"
+    },
+
+    {
+      "rule_id": "R093",
+      "component": "retaliation",
+      "description": "Temporal proximity: days_between_activity_and_action 31–90 → proximity_strength = moderate.",
+      "determination_type": "rule_based",
+      "priority": 6,
+      "heuristic_basis": "engine_defined",
+      "condition": "days_between_activity_and_action IS NOT NULL AND days_between_activity_and_action >= 31 AND days_between_activity_and_action <= 90",
+      "result": {
+        "proximity_strength": "moderate"
+      },
+      "reasoning_template": "Adverse action occurred 31–90 days after protected activity ({days_between_activity_and_action} days). Temporal proximity is moderate. NOTE: The 31–90 day threshold is an engine-defined heuristic; additional corroborating evidence is typically required.",
+      "source_citation": "42 U.S.C. § 12203; EEOC Enforcement Guidance on Retaliation and Related Issues (2016) § II.C.3"
+    },
+
+    {
+      "rule_id": "R094",
+      "component": "retaliation",
+      "description": "Temporal proximity: days_between_activity_and_action 91–180 → proximity_strength = weak.",
+      "determination_type": "rule_based",
+      "priority": 7,
+      "heuristic_basis": "engine_defined",
+      "condition": "days_between_activity_and_action IS NOT NULL AND days_between_activity_and_action >= 91 AND days_between_activity_and_action <= 180",
+      "result": {
+        "proximity_strength": "weak"
+      },
+      "reasoning_template": "Adverse action occurred 91–180 days after protected activity ({days_between_activity_and_action} days). Temporal proximity is weak. NOTE: The 91–180 day threshold is an engine-defined heuristic; temporal proximity alone unlikely to support retaliation inference.",
+      "source_citation": "42 U.S.C. § 12203; EEOC Enforcement Guidance on Retaliation and Related Issues (2016) § II.C.3"
+    },
+
+    {
+      "rule_id": "R095",
+      "component": "retaliation",
+      "description": "Temporal proximity: days_between_activity_and_action > 180 → proximity_strength = minimal.",
+      "determination_type": "rule_based",
+      "priority": 8,
+      "heuristic_basis": "engine_defined",
+      "condition": "days_between_activity_and_action IS NOT NULL AND days_between_activity_and_action > 180",
+      "result": {
+        "proximity_strength": "minimal"
+      },
+      "reasoning_template": "Adverse action occurred more than 180 days after protected activity ({days_between_activity_and_action} days). Temporal proximity is minimal. NOTE: The >180 day threshold is an engine-defined heuristic; strong other evidence required to support retaliation inference.",
+      "source_citation": "42 U.S.C. § 12203; EEOC Enforcement Guidance on Retaliation and Related Issues (2016) § II.C.3"
+    },
+
+    {
+      "rule_id": "R096",
+      "component": "retaliation",
+      "description": "Temporal proximity: days_between_activity_and_action not provided → proximity_strength = not_provided. When all four retaliation elements are present, absence of data defaults risk to high.",
+      "determination_type": "rule_based",
+      "priority": 9,
+      "condition": "days_between_activity_and_action IS NULL",
+      "result": {
+        "proximity_strength": "not_provided"
+      },
+      "reasoning_template": "Days between protected activity and adverse action was not provided. Temporal proximity cannot be assessed. When all four retaliation elements are present, absence of proximity data defaults risk to 'high' — the absence of data does not reduce risk.",
+      "source_citation": "42 U.S.C. § 12203; EEOC Enforcement Guidance on Retaliation and Related Issues (2016) § II.C.3"
+    },
+
+    {
+      "rule_id": "R097",
+      "component": "retaliation",
+      "description": "All 4 retaliation elements present AND proximity_strength = strong → risk level critical.",
+      "determination_type": "rule_based",
+      "priority": 10,
+      "condition": "retaliation_elements_present = 4 AND proximity_strength = 'strong'",
+      "result": {
+        "retaliation_risk_level": "critical"
+      },
+      "reasoning_template": "All four retaliation elements are present and the adverse action occurred within 30 days of the protected activity (strong temporal proximity). This combination presents maximum retaliation exposure.",
+      "source_citation": "42 U.S.C. § 12203; EEOC Enforcement Guidance on Retaliation and Related Issues (2016) §§ II.A, II.C.3"
+    },
+
+    {
+      "rule_id": "R098",
+      "component": "retaliation",
+      "description": "All 4 retaliation elements present AND proximity_strength = moderate → risk level high.",
+      "determination_type": "rule_based",
+      "priority": 11,
+      "condition": "retaliation_elements_present = 4 AND proximity_strength = 'moderate'",
+      "result": {
+        "retaliation_risk_level": "high"
+      },
+      "reasoning_template": "All four retaliation elements are present and the adverse action occurred 31–90 days after the protected activity (moderate temporal proximity). Substantial retaliation exposure.",
+      "source_citation": "42 U.S.C. § 12203; EEOC Enforcement Guidance on Retaliation and Related Issues (2016) §§ II.A, II.C.3"
+    },
+
+    {
+      "rule_id": "R099",
+      "component": "retaliation",
+      "description": "All 4 retaliation elements present AND proximity_strength = not_provided → risk level high. Absence of temporal proximity data does not reduce risk.",
+      "determination_type": "rule_based",
+      "priority": 12,
+      "condition": "retaliation_elements_present = 4 AND proximity_strength = 'not_provided'",
+      "result": {
+        "retaliation_risk_level": "high"
+      },
+      "reasoning_template": "All four retaliation elements are present. Temporal proximity data was not provided. The absence of this data does not reduce risk — the engine defaults to 'high' to avoid rewarding incomplete disclosures.",
+      "source_citation": "42 U.S.C. § 12203; EEOC Enforcement Guidance on Retaliation and Related Issues (2016) §§ II.A, II.C.3"
+    },
+
+    {
+      "rule_id": "R100",
+      "component": "retaliation",
+      "description": "All 4 retaliation elements present AND proximity_strength = weak → risk level moderate.",
+      "determination_type": "rule_based",
+      "priority": 13,
+      "condition": "retaliation_elements_present = 4 AND proximity_strength = 'weak'",
+      "result": {
+        "retaliation_risk_level": "moderate"
+      },
+      "reasoning_template": "All four retaliation elements are present and the adverse action occurred 91–180 days after the protected activity (weak temporal proximity). Retaliation exposure is elevated but temporal proximity alone is unlikely to support a retaliation inference without additional evidence.",
+      "source_citation": "42 U.S.C. § 12203; EEOC Enforcement Guidance on Retaliation and Related Issues (2016) §§ II.A, II.C.3"
+    },
+
+    {
+      "rule_id": "R101",
+      "component": "retaliation",
+      "description": "All 4 retaliation elements present AND proximity_strength = minimal → risk level low.",
+      "determination_type": "rule_based",
+      "priority": 14,
+      "condition": "retaliation_elements_present = 4 AND proximity_strength = 'minimal'",
+      "result": {
+        "retaliation_risk_level": "low"
+      },
+      "reasoning_template": "All four retaliation elements are present but the adverse action occurred more than 180 days after the protected activity (minimal temporal proximity). Residual exposure exists but temporal proximity strongly disfavors a retaliation inference.",
+      "source_citation": "42 U.S.C. § 12203; EEOC Enforcement Guidance on Retaliation and Related Issues (2016) §§ II.A, II.C.3"
+    },
+
+    {
+      "rule_id": "R102",
+      "component": "retaliation",
+      "description": "Exactly 3 retaliation elements present → risk level low.",
+      "determination_type": "rule_based",
+      "priority": 20,
+      "condition": "retaliation_elements_present = 3",
+      "result": {
+        "retaliation_risk_level": "low"
+      },
+      "reasoning_template": "Three of four retaliation elements are present. A complete prima facie retaliation case requires all four elements.",
+      "source_citation": "42 U.S.C. § 12203; EEOC Enforcement Guidance on Retaliation and Related Issues (2016) § II.A"
+    },
+
+    {
+      "rule_id": "R103",
+      "component": "retaliation",
+      "description": "Fewer than 3 retaliation elements present → risk level minimal.",
+      "determination_type": "rule_based",
+      "priority": 21,
+      "condition": "retaliation_elements_present < 3",
+      "result": {
+        "retaliation_risk_level": "minimal"
+      },
+      "reasoning_template": "Fewer than three retaliation elements are present ({retaliation_elements_present} of 4). Retaliation exposure is minimal.",
+      "source_citation": "42 U.S.C. § 12203; EEOC Enforcement Guidance on Retaliation and Related Issues (2016) § II.A"
+    },
+
+    {
+      "rule_id": "R104",
+      "component": "overall_violation_risk",
+      "description": "Compute overall risk level as the maximum of the four component risk levels.",
+      "determination_type": "composite",
+      "priority": 1,
+      "condition": "Always fires first in component 4.5. Applies after all of 4.1–4.4 have completed.",
+      "result": {
+        "component_risk_levels": {
+          "failure_to_accommodate": "fta_risk_level from 4.1",
+          "disability_discrimination": "discrimination_risk_level from 4.2",
+          "harassment": "harassment_risk_level from 4.3",
+          "retaliation": "retaliation_risk_level from 4.4"
+        },
+        "overall_risk_level": "maximum of the four component risk levels using ordinal order: minimal(1) < low(2) < moderate(3) < high(4) < critical(5)"
+      },
+      "reasoning_template": "Component risk levels: FTA={fta_risk_level}, discrimination={discrimination_risk_level}, harassment={harassment_risk_level}, retaliation={retaliation_risk_level}. Overall risk level is the maximum: {overall_risk_level}.",
+      "source_citation": "42 U.S.C. §§ 12112–12117; 42 U.S.C. § 12203; 29 CFR Part 1630"
+    },
+
+    {
+      "rule_id": "R105",
+      "component": "overall_violation_risk",
+      "description": "Identify primary_claim_basis and contributing_claims. When two or more components produce the same maximum risk level, tiebreak order determines primary_claim_basis: failure_to_accommodate > disability_discrimination > harassment > retaliation.",
+      "determination_type": "composite",
+      "priority": 2,
+      "condition": "Fires after R104. One or more components equal overall_risk_level.",
+      "result": {
+        "contributing_claims": "array of all component IDs where component_risk_level = overall_risk_level",
+        "primary_claim_basis": "from contributing_claims, select first in tiebreak order: [failure_to_accommodate, disability_discrimination, harassment, retaliation]"
+      },
+      "reasoning_template": "Contributing claims at {overall_risk_level} level: {contributing_claims}. Primary claim basis determined by tiebreak order: {primary_claim_basis}.",
+      "source_citation": "42 U.S.C. §§ 12112–12117; 42 U.S.C. § 12203; 29 CFR Part 1630"
+    },
+
+    {
+      "rule_id": "R106",
+      "component": "overall_violation_risk",
+      "description": "Populate recommended_actions for overall_risk_level = critical.",
+      "determination_type": "rule_based",
+      "priority": 10,
+      "condition": "overall_risk_level = 'critical'",
+      "result": {
+        "recommended_actions": [
+          "Engage employment counsel immediately — do not take further adverse action without legal review.",
+          "Preserve all documentation related to the accommodation request, interactive process, adverse action, and any complaints.",
+          "Conduct an internal investigation to assess whether the conduct can be remediated prior to an EEOC charge.",
+          "Evaluate whether corrective action (accommodation provision, reinstatement, or similar) can reduce exposure.",
+          "Review and update ADA reasonable accommodation policies and training."
+        ]
+      },
+      "reasoning_template": "Overall risk level is critical. Immediate legal engagement and document preservation are warranted. See recommended_actions.",
+      "source_citation": "42 U.S.C. §§ 12112–12117; 42 U.S.C. § 12203; 29 CFR Part 1630"
+    },
+
+    {
+      "rule_id": "R107",
+      "component": "overall_violation_risk",
+      "description": "Populate recommended_actions for overall_risk_level = high.",
+      "determination_type": "rule_based",
+      "priority": 11,
+      "condition": "overall_risk_level = 'high'",
+      "result": {
+        "recommended_actions": [
+          "Consult employment counsel promptly to evaluate exposure and remediation options.",
+          "Preserve all documentation related to the accommodation request, interactive process, and adverse action.",
+          "Assess whether the interactive process can be reopened or corrective steps taken.",
+          "Review ADA reasonable accommodation procedures for systemic gaps."
+        ]
+      },
+      "reasoning_template": "Overall risk level is high. Prompt legal consultation and documentation review are recommended. See recommended_actions.",
+      "source_citation": "42 U.S.C. §§ 12112–12117; 42 U.S.C. § 12203; 29 CFR Part 1630"
+    },
+
+    {
+      "rule_id": "R108",
+      "component": "overall_violation_risk",
+      "description": "Populate recommended_actions for overall_risk_level = moderate.",
+      "determination_type": "rule_based",
+      "priority": 12,
+      "condition": "overall_risk_level = 'moderate'",
+      "result": {
+        "recommended_actions": [
+          "Review the accommodation process and documentation for gaps identified in the analysis.",
+          "Consider consulting employment counsel if the identified gaps are not easily remediated.",
+          "Document all steps taken in the interactive process going forward.",
+          "Ensure supervisor and HR training on ADA obligations is current."
+        ]
+      },
+      "reasoning_template": "Overall risk level is moderate. Process and documentation review are recommended. See recommended_actions.",
+      "source_citation": "42 U.S.C. §§ 12112–12117; 29 CFR Part 1630"
+    },
+
+    {
+      "rule_id": "R109",
+      "component": "overall_violation_risk",
+      "description": "Populate recommended_actions for overall_risk_level = low.",
+      "determination_type": "rule_based",
+      "priority": 13,
+      "condition": "overall_risk_level = 'low'",
+      "result": {
+        "recommended_actions": [
+          "Monitor the situation and document the basis for any accommodation-related decisions.",
+          "Ensure the accommodation process is complete and documented if still ongoing.",
+          "No immediate legal consultation required, but note the flagged gaps."
+        ]
+      },
+      "reasoning_template": "Overall risk level is low. Continued documentation and process monitoring recommended. See recommended_actions.",
+      "source_citation": "42 U.S.C. §§ 12112–12117; 29 CFR Part 1630"
+    },
+
+    {
+      "rule_id": "R110",
+      "component": "overall_violation_risk",
+      "description": "Populate recommended_actions for overall_risk_level = minimal.",
+      "determination_type": "rule_based",
+      "priority": 14,
+      "condition": "overall_risk_level = 'minimal'",
+      "result": {
+        "recommended_actions": [
+          "No immediate action required. Employer conduct appears compliant based on available information.",
+          "Continue standard ADA compliance practices and documentation."
+        ]
+      },
+      "reasoning_template": "Overall risk level is minimal. No identified compliance gaps require action at this time. See recommended_actions.",
+      "source_citation": "42 U.S.C. §§ 12112–12117; 29 CFR Part 1630"
+    }
+
+  ],
+
+  "rule_count_summary": {
+    "total_rules": 43,
+    "rule_id_range": "R068–R110",
+    "by_component": {
+      "failure_to_accommodate": {
+        "rules": ["R068", "R069", "R070", "R071", "R072", "R073", "R074", "R075", "R076", "R077"],
+        "count": 10
+      },
+      "disability_discrimination": {
+        "rules": ["R078", "R079", "R080", "R081", "R082", "R083", "R084"],
+        "count": 7
+      },
+      "harassment": {
+        "rules": ["R085", "R086", "R087", "R088", "R089", "R090"],
+        "count": 6
+      },
+      "retaliation": {
+        "rules": ["R091", "R092", "R093", "R094", "R095", "R096", "R097", "R098", "R099", "R100", "R101", "R102", "R103"],
+        "count": 13
+      },
+      "overall_violation_risk": {
+        "rules": ["R104", "R105", "R106", "R107", "R108", "R109", "R110"],
+        "count": 7
+      }
+    }
+  }
+}
