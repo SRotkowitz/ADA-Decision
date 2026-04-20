@@ -1,0 +1,124 @@
+{
+  "wrapper": "ada_unified",
+  "version": "0.1",
+  "last_updated": "2026-04-20",
+  "description": "Unified wrapper logic for the ADA Reasonable Accommodation Decision Engine. Defines execution order, the is_qualified_individual composite determination (WR-1 through WR-5), summary output derivation rules, and the employer_compliance_status aggregation logic. The wrapper does not re-implement any module logic. All module determinations are passed through or aggregated as documented here.",
+  "legal_domain": "Americans with Disabilities Act — Title I (Employment)",
+  "governing_law": ["42 U.S.C. §§ 12111–12117", "29 CFR Part 1630"],
+  "enforcing_agency": "EEOC",
+
+  "execution_order": [
+    "ada_coverage_eligibility",
+    "ada_accommodation_analysis",
+    "is_qualified_individual_composite",
+    "ada_employer_obligations",
+    "ada_violation_risk"
+  ],
+
+  "execution_order_rationale": "Module 1 must execute first to establish employer coverage, individual coverage, and disability determination — all prerequisites for Module 2. Module 2 must execute second to produce accommodation_required, which the is_qualified_individual_composite (WR-1 through WR-5) requires. The composite is computed third, before Modules 3 and 4, because both those modules need the resolved is_qualified_individual value. Module 3 runs fourth to evaluate employer obligations. Module 4 runs last, after all upstream determinations are resolved.",
+
+  "is_qualified_individual_composite": {
+    "description": "Final composite determination of whether the individual is a 'qualified individual' under 42 U.S.C. § 12111(8) and 29 CFR § 1630.2(m). Computed by the wrapper between Module 2 and Module 3 because the final determination requires Module 2's accommodation_required output, which cannot be known until Module 2 executes. Module 1's preliminary_qualified_without_accommodation is the primary input. Rules are evaluated in strict priority order; the first rule whose condition is satisfied fires and no subsequent rules are evaluated.",
+    "inputs_consumed": [
+      "Module 1 component 1.4: preliminary_qualified_without_accommodation",
+      "Module 2 component 2.4: accommodation_required",
+      "Module 2 component 2.4: denial_basis",
+      "Wrapper input: accommodation_theoretically_effective"
+    ],
+    "output": "is_qualified_individual (yes / no / indeterminate)",
+    "rules": [
+      {
+        "rule_id": "WR-1",
+        "priority": 1,
+        "condition": "preliminary_qualified_without_accommodation == yes",
+        "result": "is_qualified_individual = yes",
+        "reasoning_template": "The individual can perform all essential functions of the position without any accommodation. Because qualified status is established without accommodation, the outcome of Module 2's accommodation analysis does not affect this determination.",
+        "source_citation": "42 U.S.C. § 12111(8); 29 CFR § 1630.2(m)",
+        "notes": "This rule fires regardless of accommodation_required. An individual who is qualified without accommodation is qualified irrespective of whether accommodation is required or available."
+      },
+      {
+        "rule_id": "WR-2",
+        "priority": 2,
+        "condition": "preliminary_qualified_without_accommodation == no AND accommodation_required == yes AND accommodation_theoretically_effective == yes",
+        "result": "is_qualified_individual = yes",
+        "reasoning_template": "The individual cannot perform essential functions without accommodation. However, an accommodation is both required and would be theoretically effective in enabling performance of essential functions. The individual is qualified with accommodation.",
+        "source_citation": "42 U.S.C. § 12111(8); 42 U.S.C. § 12112(b)(5)(A); 29 CFR § 1630.2(m)",
+        "notes": "All three conditions must be satisfied: (1) not qualified without accommodation, (2) accommodation required (Module 2 output = yes), (3) accommodation_theoretically_effective = yes (wrapper input). If accommodation_theoretically_effective is indeterminate, this rule does not fire and the analysis falls to WR-4 or WR-5."
+      },
+      {
+        "rule_id": "WR-3",
+        "priority": 3,
+        "condition": "preliminary_qualified_without_accommodation == no AND accommodation_required == no AND (denial_basis == undue_hardship OR denial_basis == direct_threat)",
+        "result": "is_qualified_individual = no",
+        "reasoning_template": "The individual cannot perform essential functions without accommodation, and no accommodation is legally required because a valid defense applies. When the denial basis is undue_hardship or direct_threat, no effective accommodation can be required. The individual is not a qualified individual.",
+        "source_citation": "42 U.S.C. § 12111(8); 29 CFR § 1630.2(m); 29 CFR § 1630.15(b),(c)",
+        "notes": "This rule fires only when denial_basis is undue_hardship or direct_threat — the two accommodation defenses that reflect the absence of any feasible accommodation. It does not fire when denial_basis reflects a threshold failure (e.g., not_qualified, not_disabled, invalid_request) because in those cases the qualified individual question either was never reached or is resolved by a different mechanism."
+      },
+      {
+        "rule_id": "WR-4",
+        "priority": 4,
+        "condition": "preliminary_qualified_without_accommodation == no AND accommodation_required == indeterminate",
+        "result": "is_qualified_individual = indeterminate",
+        "reasoning_template": "The individual cannot perform essential functions without accommodation, and whether an accommodation is required cannot be determined on available facts. Qualified individual status therefore cannot be resolved until the accommodation analysis is complete.",
+        "source_citation": "42 U.S.C. § 12111(8); 29 CFR § 1630.2(m)",
+        "notes": "The indeterminate accommodation_required output from Module 2 prevents the wrapper from determining whether the individual is qualified with accommodation. Callers should provide the additional information identified in indeterminate_factors to resolve this."
+      },
+      {
+        "rule_id": "WR-5",
+        "priority": 5,
+        "condition": "No prior WR rule has fired AND any upstream input is indeterminate",
+        "result": "is_qualified_individual = indeterminate",
+        "reasoning_template": "An upstream indeterminate value prevents resolution of qualified individual status. The specific unresolved factor(s) are identified in the indeterminate_factors object.",
+        "source_citation": "42 U.S.C. § 12111(8); 29 CFR § 1630.2(m)",
+        "notes": "Catch-all rule. Fires only if WR-1 through WR-4 did not fire and an indeterminate input remains unresolved. In practice this covers cases where preliminary_qualified_without_accommodation is itself indeterminate."
+      }
+    ]
+  },
+
+  "summary_output_derivation": {
+    "ada_covered": {
+      "source": "Module 1 components 1.1 (employer_coverage) and 1.2 (individual_status)",
+      "logic": "ada_covered = true if is_covered_employer == true AND is_covered_individual == true. ada_covered = false if is_covered_employer == false OR is_covered_individual == false."
+    },
+    "has_qualifying_disability": {
+      "source": "Module 1 component 1.3 (disability_determination)",
+      "logic": "pass-through of Module 1 component 1.3 has_qualifying_disability. No wrapper transformation."
+    },
+    "is_qualified_individual": {
+      "source": "Wrapper composite — see is_qualified_individual_composite rules WR-1 through WR-5",
+      "logic": "Computed by wrapper between Module 2 and Module 3. Not a module pass-through."
+    },
+    "accommodation_required": {
+      "source": "Module 2 component 2.4 (accommodation_determination)",
+      "logic": "pass-through of Module 2 component 2.4 accommodation_required. No wrapper transformation."
+    },
+    "employer_compliance_status": {
+      "source": "Module 3 components 3.1 (interactive_process), 3.2 (medical_inquiry_limitations), 3.3 (confidentiality)",
+      "logic": {
+        "compliant": "interactive_process_compliant == yes AND inquiry_permitted == yes (for all stages evaluated) AND confidentiality_compliant == yes",
+        "non_compliant": "interactive_process_compliant == no OR inquiry_permitted == no (any stage evaluated) OR confidentiality_compliant == no",
+        "indeterminate": "No component produces no AND at least one component produces indeterminate",
+        "precedence_note": "non_compliant takes precedence over indeterminate. If any component produces no, the status is non_compliant regardless of whether other components are indeterminate."
+      }
+    },
+    "violation_risk_level": {
+      "source": "Module 4 component 4.5 (overall_violation_risk)",
+      "logic": "pass-through of Module 4 component 4.5 overall_risk_level. No wrapper transformation."
+    },
+    "recommended_actions": {
+      "source": "Module 4 component 4.5 (overall_violation_risk)",
+      "logic": "pass-through of Module 4 component 4.5 recommended_actions. No wrapper transformation."
+    },
+    "indeterminate_factors": {
+      "source": "All modules — any component that produced an indeterminate determination",
+      "logic": "Collect all key_uncertainties arrays from every module component that produced indeterminate. Key: '{module_id}.{component_id}' (e.g., 'ada_coverage_eligibility.disability_determination'). Value: the component's key_uncertainties array. Omit any component that did not produce indeterminate. Result is empty object {} if no module component produced indeterminate."
+    },
+    "module_outputs": {
+      "source": "All modules",
+      "logic": "Full structured output from each module, keyed by module_id. Keys: ada_coverage_eligibility, ada_accommodation_analysis, ada_employer_obligations, ada_violation_risk."
+    }
+  },
+
+  "new_r_series_rules": "none",
+  "new_r_series_rules_note": "No new R-series rules are introduced by the wrapper. The wrapper computes one determination (is_qualified_individual composite) using WR-series rules WR-1 through WR-5. All other summary outputs are derived by aggregation or pass-through logic documented above. The next available R-series rule number for future modules is R111."
+}

@@ -1,0 +1,127 @@
+{
+  "metadata": {
+    "schema_name": "ada_unified_output",
+    "version": "0.1",
+    "last_updated": "2026-04-20",
+    "description": "Output schema for the ADA Decision Engine unified assessment endpoint. Defines all eight top-level summary output fields plus the module_outputs container. Summary fields are derived from module outputs as documented in unified_logic.json.",
+    "engine": "ADA Reasonable Accommodation Decision Engine",
+    "legal_domain": "Americans with Disabilities Act — Title I (Employment)",
+    "governing_law": ["42 U.S.C. §§ 12111–12117", "29 CFR Part 1630"],
+    "enforcing_agency": "EEOC",
+    "vocabulary_reference": "../vocabulary/ada_vocabulary.json"
+  },
+  "summary_outputs": {
+    "ada_covered": {
+      "name": "ada_covered",
+      "data_type": "boolean",
+      "description": "True if both is_covered_employer=true and is_covered_individual=true from Module 1. False if either is false. A false value means the ADA Title I framework does not apply and all downstream determinations are not operative. Source: Module 1 components 1.1 and 1.2.",
+      "source_module": "ada_coverage_eligibility",
+      "source_components": ["employer_coverage", "individual_status"],
+      "derivation": "is_covered_employer == true AND is_covered_individual == true"
+    },
+    "has_qualifying_disability": {
+      "name": "has_qualifying_disability",
+      "data_type": "string",
+      "allowed_values": ["yes", "no", "indeterminate"],
+      "vocabulary_reference": "determination_states",
+      "description": "Whether the individual has a qualifying disability under the ADA, per Module 1 component 1.3. Pass-through from disability_determination output. 'indeterminate' indicates that available facts are insufficient to resolve disability status; see indeterminate_factors for specifics. Only actual_disability and record_of_disability prongs support accommodation rights.",
+      "source_module": "ada_coverage_eligibility",
+      "source_component": "disability_determination",
+      "derivation": "pass-through from Module 1 component 1.3 has_qualifying_disability"
+    },
+    "is_qualified_individual": {
+      "name": "is_qualified_individual",
+      "data_type": "string",
+      "allowed_values": ["yes", "no", "indeterminate"],
+      "vocabulary_reference": "determination_states",
+      "description": "Final composite determination of whether the individual is a qualified individual under 42 U.S.C. § 12111(8). Computed by the wrapper (WR-1 through WR-5) between Module 2 and Module 3. Not a pass-through — this is the only determination computed by the wrapper itself. Distinct from Module 1's preliminary_qualified_without_accommodation value, which is consumed by Module 2 and the WR rules but is not surfaced as a summary output.",
+      "source": "wrapper_composite",
+      "rules_applied": ["WR-1", "WR-2", "WR-3", "WR-4", "WR-5"],
+      "derivation": "See unified_logic.json is_qualified_individual_composite rules WR-1 through WR-5"
+    },
+    "accommodation_required": {
+      "name": "accommodation_required",
+      "data_type": "string",
+      "allowed_values": ["yes", "no", "indeterminate"],
+      "vocabulary_reference": "determination_states",
+      "description": "Whether the employer is obligated to provide a reasonable accommodation. Pass-through from Module 2 component 2.4 accommodation_determination. 'yes' means an accommodation obligation exists. 'no' means a valid legal basis for denial was established (see module_outputs for denial_basis). 'indeterminate' means upstream uncertainty prevents resolution.",
+      "source_module": "ada_accommodation_analysis",
+      "source_component": "accommodation_determination",
+      "derivation": "pass-through from Module 2 component 2.4 accommodation_required"
+    },
+    "employer_compliance_status": {
+      "name": "employer_compliance_status",
+      "data_type": "string",
+      "allowed_values": ["compliant", "non_compliant", "indeterminate"],
+      "description": "Composite compliance status across Module 3's three compliance components: interactive process, medical inquiry limitations, and confidentiality. Derivation: (1) compliant = interactive_process_compliant==yes AND inquiry_permitted==yes (all stages evaluated) AND confidentiality_compliant==yes; (2) non_compliant = any of the three components produces 'no'; (3) indeterminate = no component produces 'no' but at least one produces 'indeterminate'. The non_compliant determination takes precedence over indeterminate.",
+      "source_module": "ada_employer_obligations",
+      "source_components": ["interactive_process", "medical_inquiry_limitations", "confidentiality"],
+      "derivation": {
+        "compliant": "interactive_process_compliant == yes AND inquiry_permitted == yes (for all stages evaluated) AND confidentiality_compliant == yes",
+        "non_compliant": "interactive_process_compliant == no OR inquiry_permitted == no (any stage) OR confidentiality_compliant == no",
+        "indeterminate": "no component produces no AND at least one component produces indeterminate"
+      }
+    },
+    "violation_risk_level": {
+      "name": "violation_risk_level",
+      "data_type": "string",
+      "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+      "vocabulary_reference": "risk_levels",
+      "description": "The overall ADA violation risk level, representing the maximum risk level across all four claim type components (failure_to_accommodate, disability_discrimination, harassment, retaliation). Pass-through from Module 4 component 4.5 overall_risk_level. Risk level ordinal order: minimal < low < moderate < high < critical.",
+      "source_module": "ada_violation_risk",
+      "source_component": "overall_violation_risk",
+      "derivation": "pass-through from Module 4 component 4.5 overall_risk_level"
+    },
+    "recommended_actions": {
+      "name": "recommended_actions",
+      "data_type": "array",
+      "items_type": "string",
+      "description": "Ordered array of plain-language recommended actions for the employer based on the overall violation risk level and primary claim basis. Pass-through from Module 4 component 4.5 recommended_actions. Empty array if violation_risk_level is minimal and no specific actions are warranted.",
+      "source_module": "ada_violation_risk",
+      "source_component": "overall_violation_risk",
+      "derivation": "pass-through from Module 4 component 4.5 recommended_actions"
+    },
+    "indeterminate_factors": {
+      "name": "indeterminate_factors",
+      "data_type": "object",
+      "description": "Aggregated collection of all key_uncertainties arrays from every module component that produced an 'indeterminate' determination. Empty object {} if no indeterminate factors exist across any module. Populated when any module component outputs indeterminate. Callers should surface these factors to end users so missing information can be gathered and the assessment can be re-run.",
+      "keying_pattern": "{module_id}.{component_id}",
+      "key_format": "The key is the module_id concatenated with a period and the component_id. Example: 'ada_coverage_eligibility.disability_determination' or 'ada_accommodation_analysis.undue_hardship_analysis'. Component IDs are the component_name values defined in each module schema.",
+      "value_type": "array of strings — the key_uncertainties array from the indeterminate component",
+      "example": {
+        "ada_coverage_eligibility.disability_determination": [
+          "Medical documentation does not establish substantial limitation",
+          "Condition duration is unknown — regarded-as exclusion cannot be ruled out"
+        ],
+        "ada_accommodation_analysis.undue_hardship_analysis": [
+          "Facility operating budget not provided — cost burden ratio cannot be calculated"
+        ]
+      },
+      "source": "all modules",
+      "derivation": "For each module component that produced 'indeterminate', collect the component's key_uncertainties array and store under key '{module_id}.{component_id}'. Omit components that did not produce indeterminate."
+    },
+    "module_outputs": {
+      "name": "module_outputs",
+      "data_type": "object",
+      "description": "Full structured output from each module, keyed by module_id. Provided for API callers who need detail beyond the top-level summary. Subfields are the complete output objects as defined in each module's schema.",
+      "subfields": {
+        "ada_coverage_eligibility": {
+          "data_type": "object",
+          "description": "Complete output from Module 1 (ada_coverage_eligibility). Includes all four component outputs: employer_coverage (1.1), individual_status (1.2), disability_determination (1.3), and qualified_individual (1.4)."
+        },
+        "ada_accommodation_analysis": {
+          "data_type": "object",
+          "description": "Complete output from Module 2 (ada_accommodation_analysis). Includes all four component outputs: accommodation_request (2.1), undue_hardship_analysis (2.2), direct_threat_analysis (2.3), and accommodation_determination (2.4)."
+        },
+        "ada_employer_obligations": {
+          "data_type": "object",
+          "description": "Complete output from Module 3 (ada_employer_obligations). Includes all three component outputs: interactive_process (3.1), medical_inquiry_limitations (3.2), and confidentiality (3.3)."
+        },
+        "ada_violation_risk": {
+          "data_type": "object",
+          "description": "Complete output from Module 4 (ada_violation_risk). Includes all five component outputs: failure_to_accommodate (4.1), disability_discrimination (4.2), harassment (4.3), retaliation (4.4), and overall_violation_risk (4.5)."
+        }
+      }
+    }
+  }
+}

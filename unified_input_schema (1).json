@@ -1,0 +1,553 @@
+{
+  "metadata": {
+    "schema_name": "ada_unified_input",
+    "version": "0.1",
+    "last_updated": "2026-04-20",
+    "description": "Complete input schema for the ADA Decision Engine unified assessment endpoint. Covers all four module input sets plus wrapper-level inputs. All categorical values reference ada_vocabulary.json. Fields marked required:true must be present in a valid request; required:false fields are optional but may affect determination quality.",
+    "engine": "ADA Reasonable Accommodation Decision Engine",
+    "legal_domain": "Americans with Disabilities Act — Title I (Employment)",
+    "governing_law": ["42 U.S.C. §§ 12111–12117", "29 CFR Part 1630"],
+    "enforcing_agency": "EEOC",
+    "vocabulary_reference": "../vocabulary/ada_vocabulary.json"
+  },
+  "description": "Complete input schema for the ADA Decision Engine unified assessment endpoint.",
+  "wrapper_inputs": {
+    "accommodation_theoretically_effective": {
+      "name": "accommodation_theoretically_effective",
+      "data_type": "string",
+      "allowed_values": ["yes", "no", "indeterminate"],
+      "required": true,
+      "description": "Wrapper-level input. Whether the requested or identified accommodation would be theoretically effective in enabling the individual to perform essential functions. Not produced by any module. Required for WR-2 resolution. If unknown at time of submission, use 'indeterminate'."
+    }
+  },
+  "module_inputs": {
+    "module_1_coverage_eligibility": {
+      "module_id": "ada_coverage_eligibility",
+      "description": "Inputs for Module 1: Coverage and Eligibility. Covers employer coverage, individual employment status, disability determination, and qualified individual assessment.",
+      "fields": {
+        "employer_type": {
+          "name": "employer_type",
+          "data_type": "string",
+          "allowed_values": ["private_employer", "state_local_government", "employment_agency", "labor_organization", "joint_labor_management_committee"],
+          "vocabulary_reference": "employer_types",
+          "required": true,
+          "description": "The type of covered entity. Determines whether the employer threshold and coverage rules under 29 CFR § 1630.2(b) apply."
+        },
+        "total_employees": {
+          "name": "total_employees",
+          "data_type": "integer",
+          "minimum": 0,
+          "required": true,
+          "description": "Total number of employees across all locations for the current or preceding calendar year, whichever is greater. Must reach 15 for coverage threshold under 42 U.S.C. § 12111(5)."
+        },
+        "weeks_with_15_employees": {
+          "name": "weeks_with_15_employees",
+          "data_type": "integer",
+          "minimum": 0,
+          "maximum": 52,
+          "required": true,
+          "description": "Number of weeks in the current or preceding calendar year during which the employer had 15 or more employees. Coverage requires 20 or more such weeks per 42 U.S.C. § 12111(5)(A)."
+        },
+        "individual_status": {
+          "name": "individual_status",
+          "data_type": "string",
+          "allowed_values": ["current_employee", "job_applicant", "former_employee"],
+          "vocabulary_reference": "individual_statuses",
+          "required": true,
+          "description": "The employment relationship status of the individual asserting ADA rights."
+        },
+        "disability_basis": {
+          "name": "disability_basis",
+          "data_type": "string",
+          "allowed_values": ["actual_disability", "record_of_disability", "regarded_as"],
+          "vocabulary_reference": "disability_bases",
+          "required": true,
+          "description": "The statutory prong under which disability status is asserted. Only actual_disability and record_of_disability entitle the individual to reasonable accommodation."
+        },
+        "impairment_type": {
+          "name": "impairment_type",
+          "data_type": "string",
+          "allowed_values": ["physical", "mental", "sensory", "neurological", "chronic_disease", "episodic", "in_remission", "other"],
+          "vocabulary_reference": "impairment_types",
+          "required": true,
+          "description": "Category of the underlying physical or mental impairment."
+        },
+        "impairment_description": {
+          "name": "impairment_description",
+          "data_type": "string",
+          "required": false,
+          "description": "Freeform description of the diagnosed or perceived impairment. Supplements impairment_type for reasoning output."
+        },
+        "major_life_activities_affected": {
+          "name": "major_life_activities_affected",
+          "data_type": "array",
+          "items_type": "string",
+          "vocabulary_reference": "major_life_activities",
+          "required": true,
+          "description": "List of major life activities or major bodily functions substantially limited by the impairment, per 29 CFR § 1630.2(i)."
+        },
+        "substantially_limits": {
+          "name": "substantially_limits",
+          "data_type": "string",
+          "allowed_values": ["yes", "no", "indeterminate"],
+          "required": true,
+          "description": "Whether the impairment substantially limits one or more major life activities. Construed broadly per ADA Amendments Act of 2008 and 29 CFR § 1630.2(j)."
+        },
+        "condition_is_episodic_or_remission": {
+          "name": "condition_is_episodic_or_remission",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the impairment is episodic or in remission. Such conditions are evaluated in their active state per 29 CFR § 1630.2(j)(1)(vii)."
+        },
+        "condition_duration": {
+          "name": "condition_duration",
+          "data_type": "string",
+          "allowed_values": ["transitory_minor", "six_months_or_less", "more_than_six_months", "permanent", "unknown"],
+          "vocabulary_reference": "condition_durations",
+          "required": false,
+          "description": "Expected or actual duration of the impairment. Relevant to regarded-as prong exclusion for transitory and minor conditions under 29 CFR § 1630.2(l)."
+        },
+        "essential_functions_identified": {
+          "name": "essential_functions_identified",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if the essential functions of the position have been identified, documented, or otherwise established. Essential functions are the fundamental job duties per 29 CFR § 1630.2(n)."
+        },
+        "can_perform_essential_functions_without_accommodation": {
+          "name": "can_perform_essential_functions_without_accommodation",
+          "data_type": "string",
+          "allowed_values": ["yes", "no", "indeterminate"],
+          "required": true,
+          "description": "Whether the individual can perform all essential functions without any accommodation. Drives preliminary_qualified_without_accommodation determination in Module 1 component 1.4."
+        },
+        "meets_skill_experience_education_requirements": {
+          "name": "meets_skill_experience_education_requirements",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if the individual meets the position's skill, experience, education, and other job-related requirements per 29 CFR § 1630.2(m)."
+        }
+      }
+    },
+    "module_2_accommodation_analysis": {
+      "module_id": "ada_accommodation_analysis",
+      "description": "Inputs for Module 2: Accommodation Analysis. Covers accommodation request validation, undue hardship factors, and direct threat factors.",
+      "fields": {
+        "accommodation_type_requested": {
+          "name": "accommodation_type_requested",
+          "data_type": "string",
+          "allowed_values": ["job_restructuring", "modified_schedule", "reassignment", "equipment_modification", "policy_modification", "reader_interpreter", "leave_as_accommodation", "telework", "facility_access", "other"],
+          "vocabulary_reference": "accommodation_types",
+          "required": true,
+          "description": "Category of accommodation requested. Use canonical vocabulary term."
+        },
+        "accommodation_description": {
+          "name": "accommodation_description",
+          "data_type": "string",
+          "required": false,
+          "description": "Freeform description of the specific accommodation requested."
+        },
+        "accommodation_request_date": {
+          "name": "accommodation_request_date",
+          "data_type": "string",
+          "format": "YYYY-MM-DD",
+          "required": true,
+          "description": "Date the accommodation was first requested or the employer first became aware of the need."
+        },
+        "request_made_by": {
+          "name": "request_made_by",
+          "data_type": "string",
+          "allowed_values": ["employee", "employee_representative", "medical_provider", "employer_initiated"],
+          "required": true,
+          "description": "The party who made the accommodation request."
+        },
+        "accommodation_is_for": {
+          "name": "accommodation_is_for",
+          "data_type": "string",
+          "allowed_values": ["application_process", "performing_job_functions", "accessing_benefits_privileges"],
+          "vocabulary_reference": "accommodation_purposes",
+          "required": true,
+          "description": "Purpose for which the accommodation is requested."
+        },
+        "functional_limitation_identified": {
+          "name": "functional_limitation_identified",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if the request identifies the functional limitation or workplace barrier the accommodation addresses."
+        },
+        "accommodation_request_in_writing": {
+          "name": "accommodation_request_in_writing",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the accommodation request was made or confirmed in writing. Not required by law but relevant to documentation."
+        },
+        "accommodation_previously_denied": {
+          "name": "accommodation_previously_denied",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if a substantially similar accommodation was previously denied by this employer."
+        },
+        "accommodation_gross_cost": {
+          "name": "accommodation_gross_cost",
+          "data_type": "number",
+          "minimum": 0,
+          "required": true,
+          "description": "Total gross cost of the accommodation before any tax credits or outside funding. In USD."
+        },
+        "tax_credits_available": {
+          "name": "tax_credits_available",
+          "data_type": "number",
+          "minimum": 0,
+          "required": false,
+          "default": 0,
+          "description": "Dollar value of available tax credits offsetting accommodation cost."
+        },
+        "outside_funding_available": {
+          "name": "outside_funding_available",
+          "data_type": "number",
+          "minimum": 0,
+          "required": false,
+          "default": 0,
+          "description": "Dollar value of outside funding sources offsetting accommodation cost."
+        },
+        "accommodation_net_cost": {
+          "name": "accommodation_net_cost",
+          "data_type": "number",
+          "required": false,
+          "description": "Net accommodation cost after credits and outside funding. If not provided, calculated by engine."
+        },
+        "accommodation_frequency": {
+          "name": "accommodation_frequency",
+          "data_type": "string",
+          "allowed_values": ["one_time", "occasional", "ongoing"],
+          "vocabulary_reference": "accommodation_frequencies",
+          "required": true,
+          "description": "Whether the accommodation cost is one-time, periodic, or recurring."
+        },
+        "facility_annual_revenue": {
+          "name": "facility_annual_revenue",
+          "data_type": "number",
+          "minimum": 0,
+          "required": true,
+          "description": "Annual revenue of the specific facility where the employee works. Used as cost burden denominator per 29 CFR § 1630.2(p)(2)(ii)."
+        },
+        "facility_employee_count": {
+          "name": "facility_employee_count",
+          "data_type": "integer",
+          "minimum": 1,
+          "required": true,
+          "description": "Number of employees at the specific facility."
+        },
+        "facility_operating_budget": {
+          "name": "facility_operating_budget",
+          "data_type": "number",
+          "minimum": 0,
+          "required": false,
+          "description": "Annual operating budget of the specific facility. Preferred cost burden denominator when available."
+        },
+        "entity_annual_revenue": {
+          "name": "entity_annual_revenue",
+          "data_type": "number",
+          "minimum": 0,
+          "required": true,
+          "description": "Total annual revenue of the covered entity."
+        },
+        "entity_total_employees": {
+          "name": "entity_total_employees",
+          "data_type": "integer",
+          "minimum": 1,
+          "required": true,
+          "description": "Total employees across all facilities of the covered entity."
+        },
+        "entity_number_of_facilities": {
+          "name": "entity_number_of_facilities",
+          "data_type": "integer",
+          "minimum": 1,
+          "required": false,
+          "description": "Total facilities operated by the covered entity."
+        },
+        "entity_type": {
+          "name": "entity_type",
+          "data_type": "string",
+          "allowed_values": ["single_facility", "multi_facility_same_region", "multi_facility_national", "multi_facility_international"],
+          "vocabulary_reference": "entity_types",
+          "required": false,
+          "description": "Structural classification of the entity."
+        },
+        "administrative_relationship": {
+          "name": "administrative_relationship",
+          "data_type": "string",
+          "allowed_values": ["centralized", "decentralized", "hybrid"],
+          "vocabulary_reference": "administrative_relationships",
+          "required": false,
+          "description": "Degree of administrative and fiscal integration between facility and parent entity."
+        },
+        "geographic_separateness": {
+          "name": "geographic_separateness",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the facility is geographically remote from other entity facilities."
+        },
+        "impact_on_operations": {
+          "name": "impact_on_operations",
+          "data_type": "string",
+          "allowed_values": ["none", "minor", "moderate", "significant", "severe"],
+          "vocabulary_reference": "impact_levels",
+          "required": true,
+          "description": "Impact of the accommodation on the facility's ability to conduct business."
+        },
+        "impact_on_other_employees": {
+          "name": "impact_on_other_employees",
+          "data_type": "string",
+          "allowed_values": ["none", "minor", "moderate", "significant", "severe"],
+          "vocabulary_reference": "impact_levels",
+          "required": true,
+          "description": "Impact of the accommodation on other employees' ability to perform their duties."
+        },
+        "impact_description": {
+          "name": "impact_description",
+          "data_type": "string",
+          "required": false,
+          "description": "Freeform description of the operational or employee impact."
+        },
+        "direct_threat_basis": {
+          "name": "direct_threat_basis",
+          "data_type": "string",
+          "allowed_values": ["self", "others", "none_claimed"],
+          "vocabulary_reference": "direct_threat_bases",
+          "required": true,
+          "description": "Whether employer asserts direct threat to the individual themselves, to others, or asserts no direct threat."
+        },
+        "threat_duration": {
+          "name": "threat_duration",
+          "data_type": "string",
+          "allowed_values": ["temporary", "ongoing", "permanent", "unknown"],
+          "required": false,
+          "description": "Duration of the asserted direct threat."
+        },
+        "threat_severity": {
+          "name": "threat_severity",
+          "data_type": "string",
+          "allowed_values": ["minor", "moderate", "significant", "severe"],
+          "vocabulary_reference": "threat_severity_levels",
+          "required": false,
+          "description": "Employer's assessment of the severity of the direct threat."
+        },
+        "threat_likelihood": {
+          "name": "threat_likelihood",
+          "data_type": "string",
+          "allowed_values": ["remote", "possible", "likely", "highly_likely"],
+          "required": false,
+          "description": "Employer's assessment of the likelihood that the threatened harm will occur."
+        },
+        "objective_evidence_basis": {
+          "name": "objective_evidence_basis",
+          "data_type": "string",
+          "allowed_values": ["current_medical_knowledge", "best_available_objective_evidence", "employer_judgment_only", "none"],
+          "required": false,
+          "description": "The evidentiary basis for the direct threat assessment. Current medical knowledge or objective evidence required under 29 CFR § 1630.2(r)."
+        },
+        "individualized_assessment_conducted": {
+          "name": "individualized_assessment_conducted",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if an individualized assessment of the individual's present ability was conducted, not reliance on generalizations."
+        },
+        "mitigation_considered": {
+          "name": "mitigation_considered",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer considered whether a reasonable accommodation could reduce the direct threat to an acceptable level."
+        }
+      }
+    },
+    "module_3_employer_obligations": {
+      "module_id": "ada_employer_obligations",
+      "description": "Inputs for Module 3: Employer Obligations. Covers interactive process quality, medical inquiry stage and basis, and confidentiality compliance.",
+      "fields": {
+        "interactive_process_initiated": {
+          "name": "interactive_process_initiated",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if the employer engaged in or initiated the interactive process after the accommodation request."
+        },
+        "interactive_process_steps_completed": {
+          "name": "interactive_process_steps_completed",
+          "data_type": "array",
+          "items_type": "string",
+          "allowed_values": ["acknowledged_request", "requested_medical_documentation", "identified_barriers", "explored_alternatives", "communicated_decision", "documented_process"],
+          "required": true,
+          "description": "Steps of the interactive process completed by the employer."
+        },
+        "employer_good_faith_shown": {
+          "name": "employer_good_faith_shown",
+          "data_type": "string",
+          "allowed_values": ["yes", "no", "indeterminate"],
+          "required": true,
+          "description": "Whether the employer demonstrated good faith in exploring accommodation options."
+        },
+        "process_breakdown_cause": {
+          "name": "process_breakdown_cause",
+          "data_type": "string",
+          "allowed_values": ["employer_failure", "employee_failure", "joint_failure", "no_breakdown", "unknown"],
+          "required": false,
+          "description": "The party responsible for any breakdown in the interactive process."
+        },
+        "process_documented": {
+          "name": "process_documented",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer has contemporaneous documentation of the interactive process."
+        },
+        "inquiry_stage": {
+          "name": "inquiry_stage",
+          "data_type": "string",
+          "allowed_values": ["pre_offer", "post_offer_pre_employment", "employment", "return_to_work"],
+          "vocabulary_reference": "inquiry_stages",
+          "required": true,
+          "description": "The stage of the hiring or employment relationship at which medical information was sought."
+        },
+        "inquiry_type": {
+          "name": "inquiry_type",
+          "data_type": "string",
+          "allowed_values": ["disability_related_question", "medical_examination", "documentation_request", "functional_capacity_evaluation"],
+          "vocabulary_reference": "inquiry_types",
+          "required": true,
+          "description": "The type of medical inquiry conducted."
+        },
+        "inquiry_job_related": {
+          "name": "inquiry_job_related",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if the inquiry is job-related and consistent with business necessity under 42 U.S.C. § 12112(d)(4)(A)."
+        },
+        "inquiry_consistent_with_business_necessity": {
+          "name": "inquiry_consistent_with_business_necessity",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if the inquiry is consistent with business necessity as required for employment-stage inquiries."
+        },
+        "medical_information_in_separate_file": {
+          "name": "medical_information_in_separate_file",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if medical information is maintained in a confidential file separate from the general personnel file, per 42 U.S.C. § 12112(d)(3)(B)."
+        },
+        "access_limited_to_authorized_personnel": {
+          "name": "access_limited_to_authorized_personnel",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if access to confidential medical information is limited to authorized personnel only."
+        },
+        "unauthorized_disclosure_occurred": {
+          "name": "unauthorized_disclosure_occurred",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if the employer disclosed medical information to unauthorized parties."
+        }
+      }
+    },
+    "module_4_violation_risk": {
+      "module_id": "ada_violation_risk",
+      "description": "Inputs for Module 4: Violation Risk. Covers interactive process participation quality, discrimination indicators, harassment facts, and retaliation proximity.",
+      "fields": {
+        "employee_interactive_process_participation": {
+          "name": "employee_interactive_process_participation",
+          "data_type": "string",
+          "allowed_values": ["good_faith", "partial", "refused", "abandoned"],
+          "required": true,
+          "description": "The quality of the employee's participation in the interactive process. 'refused' or 'abandoned' with documentation shifts FTA risk one tier downward."
+        },
+        "employee_nonparticipation_documented": {
+          "name": "employee_nonparticipation_documented",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer has contemporaneous documentation of employee refusal or abandonment."
+        },
+        "adverse_action_taken": {
+          "name": "adverse_action_taken",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if the employer took an adverse employment action against the individual."
+        },
+        "adverse_action_type": {
+          "name": "adverse_action_type",
+          "data_type": "string",
+          "allowed_values": ["termination", "demotion", "reduction_in_hours", "denial_of_promotion", "suspension", "reassignment_punitive", "constructive_discharge", "other"],
+          "vocabulary_reference": "adverse_action_types",
+          "required": false,
+          "description": "The category of adverse action taken."
+        },
+        "adverse_action_reason_documented": {
+          "name": "adverse_action_reason_documented",
+          "data_type": "string",
+          "allowed_values": ["performance", "conduct", "reduction_in_force", "position_elimination", "accommodation_denial_basis", "undocumented"],
+          "required": false,
+          "description": "The stated basis for the adverse action."
+        },
+        "discriminatory_statements_made": {
+          "name": "discriminatory_statements_made",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if supervisors or decision-makers made statements reflecting disability-based animus."
+        },
+        "comparator_treated_differently": {
+          "name": "comparator_treated_differently",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if similarly situated non-disabled employees were treated more favorably under similar circumstances."
+        },
+        "harassment_conduct_occurred": {
+          "name": "harassment_conduct_occurred",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if conduct occurred that may constitute disability-based harassment."
+        },
+        "harassment_severity": {
+          "name": "harassment_severity",
+          "data_type": "string",
+          "allowed_values": ["isolated_minor", "repeated_minor", "isolated_severe", "pervasive"],
+          "required": false,
+          "description": "The severity and pattern of alleged harassing conduct."
+        },
+        "harassment_reported_to_employer": {
+          "name": "harassment_reported_to_employer",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the harassment was reported through the employer's internal complaint process."
+        },
+        "employer_remedial_action_taken": {
+          "name": "employer_remedial_action_taken",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer took prompt and effective remedial action upon notice of the harassment."
+        },
+        "engaged_in_protected_activity": {
+          "name": "engaged_in_protected_activity",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if the individual engaged in ADA-protected activity (accommodation request, complaint, opposition, participation in investigation)."
+        },
+        "employer_aware_of_activity": {
+          "name": "employer_aware_of_activity",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer had actual knowledge of the protected activity at the time of the adverse action."
+        },
+        "causal_nexus_present": {
+          "name": "causal_nexus_present",
+          "data_type": "string",
+          "allowed_values": ["yes", "no", "indeterminate"],
+          "required": false,
+          "description": "Whether circumstances suggest a retaliation nexus between the protected activity and the adverse action."
+        },
+        "days_between_activity_and_action": {
+          "name": "days_between_activity_and_action",
+          "data_type": "integer",
+          "minimum": 0,
+          "required": false,
+          "description": "Days between the protected activity and the adverse action. Drives proximity_strength calculation. If absent, defaults to not_provided."
+        }
+      }
+    }
+  }
+}
