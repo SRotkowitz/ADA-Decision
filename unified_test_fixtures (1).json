@@ -1,0 +1,1243 @@
+{
+  "wrapper": "ada_unified",
+  "version": "0.1",
+  "last_updated": "2026-04-20",
+  "description": "End-to-end test fixtures for the ADA Decision Engine unified wrapper. One fixture per scenario (UA-001 through UA-010). Expected outputs cover all eight summary output fields. Full module_outputs are excluded from fixtures — test runners validate summary outputs only.",
+  "test_cases": [
+    {
+      "test_id": "UA-001",
+      "description": "Full yes path — covered employer, actual disability, qualified without accommodation (WR-1), accommodation approved but not legally required, employer compliant, minimal risk",
+      "input": {
+        "wrapper_inputs": {
+          "accommodation_theoretically_effective": "yes"
+        },
+        "module_inputs": {
+          "module_1_coverage_eligibility": {
+            "employer_coverage": {
+              "employer_type": "private_employer",
+              "employee_count_current_year": 220,
+              "employee_count_prior_year": 215,
+              "is_us_government": false,
+              "is_indian_tribe": false,
+              "affects_commerce": true
+            },
+            "individual_status": {
+              "individual_status": "current_employee",
+              "individual_employed_by_covered_entity": true
+            },
+            "disability_determination": {
+              "impairment_type": "endocrine",
+              "impairment_description": "Type 2 diabetes mellitus",
+              "disability_basis_claimed": "actual_disability",
+              "major_life_activity_affected": "endocrine_function",
+              "limitation_severity": "substantially_limits",
+              "mitigating_measures_used": true,
+              "mitigating_measures_description": "insulin therapy and glucose monitoring"
+            },
+            "qualified_individual": {
+              "essential_functions_identified": true,
+              "can_perform_essential_functions_without_accommodation": "yes",
+              "satisfies_skill_experience_requirements": true,
+              "job_description_exists": true
+            }
+          },
+          "module_2_accommodation_analysis": {
+            "accommodation_request": {
+              "accommodation_type_requested": "equipment_modification",
+              "accommodation_description": "Small refrigerator at workstation for insulin storage",
+              "accommodation_request_date": "2026-03-01",
+              "request_made_by": "employee",
+              "accommodation_is_for": "performing_job_functions",
+              "functional_limitation_identified": true,
+              "accommodation_request_in_writing": true,
+              "accommodation_previously_denied": false
+            },
+            "undue_hardship_analysis": {
+              "accommodation_gross_cost": 350,
+              "accommodation_frequency": "one_time",
+              "facility_annual_revenue": 8500000,
+              "facility_employee_count": 220,
+              "entity_annual_revenue": 8500000,
+              "entity_total_employees": 220,
+              "impact_on_operations": "none",
+              "impact_on_other_employees": "none",
+              "employer_asserts_hardship": false
+            },
+            "direct_threat_analysis": {
+              "direct_threat_claimed": false
+            }
+          },
+          "module_3_employer_obligations": {
+            "interactive_process": {
+              "employer_initiated_interactive_process": true,
+              "interactive_process_steps_completed": ["acknowledged_request", "identified_limitation", "identified_accommodation", "implemented_accommodation"],
+              "good_faith_effort_documented": true,
+              "process_breakdown_reason": "no_breakdown",
+              "response_time_days": 7
+            },
+            "medical_inquiry_limitations": {
+              "employment_stage": "employed",
+              "inquiry_type": "request_for_documentation",
+              "inquiry_is_job_related": true,
+              "inquiry_consistent_with_business_necessity": true,
+              "inquiry_triggered_by_accommodation_request": true
+            },
+            "confidentiality": {
+              "medical_information_maintained_separately": true,
+              "medical_information_treated_as_confidential": true,
+              "disclosure_made": false
+            }
+          },
+          "module_4_violation_risk": {
+            "failure_to_accommodate": {
+              "employee_interactive_process_participation": "good_faith"
+            },
+            "disability_discrimination": {
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            },
+            "harassment": {
+              "unwelcome_conduct_occurred": false
+            },
+            "retaliation": {
+              "engaged_in_protected_activity": true,
+              "protected_activity_type": "accommodation_request",
+              "employer_aware_of_activity": true,
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            }
+          }
+        }
+      },
+      "expected_output": {
+        "ada_covered": true,
+        "has_qualifying_disability": "yes",
+        "is_qualified_individual": "yes",
+        "accommodation_required": "yes",
+        "employer_compliance_status": "compliant",
+        "violation_risk_level": "minimal",
+        "recommended_actions": [],
+        "indeterminate_factors": {}
+      },
+      "wr_rules_fired": ["WR-1"],
+      "module_rules_fired": ["R001", "R002", "R003", "R004", "R005", "R006", "R007", "R008", "R009", "R010", "R011", "R012", "R013", "R014", "R015", "R016", "R017", "R018", "R019", "R026", "R027", "R028", "R029", "R030", "R031", "R032", "R033", "R034", "R035", "R036", "R037", "R038", "R039", "R040", "R041", "R047", "R048", "R049", "R050", "R051", "R052", "R053", "R056", "R057", "R058", "R061", "R062", "R063", "R068", "R069", "R070", "R091", "R092", "R093", "R094", "R095"]
+    },
+    {
+      "test_id": "UA-002",
+      "description": "Not covered employer (9 employees) — all downstream analyses short-circuit; ada_covered = false",
+      "input": {
+        "wrapper_inputs": {
+          "accommodation_theoretically_effective": "yes"
+        },
+        "module_inputs": {
+          "module_1_coverage_eligibility": {
+            "employer_coverage": {
+              "employer_type": "private_employer",
+              "employee_count_current_year": 9,
+              "employee_count_prior_year": 8,
+              "is_us_government": false,
+              "is_indian_tribe": false,
+              "affects_commerce": true
+            },
+            "individual_status": {
+              "individual_status": "current_employee",
+              "individual_employed_by_covered_entity": true
+            },
+            "disability_determination": {
+              "impairment_type": "musculoskeletal",
+              "disability_basis_claimed": "actual_disability",
+              "major_life_activity_affected": "lifting",
+              "limitation_severity": "substantially_limits"
+            },
+            "qualified_individual": {
+              "essential_functions_identified": true,
+              "can_perform_essential_functions_without_accommodation": "no",
+              "satisfies_skill_experience_requirements": true
+            }
+          },
+          "module_2_accommodation_analysis": {
+            "accommodation_request": {
+              "accommodation_type_requested": "modified_schedule",
+              "accommodation_request_date": "2026-02-10",
+              "request_made_by": "employee",
+              "accommodation_is_for": "performing_job_functions",
+              "functional_limitation_identified": true
+            },
+            "undue_hardship_analysis": {
+              "accommodation_gross_cost": 0,
+              "accommodation_frequency": "ongoing",
+              "facility_annual_revenue": 420000,
+              "facility_employee_count": 9,
+              "entity_annual_revenue": 420000,
+              "entity_total_employees": 9,
+              "impact_on_operations": "minor",
+              "impact_on_other_employees": "minor",
+              "employer_asserts_hardship": false
+            },
+            "direct_threat_analysis": {
+              "direct_threat_claimed": false
+            }
+          },
+          "module_3_employer_obligations": {
+            "interactive_process": {
+              "employer_initiated_interactive_process": false,
+              "interactive_process_steps_completed": [],
+              "good_faith_effort_documented": false,
+              "process_breakdown_reason": "no_breakdown"
+            },
+            "medical_inquiry_limitations": {
+              "employment_stage": "employed",
+              "inquiry_type": "request_for_documentation",
+              "inquiry_is_job_related": true,
+              "inquiry_consistent_with_business_necessity": true,
+              "inquiry_triggered_by_accommodation_request": true
+            },
+            "confidentiality": {
+              "medical_information_maintained_separately": true,
+              "medical_information_treated_as_confidential": true,
+              "disclosure_made": false
+            }
+          },
+          "module_4_violation_risk": {
+            "failure_to_accommodate": {
+              "employee_interactive_process_participation": "good_faith"
+            },
+            "disability_discrimination": {
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            },
+            "harassment": {
+              "unwelcome_conduct_occurred": false
+            },
+            "retaliation": {
+              "engaged_in_protected_activity": false,
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            }
+          }
+        }
+      },
+      "expected_output": {
+        "ada_covered": false,
+        "has_qualifying_disability": "yes",
+        "is_qualified_individual": "indeterminate",
+        "accommodation_required": "no",
+        "employer_compliance_status": "non_compliant",
+        "violation_risk_level": "minimal",
+        "recommended_actions": [],
+        "indeterminate_factors": {}
+      },
+      "wr_rules_fired": ["WR-5"],
+      "module_rules_fired": ["R001", "R002", "R003", "R004", "R068"]
+    },
+    {
+      "test_id": "UA-003",
+      "description": "Disability indeterminate (uncertain limitation severity) — propagates to qualified individual and accommodation; indeterminate_factors populated from two components",
+      "input": {
+        "wrapper_inputs": {
+          "accommodation_theoretically_effective": "yes"
+        },
+        "module_inputs": {
+          "module_1_coverage_eligibility": {
+            "employer_coverage": {
+              "employer_type": "private_employer",
+              "employee_count_current_year": 85,
+              "employee_count_prior_year": 82,
+              "is_us_government": false,
+              "is_indian_tribe": false,
+              "affects_commerce": true
+            },
+            "individual_status": {
+              "individual_status": "current_employee",
+              "individual_employed_by_covered_entity": true
+            },
+            "disability_determination": {
+              "impairment_type": "musculoskeletal",
+              "impairment_description": "Lumbar back condition, unspecified",
+              "disability_basis_claimed": "actual_disability",
+              "major_life_activity_affected": "standing",
+              "limitation_severity": "uncertain",
+              "mitigating_measures_used": false
+            },
+            "qualified_individual": {
+              "essential_functions_identified": true,
+              "can_perform_essential_functions_without_accommodation": "no",
+              "satisfies_skill_experience_requirements": true
+            }
+          },
+          "module_2_accommodation_analysis": {
+            "accommodation_request": {
+              "accommodation_type_requested": "equipment_modification",
+              "accommodation_description": "Anti-fatigue mat and periodic seating",
+              "accommodation_request_date": "2026-01-15",
+              "request_made_by": "employee",
+              "accommodation_is_for": "performing_job_functions",
+              "functional_limitation_identified": true
+            },
+            "undue_hardship_analysis": {
+              "accommodation_gross_cost": 200,
+              "accommodation_frequency": "one_time",
+              "facility_annual_revenue": 3200000,
+              "facility_employee_count": 85,
+              "entity_annual_revenue": 3200000,
+              "entity_total_employees": 85,
+              "impact_on_operations": "none",
+              "impact_on_other_employees": "none",
+              "employer_asserts_hardship": false
+            },
+            "direct_threat_analysis": {
+              "direct_threat_claimed": false
+            }
+          },
+          "module_3_employer_obligations": {
+            "interactive_process": {
+              "employer_initiated_interactive_process": true,
+              "interactive_process_steps_completed": ["acknowledged_request", "requested_documentation"],
+              "good_faith_effort_documented": true,
+              "process_breakdown_reason": "no_breakdown",
+              "response_time_days": 14
+            },
+            "medical_inquiry_limitations": {
+              "employment_stage": "employed",
+              "inquiry_type": "request_for_documentation",
+              "inquiry_is_job_related": true,
+              "inquiry_consistent_with_business_necessity": true,
+              "inquiry_triggered_by_accommodation_request": true
+            },
+            "confidentiality": {
+              "medical_information_maintained_separately": true,
+              "medical_information_treated_as_confidential": true,
+              "disclosure_made": false
+            }
+          },
+          "module_4_violation_risk": {
+            "failure_to_accommodate": {
+              "employee_interactive_process_participation": "good_faith"
+            },
+            "disability_discrimination": {
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            },
+            "harassment": {
+              "unwelcome_conduct_occurred": false
+            },
+            "retaliation": {
+              "engaged_in_protected_activity": true,
+              "protected_activity_type": "accommodation_request",
+              "employer_aware_of_activity": true,
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            }
+          }
+        }
+      },
+      "expected_output": {
+        "ada_covered": true,
+        "has_qualifying_disability": "indeterminate",
+        "is_qualified_individual": "indeterminate",
+        "accommodation_required": "indeterminate",
+        "employer_compliance_status": "compliant",
+        "violation_risk_level": "low",
+        "recommended_actions": ["Obtain clarifying medical documentation to resolve disability determination before making accommodation decision"],
+        "indeterminate_factors": {
+          "ada_coverage_eligibility.disability_determination": [
+            "Medical documentation insufficient to confirm substantial limitation — physician noted possible limitation without quantifying severity or duration",
+            "Employer disputes that back condition substantially limits standing as compared to most people in the general population"
+          ],
+          "ada_accommodation_analysis.accommodation_determination": [
+            "Accommodation analysis indeterminate pending resolution of disability determination"
+          ]
+        }
+      },
+      "wr_rules_fired": ["WR-5"],
+      "module_rules_fired": ["R001", "R002", "R003", "R004", "R005", "R006", "R007", "R008", "R009", "R010", "R011", "R012", "R016", "R017", "R026", "R027", "R028", "R029", "R030", "R031", "R039", "R040", "R041", "R047", "R048", "R049", "R050", "R056", "R057", "R061", "R062", "R068", "R069", "R091"]
+    },
+    {
+      "test_id": "UA-004",
+      "description": "Qualified without accommodation (WR-1) — accommodation_required = no because no functional necessity; employer approved voluntarily",
+      "input": {
+        "wrapper_inputs": {
+          "accommodation_theoretically_effective": "yes"
+        },
+        "module_inputs": {
+          "module_1_coverage_eligibility": {
+            "employer_coverage": {
+              "employer_type": "private_employer",
+              "employee_count_current_year": 540,
+              "employee_count_prior_year": 510,
+              "is_us_government": false,
+              "is_indian_tribe": false,
+              "affects_commerce": true
+            },
+            "individual_status": {
+              "individual_status": "current_employee",
+              "individual_employed_by_covered_entity": true
+            },
+            "disability_determination": {
+              "impairment_type": "mood_disorder",
+              "impairment_description": "Bipolar I disorder, well-controlled on medication",
+              "disability_basis_claimed": "actual_disability",
+              "major_life_activity_affected": "brain_function",
+              "limitation_severity": "substantially_limits",
+              "mitigating_measures_used": true,
+              "mitigating_measures_description": "lithium carbonate and quetiapine"
+            },
+            "qualified_individual": {
+              "essential_functions_identified": true,
+              "can_perform_essential_functions_without_accommodation": "yes",
+              "satisfies_skill_experience_requirements": true,
+              "job_description_exists": true
+            }
+          },
+          "module_2_accommodation_analysis": {
+            "accommodation_request": {
+              "accommodation_type_requested": "modified_schedule",
+              "accommodation_description": "Flexible start time — begin between 9:30 and 10:30 AM instead of 9:00 AM",
+              "accommodation_request_date": "2026-02-01",
+              "request_made_by": "employee",
+              "accommodation_is_for": "performing_job_functions",
+              "functional_limitation_identified": true,
+              "accommodation_request_in_writing": true
+            },
+            "undue_hardship_analysis": {
+              "accommodation_gross_cost": 0,
+              "accommodation_frequency": "ongoing",
+              "facility_annual_revenue": 45000000,
+              "facility_employee_count": 540,
+              "entity_annual_revenue": 45000000,
+              "entity_total_employees": 540,
+              "impact_on_operations": "none",
+              "impact_on_other_employees": "none",
+              "employer_asserts_hardship": false
+            },
+            "direct_threat_analysis": {
+              "direct_threat_claimed": false
+            }
+          },
+          "module_3_employer_obligations": {
+            "interactive_process": {
+              "employer_initiated_interactive_process": true,
+              "interactive_process_steps_completed": ["acknowledged_request", "identified_limitation", "identified_accommodation", "implemented_accommodation"],
+              "good_faith_effort_documented": true,
+              "process_breakdown_reason": "no_breakdown",
+              "response_time_days": 5
+            },
+            "medical_inquiry_limitations": {
+              "employment_stage": "employed",
+              "inquiry_type": "request_for_documentation",
+              "inquiry_is_job_related": true,
+              "inquiry_consistent_with_business_necessity": true,
+              "inquiry_triggered_by_accommodation_request": true
+            },
+            "confidentiality": {
+              "medical_information_maintained_separately": true,
+              "medical_information_treated_as_confidential": true,
+              "disclosure_made": false
+            }
+          },
+          "module_4_violation_risk": {
+            "failure_to_accommodate": {
+              "employee_interactive_process_participation": "good_faith"
+            },
+            "disability_discrimination": {
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            },
+            "harassment": {
+              "unwelcome_conduct_occurred": false
+            },
+            "retaliation": {
+              "engaged_in_protected_activity": true,
+              "protected_activity_type": "accommodation_request",
+              "employer_aware_of_activity": true,
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            }
+          }
+        }
+      },
+      "expected_output": {
+        "ada_covered": true,
+        "has_qualifying_disability": "yes",
+        "is_qualified_individual": "yes",
+        "accommodation_required": "no",
+        "employer_compliance_status": "compliant",
+        "violation_risk_level": "minimal",
+        "recommended_actions": [],
+        "indeterminate_factors": {}
+      },
+      "wr_rules_fired": ["WR-1"],
+      "module_rules_fired": ["R001", "R002", "R003", "R004", "R005", "R006", "R007", "R008", "R009", "R010", "R011", "R012", "R013", "R014", "R015", "R016", "R017", "R018", "R019", "R026", "R027", "R028", "R029", "R030", "R031", "R032", "R033", "R034", "R038", "R039", "R040", "R041", "R047", "R048", "R049", "R050", "R051", "R052", "R053", "R056", "R057", "R061", "R062", "R068", "R069", "R070", "R091", "R092", "R093"]
+    },
+    {
+      "test_id": "UA-005",
+      "description": "Qualified with accommodation (WR-2) — cannot perform without accommodation; effective accommodation identified and provided",
+      "input": {
+        "wrapper_inputs": {
+          "accommodation_theoretically_effective": "yes"
+        },
+        "module_inputs": {
+          "module_1_coverage_eligibility": {
+            "employer_coverage": {
+              "employer_type": "private_employer",
+              "employee_count_current_year": 3000,
+              "employee_count_prior_year": 2900,
+              "is_us_government": false,
+              "is_indian_tribe": false,
+              "affects_commerce": true
+            },
+            "individual_status": {
+              "individual_status": "current_employee",
+              "individual_employed_by_covered_entity": true
+            },
+            "disability_determination": {
+              "impairment_type": "sensory",
+              "impairment_description": "Moderate bilateral sensorineural hearing loss",
+              "disability_basis_claimed": "actual_disability",
+              "major_life_activity_affected": "hearing",
+              "limitation_severity": "substantially_limits",
+              "mitigating_measures_used": true,
+              "mitigating_measures_description": "hearing aids — do not fully restore hearing in industrial noise environment"
+            },
+            "qualified_individual": {
+              "essential_functions_identified": true,
+              "can_perform_essential_functions_without_accommodation": "no",
+              "can_perform_with_reasonable_accommodation": "yes",
+              "satisfies_skill_experience_requirements": true,
+              "job_description_exists": true
+            }
+          },
+          "module_2_accommodation_analysis": {
+            "accommodation_request": {
+              "accommodation_type_requested": "equipment_modification",
+              "accommodation_description": "Vibrating wristband alert device for conveyor alerts",
+              "accommodation_request_date": "2026-03-10",
+              "request_made_by": "employee",
+              "accommodation_is_for": "performing_job_functions",
+              "functional_limitation_identified": true,
+              "accommodation_request_in_writing": true
+            },
+            "undue_hardship_analysis": {
+              "accommodation_gross_cost": 600,
+              "accommodation_frequency": "one_time",
+              "facility_annual_revenue": 180000000,
+              "facility_employee_count": 3000,
+              "entity_annual_revenue": 180000000,
+              "entity_total_employees": 3000,
+              "impact_on_operations": "none",
+              "impact_on_other_employees": "none",
+              "employer_asserts_hardship": false
+            },
+            "direct_threat_analysis": {
+              "direct_threat_claimed": false
+            }
+          },
+          "module_3_employer_obligations": {
+            "interactive_process": {
+              "employer_initiated_interactive_process": true,
+              "interactive_process_steps_completed": ["acknowledged_request", "identified_limitation", "consulted_employee", "identified_accommodation", "implemented_accommodation"],
+              "good_faith_effort_documented": true,
+              "process_breakdown_reason": "no_breakdown",
+              "response_time_days": 10
+            },
+            "medical_inquiry_limitations": {
+              "employment_stage": "employed",
+              "inquiry_type": "request_for_documentation",
+              "inquiry_is_job_related": true,
+              "inquiry_consistent_with_business_necessity": true,
+              "inquiry_triggered_by_accommodation_request": true
+            },
+            "confidentiality": {
+              "medical_information_maintained_separately": true,
+              "medical_information_treated_as_confidential": true,
+              "disclosure_made": false
+            }
+          },
+          "module_4_violation_risk": {
+            "failure_to_accommodate": {
+              "employee_interactive_process_participation": "good_faith"
+            },
+            "disability_discrimination": {
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            },
+            "harassment": {
+              "unwelcome_conduct_occurred": false
+            },
+            "retaliation": {
+              "engaged_in_protected_activity": true,
+              "protected_activity_type": "accommodation_request",
+              "employer_aware_of_activity": true,
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            }
+          }
+        }
+      },
+      "expected_output": {
+        "ada_covered": true,
+        "has_qualifying_disability": "yes",
+        "is_qualified_individual": "yes",
+        "accommodation_required": "yes",
+        "employer_compliance_status": "compliant",
+        "violation_risk_level": "minimal",
+        "recommended_actions": [],
+        "indeterminate_factors": {}
+      },
+      "wr_rules_fired": ["WR-2"],
+      "module_rules_fired": ["R001", "R002", "R003", "R004", "R005", "R006", "R007", "R008", "R009", "R010", "R011", "R012", "R013", "R014", "R015", "R016", "R017", "R018", "R026", "R027", "R028", "R029", "R030", "R031", "R032", "R033", "R034", "R035", "R036", "R037", "R038", "R039", "R040", "R041", "R047", "R048", "R049", "R050", "R051", "R052", "R053", "R056", "R057", "R061", "R062", "R068", "R069", "R070", "R091", "R092", "R093"]
+    },
+    {
+      "test_id": "UA-006",
+      "description": "Not qualified — WR-3 fires; undue hardship established; accommodation_theoretically_effective = no; is_qualified_individual = no",
+      "input": {
+        "wrapper_inputs": {
+          "accommodation_theoretically_effective": "no"
+        },
+        "module_inputs": {
+          "module_1_coverage_eligibility": {
+            "employer_coverage": {
+              "employer_type": "private_employer",
+              "employee_count_current_year": 25,
+              "employee_count_prior_year": 25,
+              "is_us_government": false,
+              "is_indian_tribe": false,
+              "affects_commerce": true
+            },
+            "individual_status": {
+              "individual_status": "current_employee",
+              "individual_employed_by_covered_entity": true
+            },
+            "disability_determination": {
+              "impairment_type": "neurological",
+              "impairment_description": "Severe essential tremor affecting bilateral fine motor control",
+              "disability_basis_claimed": "actual_disability",
+              "major_life_activity_affected": "fine_motor_function",
+              "limitation_severity": "substantially_limits",
+              "mitigating_measures_used": true,
+              "mitigating_measures_description": "propranolol — does not adequately control tremor for professional performance"
+            },
+            "qualified_individual": {
+              "essential_functions_identified": true,
+              "can_perform_essential_functions_without_accommodation": "no",
+              "can_perform_with_reasonable_accommodation": "no",
+              "satisfies_skill_experience_requirements": true,
+              "job_description_exists": true
+            }
+          },
+          "module_2_accommodation_analysis": {
+            "accommodation_request": {
+              "accommodation_type_requested": "equipment_modification",
+              "accommodation_description": "Robotic piano assistance system",
+              "accommodation_request_date": "2025-11-01",
+              "request_made_by": "employee",
+              "accommodation_is_for": "performing_job_functions",
+              "functional_limitation_identified": true,
+              "accommodation_request_in_writing": true
+            },
+            "undue_hardship_analysis": {
+              "accommodation_gross_cost": 800000,
+              "accommodation_frequency": "ongoing",
+              "facility_annual_revenue": 2100000,
+              "facility_employee_count": 25,
+              "entity_annual_revenue": 2100000,
+              "entity_total_employees": 25,
+              "impact_on_operations": "severe",
+              "impact_on_other_employees": "moderate",
+              "employer_asserts_hardship": true,
+              "employer_documented_hardship_analysis": true,
+              "alternative_accommodation_considered": true
+            },
+            "direct_threat_analysis": {
+              "direct_threat_claimed": false
+            }
+          },
+          "module_3_employer_obligations": {
+            "interactive_process": {
+              "employer_initiated_interactive_process": true,
+              "interactive_process_steps_completed": ["acknowledged_request", "identified_limitation", "consulted_employee", "considered_alternatives", "documented_denial"],
+              "good_faith_effort_documented": true,
+              "process_breakdown_reason": "no_breakdown",
+              "response_time_days": 45
+            },
+            "medical_inquiry_limitations": {
+              "employment_stage": "employed",
+              "inquiry_type": "request_for_documentation",
+              "inquiry_is_job_related": true,
+              "inquiry_consistent_with_business_necessity": true,
+              "inquiry_triggered_by_accommodation_request": true
+            },
+            "confidentiality": {
+              "medical_information_maintained_separately": true,
+              "medical_information_treated_as_confidential": true,
+              "disclosure_made": false
+            }
+          },
+          "module_4_violation_risk": {
+            "failure_to_accommodate": {
+              "employee_interactive_process_participation": "good_faith"
+            },
+            "disability_discrimination": {
+              "adverse_action_taken": true,
+              "adverse_action_type": "termination",
+              "causal_nexus_present": true,
+              "discriminatory_intent_evidence": false,
+              "legitimate_nondiscriminatory_reason_documented": true
+            },
+            "harassment": {
+              "unwelcome_conduct_occurred": false
+            },
+            "retaliation": {
+              "engaged_in_protected_activity": true,
+              "protected_activity_type": "accommodation_request",
+              "employer_aware_of_activity": true,
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            }
+          }
+        }
+      },
+      "expected_output": {
+        "ada_covered": true,
+        "has_qualifying_disability": "yes",
+        "is_qualified_individual": "no",
+        "accommodation_required": "no",
+        "employer_compliance_status": "compliant",
+        "violation_risk_level": "low",
+        "recommended_actions": ["Maintain complete documentation of hardship analysis and good-faith interactive process record in case of EEOC charge"],
+        "indeterminate_factors": {}
+      },
+      "wr_rules_fired": ["WR-3"],
+      "module_rules_fired": ["R001", "R002", "R003", "R004", "R005", "R006", "R007", "R008", "R009", "R010", "R011", "R012", "R013", "R014", "R015", "R016", "R017", "R018", "R026", "R027", "R028", "R029", "R030", "R031", "R032", "R033", "R034", "R035", "R036", "R037", "R038", "R039", "R040", "R041", "R047", "R048", "R049", "R050", "R051", "R052", "R053", "R056", "R057", "R061", "R062", "R068", "R069", "R070", "R080", "R081", "R082", "R091", "R092", "R093", "R094", "R095"]
+    },
+    {
+      "test_id": "UA-007",
+      "description": "Critical violation risk — employer ignored request, terminated employee, all FTA elements present, interactive process non-compliant",
+      "input": {
+        "wrapper_inputs": {
+          "accommodation_theoretically_effective": "yes"
+        },
+        "module_inputs": {
+          "module_1_coverage_eligibility": {
+            "employer_coverage": {
+              "employer_type": "private_employer",
+              "employee_count_current_year": 250,
+              "employee_count_prior_year": 240,
+              "is_us_government": false,
+              "is_indian_tribe": false,
+              "affects_commerce": true
+            },
+            "individual_status": {
+              "individual_status": "current_employee",
+              "individual_employed_by_covered_entity": true
+            },
+            "disability_determination": {
+              "impairment_type": "mood_disorder",
+              "impairment_description": "Major depressive disorder, recurrent",
+              "disability_basis_claimed": "actual_disability",
+              "major_life_activity_affected": "brain_function",
+              "limitation_severity": "substantially_limits"
+            },
+            "qualified_individual": {
+              "essential_functions_identified": true,
+              "can_perform_essential_functions_without_accommodation": "no",
+              "can_perform_with_reasonable_accommodation": "yes",
+              "satisfies_skill_experience_requirements": true
+            }
+          },
+          "module_2_accommodation_analysis": {
+            "accommodation_request": {
+              "accommodation_type_requested": "policy_modification",
+              "accommodation_description": "Reduced-noise workspace and modified schedule with later start time",
+              "accommodation_request_date": "2026-01-06",
+              "request_made_by": "employee",
+              "accommodation_is_for": "performing_job_functions",
+              "functional_limitation_identified": true,
+              "accommodation_request_in_writing": true,
+              "accommodation_previously_denied": false
+            },
+            "undue_hardship_analysis": {
+              "accommodation_gross_cost": 0,
+              "accommodation_frequency": "ongoing",
+              "facility_annual_revenue": 22000000,
+              "facility_employee_count": 250,
+              "entity_annual_revenue": 22000000,
+              "entity_total_employees": 250,
+              "impact_on_operations": "minor",
+              "impact_on_other_employees": "none",
+              "employer_asserts_hardship": false
+            },
+            "direct_threat_analysis": {
+              "direct_threat_claimed": false
+            }
+          },
+          "module_3_employer_obligations": {
+            "interactive_process": {
+              "employer_initiated_interactive_process": false,
+              "interactive_process_steps_completed": [],
+              "good_faith_effort_documented": false,
+              "process_breakdown_reason": "employer_refused_to_engage",
+              "response_time_days": 42
+            },
+            "medical_inquiry_limitations": {
+              "employment_stage": "employed",
+              "inquiry_type": "request_for_documentation",
+              "inquiry_is_job_related": true,
+              "inquiry_consistent_with_business_necessity": true,
+              "inquiry_triggered_by_accommodation_request": true
+            },
+            "confidentiality": {
+              "medical_information_maintained_separately": true,
+              "medical_information_treated_as_confidential": true,
+              "disclosure_made": false
+            }
+          },
+          "module_4_violation_risk": {
+            "failure_to_accommodate": {
+              "employee_interactive_process_participation": "good_faith",
+              "employee_nonparticipation_documented": false
+            },
+            "disability_discrimination": {
+              "adverse_action_taken": true,
+              "adverse_action_type": "termination",
+              "causal_nexus_present": true,
+              "discriminatory_intent_evidence": true,
+              "legitimate_nondiscriminatory_reason_documented": false
+            },
+            "harassment": {
+              "unwelcome_conduct_occurred": false
+            },
+            "retaliation": {
+              "engaged_in_protected_activity": true,
+              "protected_activity_type": "accommodation_request",
+              "employer_aware_of_activity": true,
+              "adverse_action_taken": true,
+              "causal_nexus_present": true,
+              "days_between_activity_and_action": 42
+            }
+          }
+        }
+      },
+      "expected_output": {
+        "ada_covered": true,
+        "has_qualifying_disability": "yes",
+        "is_qualified_individual": "yes",
+        "accommodation_required": "yes",
+        "employer_compliance_status": "non_compliant",
+        "violation_risk_level": "critical",
+        "recommended_actions": [
+          "Immediately engage in good-faith interactive process",
+          "Document all accommodation considerations and business rationale",
+          "Consult employment counsel regarding EEOC charge exposure",
+          "Preserve all communications related to accommodation request and termination decision",
+          "Assess reinstatement or settlement posture given strength of FTA and retaliation claims"
+        ],
+        "indeterminate_factors": {}
+      },
+      "wr_rules_fired": ["WR-2"],
+      "module_rules_fired": ["R001", "R002", "R003", "R004", "R005", "R006", "R007", "R008", "R009", "R010", "R011", "R012", "R013", "R014", "R015", "R016", "R017", "R018", "R026", "R027", "R028", "R029", "R030", "R031", "R032", "R033", "R034", "R035", "R036", "R037", "R038", "R039", "R040", "R041", "R047", "R048", "R049", "R050", "R054", "R055", "R056", "R057", "R061", "R062", "R068", "R069", "R070", "R071", "R072", "R073", "R074", "R075", "R080", "R081", "R082", "R083", "R084", "R085", "R091", "R092", "R095", "R096", "R097", "R098", "R099", "R100", "R101", "R102", "R103", "R104", "R105", "R106", "R107", "R108", "R109", "R110"]
+    },
+    {
+      "test_id": "UA-008",
+      "description": "Non-compliant employer — pre-offer disability-related inquiry violation and confidentiality breach; inquiry_permitted = no; confidentiality_compliant = no",
+      "input": {
+        "wrapper_inputs": {
+          "accommodation_theoretically_effective": "indeterminate"
+        },
+        "module_inputs": {
+          "module_1_coverage_eligibility": {
+            "employer_coverage": {
+              "employer_type": "private_employer",
+              "employee_count_current_year": 180,
+              "employee_count_prior_year": 175,
+              "is_us_government": false,
+              "is_indian_tribe": false,
+              "affects_commerce": true
+            },
+            "individual_status": {
+              "individual_status": "job_applicant",
+              "individual_employed_by_covered_entity": false
+            },
+            "disability_determination": {
+              "impairment_type": "neurological",
+              "impairment_description": "Epilepsy, controlled",
+              "disability_basis_claimed": "actual_disability",
+              "major_life_activity_affected": "neurological_function",
+              "limitation_severity": "substantially_limits"
+            },
+            "qualified_individual": {
+              "essential_functions_identified": true,
+              "can_perform_essential_functions_without_accommodation": "yes",
+              "satisfies_skill_experience_requirements": true
+            }
+          },
+          "module_2_accommodation_analysis": {
+            "accommodation_request": {
+              "accommodation_type_requested": "other",
+              "accommodation_description": "No accommodation requested at pre-offer stage",
+              "accommodation_request_date": "2026-03-15",
+              "request_made_by": "employee",
+              "accommodation_is_for": "application_process",
+              "functional_limitation_identified": false
+            },
+            "undue_hardship_analysis": {
+              "accommodation_gross_cost": 0,
+              "accommodation_frequency": "one_time",
+              "facility_annual_revenue": 14000000,
+              "facility_employee_count": 180,
+              "entity_annual_revenue": 14000000,
+              "entity_total_employees": 180,
+              "impact_on_operations": "none",
+              "impact_on_other_employees": "none",
+              "employer_asserts_hardship": false
+            },
+            "direct_threat_analysis": {
+              "direct_threat_claimed": false
+            }
+          },
+          "module_3_employer_obligations": {
+            "interactive_process": {
+              "employer_initiated_interactive_process": false,
+              "interactive_process_steps_completed": [],
+              "good_faith_effort_documented": false,
+              "process_breakdown_reason": "no_breakdown"
+            },
+            "medical_inquiry_limitations": {
+              "employment_stage": "pre_offer",
+              "inquiry_type": "disability_related_question",
+              "inquiry_is_job_related": false,
+              "inquiry_consistent_with_business_necessity": false,
+              "inquiry_triggered_by_accommodation_request": false
+            },
+            "confidentiality": {
+              "medical_information_maintained_separately": false,
+              "medical_information_treated_as_confidential": false,
+              "disclosure_made": true,
+              "disclosure_recipient": "unauthorized_party",
+              "disclosure_basis": "no_permissible_basis"
+            }
+          },
+          "module_4_violation_risk": {
+            "failure_to_accommodate": {
+              "employee_interactive_process_participation": "good_faith"
+            },
+            "disability_discrimination": {
+              "adverse_action_taken": true,
+              "adverse_action_type": "failure_to_hire",
+              "causal_nexus_present": true,
+              "discriminatory_intent_evidence": true,
+              "legitimate_nondiscriminatory_reason_documented": false
+            },
+            "harassment": {
+              "unwelcome_conduct_occurred": false
+            },
+            "retaliation": {
+              "engaged_in_protected_activity": false,
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            }
+          }
+        }
+      },
+      "expected_output": {
+        "ada_covered": true,
+        "has_qualifying_disability": "yes",
+        "is_qualified_individual": "yes",
+        "accommodation_required": "no",
+        "employer_compliance_status": "non_compliant",
+        "violation_risk_level": "high",
+        "recommended_actions": [
+          "Immediately train hiring managers on pre-offer inquiry prohibitions",
+          "Implement medical information confidentiality procedures and audit current files",
+          "Consult employment counsel regarding exposure from pre-offer inquiry and confidentiality breach",
+          "Review hiring decision for discriminatory nexus"
+        ],
+        "indeterminate_factors": {}
+      },
+      "wr_rules_fired": ["WR-1"],
+      "module_rules_fired": ["R001", "R002", "R003", "R004", "R005", "R006", "R007", "R008", "R009", "R010", "R011", "R012", "R013", "R014", "R015", "R016", "R017", "R018", "R019", "R026", "R027", "R028", "R029", "R030", "R039", "R040", "R041", "R047", "R048", "R056", "R057", "R058", "R059", "R060", "R061", "R062", "R063", "R064", "R065", "R068", "R069", "R070", "R080", "R081", "R082", "R083", "R084", "R085", "R091", "R092", "R093", "R094", "R095"]
+    },
+    {
+      "test_id": "UA-009",
+      "description": "Maximum indeterminate — disability indeterminate, hardship indeterminate, direct threat indeterminate, process quality indeterminate; indeterminate_factors populated from five components",
+      "input": {
+        "wrapper_inputs": {
+          "accommodation_theoretically_effective": "indeterminate"
+        },
+        "module_inputs": {
+          "module_1_coverage_eligibility": {
+            "employer_coverage": {
+              "employer_type": "private_employer",
+              "employee_count_current_year": 120,
+              "employee_count_prior_year": 115,
+              "is_us_government": false,
+              "is_indian_tribe": false,
+              "affects_commerce": true
+            },
+            "individual_status": {
+              "individual_status": "current_employee",
+              "individual_employed_by_covered_entity": true
+            },
+            "disability_determination": {
+              "impairment_type": "immune",
+              "impairment_description": "Undiagnosed condition — fatigue and cognitive symptoms; workup ongoing",
+              "disability_basis_claimed": "actual_disability",
+              "major_life_activity_affected": "concentrating",
+              "limitation_severity": "uncertain"
+            },
+            "qualified_individual": {
+              "essential_functions_identified": true,
+              "can_perform_essential_functions_without_accommodation": "no",
+              "can_perform_with_reasonable_accommodation": "indeterminate",
+              "satisfies_skill_experience_requirements": true
+            }
+          },
+          "module_2_accommodation_analysis": {
+            "accommodation_request": {
+              "accommodation_type_requested": "telework",
+              "accommodation_description": "Permanent full-time telework",
+              "accommodation_request_date": "2026-02-15",
+              "request_made_by": "employee",
+              "accommodation_is_for": "performing_job_functions",
+              "functional_limitation_identified": true,
+              "accommodation_request_in_writing": true
+            },
+            "undue_hardship_analysis": {
+              "accommodation_gross_cost": 0,
+              "accommodation_frequency": "ongoing",
+              "facility_annual_revenue": 9500000,
+              "facility_employee_count": 120,
+              "entity_annual_revenue": 9500000,
+              "entity_total_employees": 120,
+              "impact_on_operations": "moderate",
+              "impact_on_other_employees": "moderate",
+              "employer_asserts_hardship": true,
+              "employer_documented_hardship_analysis": false,
+              "alternative_accommodation_considered": false
+            },
+            "direct_threat_analysis": {
+              "direct_threat_claimed": true,
+              "threat_to": "others",
+              "individualized_assessment_performed": false,
+              "assessment_based_on_current_medical_knowledge": false,
+              "objective_evidence_exists": false,
+              "assessment_relied_on_stereotypes": true
+            }
+          },
+          "module_3_employer_obligations": {
+            "interactive_process": {
+              "employer_initiated_interactive_process": true,
+              "interactive_process_steps_completed": ["acknowledged_request"],
+              "good_faith_effort_documented": false,
+              "process_breakdown_reason": "other",
+              "process_breakdown_documented": false,
+              "response_time_days": 30
+            },
+            "medical_inquiry_limitations": {
+              "employment_stage": "employed",
+              "inquiry_type": "request_for_documentation",
+              "inquiry_is_job_related": true,
+              "inquiry_consistent_with_business_necessity": true,
+              "inquiry_triggered_by_accommodation_request": true
+            },
+            "confidentiality": {
+              "medical_information_maintained_separately": true,
+              "medical_information_treated_as_confidential": true,
+              "disclosure_made": false
+            }
+          },
+          "module_4_violation_risk": {
+            "failure_to_accommodate": {
+              "employee_interactive_process_participation": "partial"
+            },
+            "disability_discrimination": {
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            },
+            "harassment": {
+              "unwelcome_conduct_occurred": false
+            },
+            "retaliation": {
+              "engaged_in_protected_activity": true,
+              "protected_activity_type": "accommodation_request",
+              "employer_aware_of_activity": true,
+              "adverse_action_taken": false,
+              "causal_nexus_present": false
+            }
+          }
+        }
+      },
+      "expected_output": {
+        "ada_covered": true,
+        "has_qualifying_disability": "indeterminate",
+        "is_qualified_individual": "indeterminate",
+        "accommodation_required": "indeterminate",
+        "employer_compliance_status": "indeterminate",
+        "violation_risk_level": "moderate",
+        "recommended_actions": [
+          "Obtain complete medical documentation before making any accommodation decision",
+          "Conduct individualized direct threat assessment — stereotypes-based assessment is not legally sufficient",
+          "Document good-faith interactive process steps in real time",
+          "Consider partial accommodations pending full diagnosis"
+        ],
+        "indeterminate_factors": {
+          "ada_coverage_eligibility.disability_determination": [
+            "Diagnosis not yet established — medical workup ongoing",
+            "Limitation severity uncertain without completed evaluation",
+            "Cannot assess substantial limitation without baseline functional capacity documentation"
+          ],
+          "ada_accommodation_analysis.undue_hardship_analysis": [
+            "Hardship asserted but no documented individualized analysis provided",
+            "Impact on operations disputed — employer has not demonstrated specific operational disruption"
+          ],
+          "ada_accommodation_analysis.direct_threat_analysis": [
+            "Direct threat claimed but no individualized assessment was conducted",
+            "Assessment relied on stereotypes — legally insufficient basis for direct threat finding",
+            "No objective evidence of specific risk to identifiable individuals"
+          ],
+          "ada_accommodation_analysis.accommodation_determination": [
+            "Accommodation analysis indeterminate pending resolution of disability determination, hardship analysis, and direct threat assessment"
+          ],
+          "ada_employer_obligations.interactive_process": [
+            "Process quality disputed — employer and employee accounts conflict on whether employer proposed alternative accommodations",
+            "Process steps incomplete — only initial acknowledgment documented"
+          ]
+        }
+      },
+      "wr_rules_fired": ["WR-4"],
+      "module_rules_fired": ["R001", "R002", "R003", "R004", "R005", "R006", "R007", "R008", "R009", "R010", "R011", "R012", "R016", "R017", "R018", "R026", "R027", "R028", "R029", "R030", "R031", "R032", "R033", "R034", "R035", "R036", "R037", "R038", "R039", "R040", "R041", "R042", "R043", "R044", "R045", "R046", "R047", "R048", "R049", "R050", "R051", "R052", "R053", "R054", "R055", "R056", "R057", "R061", "R062", "R068", "R069", "R091", "R092", "R093"]
+    },
+    {
+      "test_id": "UA-010",
+      "description": "Tiebreak fires — FTA and retaliation both critical; tiebreak produces primary_claim_basis = failure_to_accommodate; contributing_claims = [failure_to_accommodate, retaliation]",
+      "input": {
+        "wrapper_inputs": {
+          "accommodation_theoretically_effective": "yes"
+        },
+        "module_inputs": {
+          "module_1_coverage_eligibility": {
+            "employer_coverage": {
+              "employer_type": "private_employer",
+              "employee_count_current_year": 310,
+              "employee_count_prior_year": 295,
+              "is_us_government": false,
+              "is_indian_tribe": false,
+              "affects_commerce": true
+            },
+            "individual_status": {
+              "individual_status": "current_employee",
+              "individual_employed_by_covered_entity": true
+            },
+            "disability_determination": {
+              "impairment_type": "musculoskeletal",
+              "impairment_description": "Lumbar disc herniation L4-L5 with radiculopathy",
+              "disability_basis_claimed": "actual_disability",
+              "major_life_activity_affected": "standing",
+              "limitation_severity": "substantially_limits"
+            },
+            "qualified_individual": {
+              "essential_functions_identified": true,
+              "can_perform_essential_functions_without_accommodation": "no",
+              "can_perform_with_reasonable_accommodation": "yes",
+              "satisfies_skill_experience_requirements": true,
+              "job_description_exists": true
+            }
+          },
+          "module_2_accommodation_analysis": {
+            "accommodation_request": {
+              "accommodation_type_requested": "equipment_modification",
+              "accommodation_description": "Sit-stand workstation",
+              "accommodation_request_date": "2026-01-10",
+              "request_made_by": "employee",
+              "accommodation_is_for": "performing_job_functions",
+              "functional_limitation_identified": true,
+              "accommodation_request_in_writing": true,
+              "accommodation_previously_denied": true
+            },
+            "undue_hardship_analysis": {
+              "accommodation_gross_cost": 1200,
+              "accommodation_frequency": "one_time",
+              "facility_annual_revenue": 28000000,
+              "facility_employee_count": 310,
+              "entity_annual_revenue": 28000000,
+              "entity_total_employees": 310,
+              "impact_on_operations": "none",
+              "impact_on_other_employees": "none",
+              "employer_asserts_hardship": false
+            },
+            "direct_threat_analysis": {
+              "direct_threat_claimed": false
+            }
+          },
+          "module_3_employer_obligations": {
+            "interactive_process": {
+              "employer_initiated_interactive_process": false,
+              "interactive_process_steps_completed": [],
+              "good_faith_effort_documented": false,
+              "process_breakdown_reason": "employer_refused_to_engage"
+            },
+            "medical_inquiry_limitations": {
+              "employment_stage": "employed",
+              "inquiry_type": "request_for_documentation",
+              "inquiry_is_job_related": true,
+              "inquiry_consistent_with_business_necessity": true,
+              "inquiry_triggered_by_accommodation_request": true
+            },
+            "confidentiality": {
+              "medical_information_maintained_separately": true,
+              "medical_information_treated_as_confidential": true,
+              "disclosure_made": false
+            }
+          },
+          "module_4_violation_risk": {
+            "failure_to_accommodate": {
+              "employee_interactive_process_participation": "good_faith",
+              "employee_nonparticipation_documented": false
+            },
+            "disability_discrimination": {
+              "adverse_action_taken": true,
+              "adverse_action_type": "termination",
+              "causal_nexus_present": true,
+              "discriminatory_intent_evidence": true,
+              "legitimate_nondiscriminatory_reason_documented": false
+            },
+            "harassment": {
+              "unwelcome_conduct_occurred": false
+            },
+            "retaliation": {
+              "engaged_in_protected_activity": true,
+              "protected_activity_type": "eeoc_charge",
+              "employer_aware_of_activity": true,
+              "adverse_action_taken": true,
+              "causal_nexus_present": true,
+              "days_between_activity_and_action": 28
+            }
+          }
+        }
+      },
+      "expected_output": {
+        "ada_covered": true,
+        "has_qualifying_disability": "yes",
+        "is_qualified_individual": "yes",
+        "accommodation_required": "yes",
+        "employer_compliance_status": "non_compliant",
+        "violation_risk_level": "critical",
+        "recommended_actions": [
+          "Immediately consult employment counsel — EEOC charge is active",
+          "Preserve all communications, personnel records, and documentation related to accommodation denial and termination",
+          "Assess reinstatement and settlement options given critical FTA and retaliation exposure",
+          "Do not make further adverse employment decisions regarding this employee without counsel review",
+          "Audit accommodation request handling and interactive process procedures across the organization"
+        ],
+        "indeterminate_factors": {},
+        "_tiebreak_verification": {
+          "primary_claim_basis": "failure_to_accommodate",
+          "contributing_claims": ["failure_to_accommodate", "retaliation"],
+          "note": "FTA and retaliation both produce critical. Tiebreak order failure_to_accommodate → disability_discrimination → harassment → retaliation selects FTA as primary. Retaliation listed in contributing_claims. Discrimination produces high (not critical)."
+        }
+      },
+      "wr_rules_fired": ["WR-2"],
+      "module_rules_fired": ["R001", "R002", "R003", "R004", "R005", "R006", "R007", "R008", "R009", "R010", "R011", "R012", "R013", "R014", "R015", "R016", "R017", "R018", "R026", "R027", "R028", "R029", "R030", "R031", "R032", "R033", "R034", "R035", "R036", "R037", "R038", "R039", "R040", "R041", "R047", "R048", "R049", "R050", "R054", "R055", "R056", "R057", "R061", "R062", "R068", "R069", "R070", "R071", "R072", "R073", "R074", "R075", "R080", "R081", "R082", "R083", "R084", "R085", "R091", "R092", "R095", "R096", "R097", "R098", "R099", "R100", "R101", "R102", "R103", "R104", "R105", "R106", "R107", "R108", "R109", "R110"]
+    }
+  ]
+}

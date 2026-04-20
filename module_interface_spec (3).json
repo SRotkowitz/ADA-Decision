@@ -1,0 +1,386 @@
+{
+  "metadata": {
+    "document_name": "module_interface_spec",
+    "version": "0.1",
+    "last_updated": "2026-04-20",
+    "description": "Authoritative cross-session reference document for the ADA Decision Engine. Describes all four modules, their inputs, outputs, and cross-module dependencies. Intended to be attached to every build session to maintain structural continuity. Produced at Phase 6 (Unified Wrapper).",
+    "vocabulary_reference": "../vocabulary/ada_vocabulary.json"
+  },
+  "engine": {
+    "name": "ADA Decision Engine",
+    "version": "0.1",
+    "legal_domain": "Americans with Disabilities Act — Title I (Employment)",
+    "governing_law": ["42 U.S.C. §§ 12111-12117", "29 CFR Part 1630"],
+    "enforcing_agency": "EEOC",
+    "output_repository": "SRotkowitz/ADA-Decision-Engine",
+    "determination_model": {
+      "rule_based": "Binary yes/no boolean. Same input always produces same output.",
+      "standards_based": "yes / no / indeterminate with factors_for, factors_against, key_uncertainties arrays. Engine never fakes certainty.",
+      "composite": "Combines sub-outputs with explicit documented aggregation logic."
+    },
+    "field_naming": "snake_case; boolean prefixes is_, has_, was_, can_; dates YYYY-MM-DD; datetimes ISO8601; all categorical values reference ada_vocabulary.json; factor arrays alphabetical or by rule_id.",
+    "risk_levels": ["minimal", "low", "moderate", "high", "critical"]
+  },
+  "modules": {
+    "ada_coverage_eligibility": {
+      "module_id": "ada_coverage_eligibility",
+      "version": "0.2",
+      "schema_file": "coverage_eligibility_schema.json",
+      "logic_file": "coverage_eligibility_logic.json",
+      "rule_range": "R001–R025",
+      "components": [
+        {
+          "component_id": "1.1",
+          "component_name": "employer_coverage",
+          "determination_type": "rule_based",
+          "key_output_fields": ["is_covered_employer"]
+        },
+        {
+          "component_id": "1.2",
+          "component_name": "individual_status",
+          "determination_type": "rule_based",
+          "key_output_fields": ["is_covered_individual"]
+        },
+        {
+          "component_id": "1.3",
+          "component_name": "disability_determination",
+          "determination_type": "standards_based",
+          "key_output_fields": [
+            "has_qualifying_disability",
+            "accommodation_rights_attach",
+            "disability_basis",
+            "key_uncertainties"
+          ],
+          "notes": "accommodation_rights_attach = false for regarded_as-only coverage. Module 2 must not proceed to accommodation analysis when this is false."
+        },
+        {
+          "component_id": "1.4",
+          "component_name": "qualified_individual",
+          "determination_type": "standards_based",
+          "key_output_fields": [
+            "is_qualified_individual",
+            "preliminary_qualified_without_accommodation"
+          ],
+          "notes": "is_qualified_individual from this component is a preliminary value only. preliminary_qualified_without_accommodation is the explicit field consumed by Module 2 R041 and the wrapper WR-1 through WR-5. The final wrapper composite is_qualified_individual overrides the preliminary value in all summary outputs."
+        }
+      ],
+      "consumes_from": [],
+      "produces_for": ["ada_accommodation_analysis", "ada_employer_obligations", "ada_violation_risk", "wrapper"]
+    },
+    "ada_accommodation_analysis": {
+      "module_id": "ada_accommodation_analysis",
+      "version": "0.2",
+      "schema_file": "accommodation_analysis_schema.json",
+      "logic_file": "accommodation_analysis_logic.json",
+      "rule_range": "R026–R046",
+      "components": [
+        {
+          "component_id": "2.1",
+          "component_name": "accommodation_request",
+          "determination_type": "rule_based",
+          "key_output_fields": ["accommodation_request_valid", "accommodation_category", "request_validity_basis"]
+        },
+        {
+          "component_id": "2.2",
+          "component_name": "undue_hardship_analysis",
+          "determination_type": "standards_based",
+          "key_output_fields": ["undue_hardship_applies", "factors_for", "factors_against", "key_uncertainties"]
+        },
+        {
+          "component_id": "2.3",
+          "component_name": "direct_threat_analysis",
+          "determination_type": "standards_based",
+          "key_output_fields": ["direct_threat_exists", "factors_for", "factors_against", "key_uncertainties"]
+        },
+        {
+          "component_id": "2.4",
+          "component_name": "accommodation_determination",
+          "determination_type": "composite",
+          "key_output_fields": ["accommodation_required", "denial_basis"],
+          "notes": "Short-circuit R041 consumes preliminary_qualified_without_accommodation from Module 1 component 1.4b — not the final wrapper composite. denial_basis allowed values: not_covered_employer / not_covered_individual / not_disabled / not_qualified / invalid_request / undue_hardship / direct_threat / null."
+        }
+      ],
+      "consumes_from": [
+        {
+          "module": "ada_coverage_eligibility",
+          "fields": ["is_covered_employer", "is_covered_individual", "has_qualifying_disability", "accommodation_rights_attach", "preliminary_qualified_without_accommodation"]
+        }
+      ],
+      "produces_for": ["ada_employer_obligations", "ada_violation_risk", "wrapper"]
+    },
+    "ada_employer_obligations": {
+      "module_id": "ada_employer_obligations",
+      "version": "0.1",
+      "schema_file": "employer_obligations_schema.json",
+      "logic_file": "employer_obligations_logic.json",
+      "rule_range": "R047–R067",
+      "components": [
+        {
+          "component_id": "3.1",
+          "component_name": "interactive_process",
+          "determination_type": "hybrid",
+          "key_output_fields": ["process_mechanically_compliant", "process_quality", "interactive_process_compliant", "key_uncertainties"]
+        },
+        {
+          "component_id": "3.2",
+          "component_name": "medical_inquiry_limitations",
+          "determination_type": "rule_based",
+          "key_output_fields": ["inquiry_permitted", "violation_basis"]
+        },
+        {
+          "component_id": "3.3",
+          "component_name": "confidentiality",
+          "determination_type": "rule_based",
+          "key_output_fields": ["confidentiality_compliant"]
+        }
+      ],
+      "consumes_from": [
+        {
+          "module": "ada_coverage_eligibility",
+          "fields": ["is_covered_employer", "is_covered_individual"]
+        },
+        {
+          "module": "ada_accommodation_analysis",
+          "fields": ["accommodation_required"]
+        }
+      ],
+      "produces_for": ["ada_violation_risk", "wrapper"]
+    },
+    "ada_violation_risk": {
+      "module_id": "ada_violation_risk",
+      "version": "0.1",
+      "schema_file": "violation_risk_schema.json",
+      "logic_file": "violation_risk_logic.json",
+      "rule_range": "R068–R110",
+      "components": [
+        {
+          "component_id": "4.1",
+          "component_name": "failure_to_accommodate",
+          "determination_type": "composite",
+          "key_output_fields": ["fta_risk_level", "fta_elements_present", "employee_participation_shift_applied"]
+        },
+        {
+          "component_id": "4.2",
+          "component_name": "disability_discrimination",
+          "determination_type": "composite",
+          "key_output_fields": ["discrimination_risk_level"]
+        },
+        {
+          "component_id": "4.3",
+          "component_name": "harassment",
+          "determination_type": "composite",
+          "key_output_fields": ["harassment_risk_level"]
+        },
+        {
+          "component_id": "4.4",
+          "component_name": "retaliation",
+          "determination_type": "composite",
+          "key_output_fields": ["retaliation_risk_level", "proximity_strength"]
+        },
+        {
+          "component_id": "4.5",
+          "component_name": "overall_violation_risk",
+          "determination_type": "composite",
+          "key_output_fields": ["overall_risk_level", "primary_claim_basis", "contributing_claims", "component_risk_levels", "recommended_actions"],
+          "notes": "Tiebreak order when components tie: failure_to_accommodate → disability_discrimination → harassment → retaliation."
+        }
+      ],
+      "consumes_from": [
+        {
+          "module": "ada_coverage_eligibility",
+          "fields": ["is_covered_employer", "has_qualifying_disability", "preliminary_qualified_without_accommodation", "is_covered_individual"]
+        },
+        {
+          "module": "ada_accommodation_analysis",
+          "fields": ["accommodation_required", "accommodation_request_valid", "undue_hardship_applies", "direct_threat_exists"]
+        },
+        {
+          "module": "ada_employer_obligations",
+          "fields": ["interactive_process_compliant"]
+        }
+      ],
+      "produces_for": ["wrapper"]
+    }
+  },
+  "wrapper": {
+    "wrapper_id": "ada_unified",
+    "version": "0.1",
+    "logic_file": "logic/unified_logic.json",
+    "execution_order": [
+      "ada_coverage_eligibility",
+      "ada_accommodation_analysis",
+      "is_qualified_individual_composite",
+      "ada_employer_obligations",
+      "ada_violation_risk"
+    ],
+    "wrapper_inputs": {
+      "accommodation_theoretically_effective": {
+        "data_type": "string",
+        "allowed_values": ["yes", "no", "indeterminate"],
+        "required": true,
+        "description": "Whether the requested or identified accommodation would be theoretically effective. Not produced by any module. Required for WR-2 resolution."
+      }
+    },
+    "wrapper_computations": [
+      {
+        "computation_id": "is_qualified_individual_composite",
+        "rules": ["WR-1", "WR-2", "WR-3", "WR-4", "WR-5"],
+        "output_field": "is_qualified_individual",
+        "runs_after": "ada_accommodation_analysis",
+        "runs_before": "ada_employer_obligations"
+      },
+      {
+        "computation_id": "employer_compliance_status_derivation",
+        "output_field": "employer_compliance_status",
+        "runs_after": "ada_employer_obligations",
+        "source_fields": ["interactive_process_compliant", "inquiry_permitted", "confidentiality_compliant"]
+      },
+      {
+        "computation_id": "ada_covered_derivation",
+        "output_field": "ada_covered",
+        "runs_after": "ada_coverage_eligibility",
+        "source_fields": ["is_covered_employer", "is_covered_individual"]
+      },
+      {
+        "computation_id": "indeterminate_factors_aggregation",
+        "output_field": "indeterminate_factors",
+        "runs_after": "ada_violation_risk",
+        "description": "Collects key_uncertainties from all indeterminate components across all modules."
+      }
+    ]
+  },
+  "cross_module_dependencies": [
+    {
+      "field": "is_covered_employer",
+      "produced_by": {"module": "ada_coverage_eligibility", "component": "employer_coverage"},
+      "consumed_by": [
+        {"module": "ada_accommodation_analysis", "component": "accommodation_determination"},
+        {"module": "ada_employer_obligations", "component": "interactive_process"},
+        {"module": "ada_violation_risk", "component": "failure_to_accommodate"}
+      ],
+      "notes": "Primary short-circuit field. When false, all downstream modules produce not-applicable outputs."
+    },
+    {
+      "field": "is_covered_individual",
+      "produced_by": {"module": "ada_coverage_eligibility", "component": "individual_status"},
+      "consumed_by": [
+        {"module": "ada_accommodation_analysis", "component": "accommodation_determination"},
+        {"module": "ada_employer_obligations", "component": "interactive_process"}
+      ],
+      "notes": "Secondary short-circuit field."
+    },
+    {
+      "field": "has_qualifying_disability",
+      "produced_by": {"module": "ada_coverage_eligibility", "component": "disability_determination"},
+      "consumed_by": [
+        {"module": "ada_accommodation_analysis", "component": "accommodation_determination"},
+        {"module": "ada_violation_risk", "component": "failure_to_accommodate"},
+        {"module": "ada_violation_risk", "component": "disability_discrimination"}
+      ],
+      "notes": "Standards-based output. indeterminate value propagates through downstream modules."
+    },
+    {
+      "field": "accommodation_rights_attach",
+      "produced_by": {"module": "ada_coverage_eligibility", "component": "disability_determination"},
+      "consumed_by": [
+        {"module": "ada_accommodation_analysis", "component": "accommodation_determination"}
+      ],
+      "notes": "Boolean gate. When false (regarded_as-only coverage), Module 2 must not proceed to accommodation analysis and must produce accommodation_required = no with denial_basis = not_disabled."
+    },
+    {
+      "field": "preliminary_qualified_without_accommodation",
+      "produced_by": {"module": "ada_coverage_eligibility", "component": "qualified_individual"},
+      "consumed_by": [
+        {"module": "ada_accommodation_analysis", "component": "accommodation_determination", "rule": "R041"},
+        {"module": "wrapper", "component": "is_qualified_individual_composite", "rules": ["WR-1", "WR-2", "WR-3", "WR-4", "WR-5"]}
+      ],
+      "notes": "This is a distinct named field, separate from the Module 1 preliminary is_qualified_individual output. The distinction is deliberate: it prevents a builder from wiring the final wrapper composite back into Module 2's short-circuit logic. Module 2 R041 consumes this preliminary value — not the wrapper composite — because the wrapper composite does not yet exist when Module 2 executes. The name makes the preliminary nature of the value unambiguous."
+    },
+    {
+      "field": "is_qualified_individual (wrapper composite)",
+      "produced_by": {"module": "wrapper", "component": "is_qualified_individual_composite"},
+      "consumed_by": [
+        {"module": "ada_violation_risk", "component": "failure_to_accommodate"},
+        {"module": "ada_violation_risk", "component": "disability_discrimination"}
+      ],
+      "notes": "This is the final composite value, not the Module 1 preliminary. Module 4 dependency_inputs field is_qualified_individual maps to this wrapper composite value."
+    },
+    {
+      "field": "accommodation_required",
+      "produced_by": {"module": "ada_accommodation_analysis", "component": "accommodation_determination"},
+      "consumed_by": [
+        {"module": "ada_employer_obligations", "component": "interactive_process"},
+        {"module": "ada_violation_risk", "component": "failure_to_accommodate"},
+        {"module": "wrapper", "component": "is_qualified_individual_composite", "rules": ["WR-2", "WR-4"]}
+      ],
+      "notes": "Standards-based. indeterminate fires WR-4 in the qualified individual composite."
+    },
+    {
+      "field": "denial_basis",
+      "produced_by": {"module": "ada_accommodation_analysis", "component": "accommodation_determination"},
+      "consumed_by": [
+        {"module": "wrapper", "component": "is_qualified_individual_composite", "rule": "WR-3"}
+      ],
+      "notes": "WR-3 requires denial_basis = undue_hardship OR direct_threat to fire."
+    },
+    {
+      "field": "accommodation_request_valid",
+      "produced_by": {"module": "ada_accommodation_analysis", "component": "accommodation_request"},
+      "consumed_by": [
+        {"module": "ada_violation_risk", "component": "failure_to_accommodate"}
+      ],
+      "notes": "Boolean. One of five FTA prima facie elements."
+    },
+    {
+      "field": "undue_hardship_applies",
+      "produced_by": {"module": "ada_accommodation_analysis", "component": "undue_hardship_analysis"},
+      "consumed_by": [
+        {"module": "ada_violation_risk", "component": "failure_to_accommodate"}
+      ],
+      "notes": "Standards-based. When yes, contributes to documented_legitimate_denial in 4.1."
+    },
+    {
+      "field": "direct_threat_exists",
+      "produced_by": {"module": "ada_accommodation_analysis", "component": "direct_threat_analysis"},
+      "consumed_by": [
+        {"module": "ada_violation_risk", "component": "failure_to_accommodate"}
+      ],
+      "notes": "Standards-based. When yes, contributes to documented_legitimate_denial in 4.1."
+    },
+    {
+      "field": "interactive_process_compliant",
+      "produced_by": {"module": "ada_employer_obligations", "component": "interactive_process"},
+      "consumed_by": [
+        {"module": "ada_violation_risk", "component": "failure_to_accommodate"}
+      ],
+      "notes": "Hybrid determination. indeterminate treated as genuinely uncertain in Module 4 — not equivalent to no. See design_decision DD-5."
+    }
+  ],
+  "design_decisions": [
+    {
+      "decision_id": "DD-1",
+      "title": "Why is_qualified_individual is a wrapper-level composite",
+      "decision": "Module 1 produces a preliminary assessment (1.4b) before accommodation analysis runs. The final determination requires Module 2's output (accommodation_required) to resolve whether the individual is qualified with accommodation. Computing it in Module 1 would require Module 2's output, creating a circular dependency. The wrapper resolves this after Module 2 completes."
+    },
+    {
+      "decision_id": "DD-2",
+      "title": "The preliminary_qualified_without_accommodation pattern",
+      "decision": "Module 1 outputs two qualified-individual fields: is_qualified_individual (preliminary, used internally) and preliminary_qualified_without_accommodation (the explicit field consumed by Module 2 R041 and the wrapper WR rules). This naming makes the preliminary nature of the value unambiguous and prevents a builder from wiring the wrapper composite into Module 2's short-circuit logic."
+    },
+    {
+      "decision_id": "DD-3",
+      "title": "Tiebreak order for overall_risk_level",
+      "decision": "When two or more claim types produce the same maximum risk level, the primary claim is determined by: failure_to_accommodate → disability_discrimination → harassment → retaliation. Rationale: FTA is the most directly actionable ADA claim and should surface first for employer remediation purposes."
+    },
+    {
+      "decision_id": "DD-4",
+      "title": "Employee non-participation as weighting factor, not defeater",
+      "decision": "When an employee refuses or abandons the interactive process with documented basis, the engine shifts the derived FTA risk level one tier downward. It does not floor the risk at minimal. Rationale: courts and EEOC enforcement treat employee non-participation as a partial defense that mitigates but does not eliminate employer liability."
+    },
+    {
+      "decision_id": "DD-5",
+      "title": "interactive_process_compliant = indeterminate in Module 4",
+      "decision": "Module 4 R070 treats indeterminate as genuinely uncertain — not as a finding against the employer. An indeterminate process compliance finding produces high risk (one tier below the non_compliant → critical outcome), not critical. This reflects that mixed facts on process quality are meaningfully different from documented bad faith."
+    }
+  ]
+}
