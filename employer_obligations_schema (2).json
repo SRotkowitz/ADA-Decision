@@ -1,0 +1,594 @@
+{
+  "metadata": {
+    "module_name": "ada_employer_obligations",
+    "version": "0.1",
+    "last_updated": "2026-04-20",
+    "description": "Evaluates employer procedural compliance under ADA Title I after an accommodation request is made. Covers: (1) interactive process — mechanical compliance and good-faith quality; (2) medical inquiry limitations at each employment stage; (3) confidentiality of medical information. This module does not re-evaluate whether accommodation is required (Module 2). It evaluates how the employer handled the process and whether that handling was legally compliant.",
+    "legal_domain": "Americans with Disabilities Act — Title I (Employment)",
+    "governing_law": [
+      "42 U.S.C. §§ 12111–12117",
+      "29 CFR Part 1630"
+    ],
+    "enforcing_agency": "EEOC",
+    "source_documents": [
+      "https://www.law.cornell.edu/uscode/text/42/12112",
+      "https://www.law.cornell.edu/cfr/text/29/part-1630",
+      "https://www.law.cornell.edu/cfr/text/29/1630.14",
+      "https://www.eeoc.gov/laws/guidance/enforcement-guidance-reasonable-accommodation-and-undue-hardship-under-ada",
+      "https://www.eeoc.gov/laws/guidance/questions-and-answers-enforcement-guidance-disability-related-inquiries-and-medical"
+    ],
+    "vocabulary_reference": "../vocabulary/ada_vocabulary.json",
+    "module_dependencies": [
+      "ada_coverage_eligibility",
+      "ada_accommodation_analysis"
+    ]
+  },
+
+  "dependency_inputs": {
+    "description": "Fields consumed from Module 1 (ada_coverage_eligibility) and Module 2 (ada_accommodation_analysis) outputs. Module 3 does not re-evaluate these determinations but uses them to scope component execution.",
+    "fields": {
+      "is_covered_employer": {
+        "name": "is_covered_employer",
+        "data_type": "boolean",
+        "source_module": "ada_coverage_eligibility",
+        "source_component": "employer_coverage",
+        "required": true,
+        "description": "If false, Module 3 components are not applicable. Medical inquiry and confidentiality obligations arise only under a covered entity."
+      },
+      "is_covered_individual": {
+        "name": "is_covered_individual",
+        "data_type": "boolean",
+        "source_module": "ada_coverage_eligibility",
+        "source_component": "individual_status",
+        "required": true,
+        "description": "If false, interactive process obligations do not attach. Medical inquiry limitations still apply to pre-offer applicants regardless of disability status."
+      },
+      "accommodation_required": {
+        "name": "accommodation_required",
+        "data_type": "string",
+        "allowed_values": ["yes", "no", "indeterminate"],
+        "source_module": "ada_accommodation_analysis",
+        "source_component": "accommodation_determination",
+        "required": true,
+        "description": "Module 2 composite output. If 'no', interactive process compliance is still evaluated to assess whether the employer's process leading to denial was procedurally sound. If 'indeterminate', interactive process evaluation proceeds but may itself be indeterminate."
+      }
+    }
+  },
+
+  "components": {
+    "interactive_process": {
+      "component_id": "3.1",
+      "component_name": "interactive_process",
+      "determination_type": "hybrid",
+      "description": "Evaluates employer compliance with the informal interactive process obligation following an accommodation request. Produces three outputs: (3.1a) process_mechanically_compliant — rule-based binary check on procedural steps; (3.1b) process_quality — standards-based good-faith engagement assessment; (3.1c) interactive_process_compliant — composite combining 3.1a and 3.1b. Legal note: No specific formal process or written procedures are required by statute or regulation. The interactive process obligation derives from EEOC enforcement posture and case law, not an explicit regulatory mandate. Mechanical compliance checks reflect EEOC enforcement expectations, not explicit regulatory mandates.",
+      "source_citation": "EEOC Enforcement Guidance No. 915.002 § General Principles; 29 CFR § 1630 Appendix",
+      "interactive_process_legal_basis_note": "The interactive process is not expressly mandated by 42 U.S.C. § 12112 or 29 CFR Part 1630 as a formal procedural requirement. Its legal significance derives from EEOC Enforcement Guidance No. 915.002 and judicial interpretation of 29 CFR § 1630 Appendix. Mechanical compliance checks in component 3.1a are operationalized EEOC enforcement expectations, labeled accordingly throughout logic rules.",
+
+      "inputs": {
+        "request_acknowledged": {
+          "name": "request_acknowledged",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if the employer acknowledged receipt of the accommodation request and communicated next steps to the employee.",
+          "vocabulary_reference": "interactive_process_steps",
+          "vocabulary_term": "acknowledgment"
+        },
+        "dialogue_initiated_date": {
+          "name": "dialogue_initiated_date",
+          "data_type": "string",
+          "format": "YYYY-MM-DD",
+          "required": false,
+          "required_when": "request_acknowledged == true",
+          "description": "Date the employer first initiated substantive interactive dialogue with the employee. Used to calculate business days elapsed from accommodation_request_date."
+        },
+        "accommodation_request_date": {
+          "name": "accommodation_request_date",
+          "data_type": "string",
+          "format": "YYYY-MM-DD",
+          "required": true,
+          "description": "Date the accommodation request was received or the employer first became aware of the need. Passed through from Module 2 input."
+        },
+        "business_days_to_initiation": {
+          "name": "business_days_to_initiation",
+          "data_type": "integer",
+          "required": false,
+          "minimum": 0,
+          "description": "Number of business days elapsed between accommodation_request_date and dialogue_initiated_date. If not provided and both dates are present, the engine uses a calendar calculation. The 10-business-day timeliness heuristic is engine-defined, not a statutory deadline. See rule R048."
+        },
+        "accommodation_options_documented": {
+          "name": "accommodation_options_documented",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if the employer documented the scope of accommodation options it considered during the interactive process."
+        },
+        "employer_initiated_dialogue_promptly": {
+          "name": "employer_initiated_dialogue_promptly",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer initiated dialogue without undue delay after the request. Relevant to process_quality factors_for analysis.",
+          "vocabulary_reference": "interactive_process_steps",
+          "vocabulary_term": "dialogue_initiated"
+        },
+        "multiple_alternatives_considered": {
+          "name": "multiple_alternatives_considered",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer considered more than one accommodation alternative before making a decision. Relevant to process_quality factors_for analysis.",
+          "vocabulary_reference": "interactive_process_steps",
+          "vocabulary_term": "alternatives_explored"
+        },
+        "jan_or_equivalent_consulted": {
+          "name": "jan_or_equivalent_consulted",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer consulted the Job Accommodation Network or an equivalent disability resource during the accommodation analysis. Relevant to process_quality factors_for analysis."
+        },
+        "decision_communicated_with_explanation": {
+          "name": "decision_communicated_with_explanation",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer communicated its accommodation decision with a reasoned explanation, whether granting or denying. Relevant to process_quality factors_for analysis.",
+          "vocabulary_reference": "interactive_process_steps",
+          "vocabulary_term": "written_response"
+        },
+        "follow_up_on_implemented_accommodation": {
+          "name": "follow_up_on_implemented_accommodation",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer followed up after implementing the accommodation to confirm effectiveness. Relevant to process_quality factors_for analysis.",
+          "vocabulary_reference": "interactive_process_steps",
+          "vocabulary_term": "implementation"
+        },
+        "employer_delayed_without_explanation": {
+          "name": "employer_delayed_without_explanation",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer delayed the interactive process without providing an explanation to the employee. Relevant to process_quality factors_against analysis."
+        },
+        "all_options_rejected_without_rationale": {
+          "name": "all_options_rejected_without_rationale",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer rejected all identified accommodation options without documented rationale. Relevant to process_quality factors_against analysis."
+        },
+        "relied_on_disability_stereotypes": {
+          "name": "relied_on_disability_stereotypes",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer's accommodation assessment relied on generalizations or stereotypes about the disability rather than an individualized assessment of this employee. Relevant to process_quality factors_against analysis."
+        },
+        "process_terminated_unilaterally": {
+          "name": "process_terminated_unilaterally",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if the employer terminated the interactive process before reaching a conclusion, without good cause and without the employee's voluntary departure from the process. Relevant to process_quality factors_against analysis."
+        },
+        "employee_interactive_process_participation": {
+          "name": "employee_interactive_process_participation",
+          "data_type": "string",
+          "required": true,
+          "description": "The employee's level of participation in the interactive process. When refused or abandoned AND employer has documented basis, this is a weighting factor in process_quality — it shifts the output one level in the employer's favor but does not automatically produce process_quality = yes. It does not affect process_mechanically_compliant.",
+          "allowed_values": [
+            "good_faith",
+            "partial",
+            "refused",
+            "abandoned"
+          ],
+          "vocabulary_reference": "interactive_process_steps"
+        },
+        "employer_documented_employee_nonparticipation": {
+          "name": "employer_documented_employee_nonparticipation",
+          "data_type": "boolean",
+          "required": false,
+          "required_when": "employee_interactive_process_participation IN ['refused', 'abandoned']",
+          "description": "True if the employer has documented the basis for characterizing the employee's participation as refused or abandoned. Required for the non-participation weighting factor to apply under R053."
+        }
+      },
+
+      "outputs": {
+        "process_mechanically_compliant": {
+          "name": "process_mechanically_compliant",
+          "data_type": "boolean",
+          "description": "True if the employer completed all three procedural steps: (1) acknowledged the request, (2) initiated dialogue within the engine-defined 10-business-day heuristic, and (3) documented accommodation options considered. All three must pass for true. This is an EEOC enforcement expectation, not a statutory mandate.",
+          "source_citation": "EEOC Enforcement Guidance No. 915.002; 29 CFR § 1630 Appendix"
+        },
+        "mechanical_compliance_checks": {
+          "name": "mechanical_compliance_checks",
+          "data_type": "object",
+          "description": "Granular results for each of the three procedural step checks.",
+          "fields": {
+            "acknowledged_request": {
+              "name": "acknowledged_request",
+              "data_type": "boolean",
+              "description": "True if employer acknowledged the accommodation request."
+            },
+            "initiated_dialogue_timely": {
+              "name": "initiated_dialogue_timely",
+              "data_type": "boolean",
+              "description": "True if employer initiated dialogue within 10 business days of the request (engine-defined heuristic, not a statutory deadline)."
+            },
+            "documented_options_considered": {
+              "name": "documented_options_considered",
+              "data_type": "boolean",
+              "description": "True if employer documented the scope of accommodation options considered."
+            }
+          }
+        },
+        "process_quality": {
+          "name": "process_quality",
+          "data_type": "string",
+          "allowed_values": ["yes", "no", "indeterminate"],
+          "vocabulary_reference": "determination_states",
+          "description": "Standards-based assessment of good-faith engagement in the interactive process. Evaluates factors for and against good faith. Employee non-participation (refused/abandoned with documentation) shifts this output one level in employer's favor but does not automatically produce yes.",
+          "source_citation": "EEOC Enforcement Guidance No. 915.002 § General Principles; 29 CFR § 1630 Appendix"
+        },
+        "process_quality_analysis": {
+          "name": "process_quality_analysis",
+          "data_type": "object",
+          "description": "Factor analysis supporting the process_quality determination.",
+          "fields": {
+            "factors_for": {
+              "name": "factors_for",
+              "data_type": "array",
+              "items_type": "string",
+              "description": "Factors supporting a finding of good-faith engagement. Populated in alphabetical order."
+            },
+            "factors_against": {
+              "name": "factors_against",
+              "data_type": "array",
+              "items_type": "string",
+              "description": "Factors against a finding of good-faith engagement. Populated in alphabetical order."
+            },
+            "key_uncertainties": {
+              "name": "key_uncertainties",
+              "data_type": "array",
+              "items_type": "string",
+              "description": "Specific information gaps affecting the process_quality determination. Required when process_quality is indeterminate."
+            },
+            "nonparticipation_weighting_applied": {
+              "name": "nonparticipation_weighting_applied",
+              "data_type": "boolean",
+              "description": "True if the employee non-participation weighting factor was applied under R053, shifting process_quality one level in employer's favor."
+            }
+          }
+        },
+        "interactive_process_compliant": {
+          "name": "interactive_process_compliant",
+          "data_type": "string",
+          "allowed_values": ["yes", "no", "indeterminate"],
+          "vocabulary_reference": "determination_states",
+          "description": "Composite determination combining process_mechanically_compliant and process_quality per the combination matrix: (false + no = no), (false + indeterminate = indeterminate), (true + no = indeterminate — mechanical compliance does not cure bad faith), (true + yes = yes), all other combinations = indeterminate.",
+          "source_citation": "EEOC Enforcement Guidance No. 915.002; 29 CFR § 1630 Appendix"
+        },
+        "interactive_process_risk_level": {
+          "name": "interactive_process_risk_level",
+          "data_type": "string",
+          "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+          "vocabulary_reference": "risk_levels",
+          "description": "Ordinal risk rating derived from interactive_process_compliant and the presence of bad-faith factors."
+        },
+        "reasoning": {
+          "name": "reasoning",
+          "data_type": "string",
+          "description": "Plain-language explanation of all three sub-determinations with source citations."
+        },
+        "sources_cited": {
+          "name": "sources_cited",
+          "data_type": "array",
+          "items_type": "string",
+          "description": "Source citations supporting the component determination."
+        }
+      }
+    },
+
+    "medical_inquiry_limitations": {
+      "component_id": "3.2",
+      "component_name": "medical_inquiry_limitations",
+      "determination_type": "rule_based",
+      "description": "Evaluates whether employer medical inquiries and examinations complied with ADA rules at each stage of employment. Three stages are evaluated independently: pre-offer, post-offer/pre-employment, and during-employment. Only stages where an inquiry occurred are evaluated. Each stage produces an inquiry_permitted determination, violation_basis if prohibited, and source citation.",
+      "source_citation": "42 U.S.C. § 12112(d); 29 CFR §§ 1630.13–1630.14",
+
+      "inputs": {
+        "inquiry_stage": {
+          "name": "inquiry_stage",
+          "data_type": "string",
+          "required": true,
+          "description": "The employment stage at which the inquiry occurred. One or more stages may be evaluated per API call.",
+          "allowed_values": [
+            "pre_offer",
+            "post_offer",
+            "during_employment"
+          ],
+          "vocabulary_reference": "inquiry_stages"
+        },
+        "inquiry_type": {
+          "name": "inquiry_type",
+          "data_type": "string",
+          "required": true,
+          "description": "The type of inquiry or examination conducted.",
+          "allowed_values": [
+            "disability_related_question",
+            "medical_examination",
+            "request_for_documentation"
+          ],
+          "vocabulary_reference": "inquiry_types"
+        },
+        "inquiry_description": {
+          "name": "inquiry_description",
+          "data_type": "string",
+          "required": false,
+          "description": "Freeform description of the specific inquiry or examination conducted. Used to populate reasoning output; does not affect logic."
+        },
+        "post_offer_all_employees_examined": {
+          "name": "post_offer_all_employees_examined",
+          "data_type": "boolean",
+          "required": false,
+          "required_when": "inquiry_stage == 'post_offer'",
+          "description": "True if all entering employees in the same job category are subject to the same medical examination requirement. Required condition for post-offer examinations to be permissible under 42 U.S.C. § 12112(d)(3)(A).",
+          "source_citation": "42 U.S.C. § 12112(d)(3)(A); 29 CFR § 1630.14(b)(1)"
+        },
+        "post_offer_information_kept_confidential": {
+          "name": "post_offer_information_kept_confidential",
+          "data_type": "boolean",
+          "required": false,
+          "required_when": "inquiry_stage == 'post_offer'",
+          "description": "True if medical information obtained at the post-offer stage is maintained on separate, confidential forms and in separate files. Required for post-offer examinations to be permissible under 42 U.S.C. § 12112(d)(3)(B).",
+          "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)"
+        },
+        "post_offer_results_used_only_as_permitted": {
+          "name": "post_offer_results_used_only_as_permitted",
+          "data_type": "boolean",
+          "required": false,
+          "required_when": "inquiry_stage == 'post_offer'",
+          "description": "True if medical examination results are used only as permitted by the ADA — e.g., not to discriminate on the basis of disability unless a direct threat or qualification standard exception applies. Required for post-offer examinations to be permissible under 42 U.S.C. § 12112(d)(3)(C).",
+          "source_citation": "42 U.S.C. § 12112(d)(3)(C); 29 CFR § 1630.14(b)(3)"
+        },
+        "during_employment_inquiry_job_related": {
+          "name": "during_employment_inquiry_job_related",
+          "data_type": "boolean",
+          "required": false,
+          "required_when": "inquiry_stage == 'during_employment'",
+          "description": "True if the inquiry or examination is job-related. Required for during-employment inquiries under 42 U.S.C. § 12112(d)(4)(A), unless the wellness program exception applies.",
+          "source_citation": "42 U.S.C. § 12112(d)(4)(A); 29 CFR § 1630.14(c)"
+        },
+        "during_employment_inquiry_business_necessity": {
+          "name": "during_employment_inquiry_business_necessity",
+          "data_type": "boolean",
+          "required": false,
+          "required_when": "inquiry_stage == 'during_employment'",
+          "description": "True if the inquiry or examination is consistent with business necessity. Required for during-employment inquiries under 42 U.S.C. § 12112(d)(4)(A), unless the wellness program exception applies.",
+          "source_citation": "42 U.S.C. § 12112(d)(4)(A); 29 CFR § 1630.14(c)"
+        },
+        "during_employment_voluntary_wellness": {
+          "name": "during_employment_voluntary_wellness",
+          "data_type": "boolean",
+          "required": false,
+          "required_when": "inquiry_stage == 'during_employment'",
+          "description": "True if the examination is part of a voluntary employee health program (wellness program). Voluntary wellness program examinations are excepted from the job-related and business necessity requirements under 42 U.S.C. § 12112(d)(4)(B).",
+          "source_citation": "42 U.S.C. § 12112(d)(4)(B); 29 CFR § 1630.14(d)"
+        },
+        "multiple_inquiry_stages": {
+          "name": "multiple_inquiry_stages",
+          "data_type": "array",
+          "items_type": "object",
+          "required": false,
+          "description": "Array of inquiry stage records when multiple stages are evaluated in a single API call. Each object mirrors the single-stage input structure (inquiry_stage, inquiry_type, and relevant conditional fields for that stage). When populated, this field drives multi-stage evaluation; single-stage fields above are ignored.",
+          "items_schema": {
+            "inquiry_stage": "string (pre_offer | post_offer | during_employment)",
+            "inquiry_type": "string (disability_related_question | medical_examination | request_for_documentation)",
+            "inquiry_description": "string (optional)",
+            "conditional_fields": "stage-specific fields as defined above"
+          }
+        }
+      },
+
+      "outputs": {
+        "inquiry_evaluations": {
+          "name": "inquiry_evaluations",
+          "data_type": "array",
+          "description": "One evaluation object per inquiry stage evaluated. Each object contains the fields below.",
+          "items_schema": {
+            "inquiry_stage": {
+              "name": "inquiry_stage",
+              "data_type": "string",
+              "allowed_values": ["pre_offer", "post_offer", "during_employment"],
+              "vocabulary_reference": "inquiry_stages",
+              "description": "The employment stage evaluated."
+            },
+            "inquiry_type": {
+              "name": "inquiry_type",
+              "data_type": "string",
+              "allowed_values": ["disability_related_question", "medical_examination", "request_for_documentation"],
+              "vocabulary_reference": "inquiry_types",
+              "description": "The type of inquiry evaluated."
+            },
+            "inquiry_permitted": {
+              "name": "inquiry_permitted",
+              "data_type": "string",
+              "allowed_values": ["yes", "no"],
+              "description": "Yes if the inquiry or examination is permitted at this stage under ADA Title I. No if it violates the applicable prohibition."
+            },
+            "violation_basis": {
+              "name": "violation_basis",
+              "data_type": "string",
+              "description": "Populated when inquiry_permitted is no. Describes the specific prohibition violated.",
+              "allowed_values": [
+                "pre_offer_disability_question_prohibited",
+                "pre_offer_medical_exam_prohibited",
+                "post_offer_not_all_employees_examined",
+                "post_offer_confidentiality_not_maintained",
+                "post_offer_results_used_improperly",
+                "during_employment_not_job_related",
+                "during_employment_not_business_necessity",
+                "none"
+              ]
+            },
+            "source_citation": {
+              "name": "source_citation",
+              "data_type": "string",
+              "description": "Specific statutory and regulatory subsection supporting this stage's determination."
+            },
+            "reasoning": {
+              "name": "reasoning",
+              "data_type": "string",
+              "description": "Plain-language explanation of the inquiry determination for this stage."
+            }
+          }
+        },
+        "medical_inquiry_compliant": {
+          "name": "medical_inquiry_compliant",
+          "data_type": "boolean",
+          "description": "True if all evaluated stages returned inquiry_permitted = yes. False if any stage returned inquiry_permitted = no."
+        },
+        "medical_inquiry_risk_level": {
+          "name": "medical_inquiry_risk_level",
+          "data_type": "string",
+          "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+          "vocabulary_reference": "risk_levels",
+          "description": "Ordinal risk rating. Pre-offer violations are critical (per se prohibition). Post-offer violations with improper use are high. During-employment violations without business necessity are moderate to high."
+        },
+        "sources_cited": {
+          "name": "sources_cited",
+          "data_type": "array",
+          "items_type": "string",
+          "description": "All source citations supporting the component determination."
+        }
+      }
+    },
+
+    "confidentiality": {
+      "component_id": "3.3",
+      "component_name": "confidentiality",
+      "determination_type": "rule_based",
+      "description": "Evaluates whether medical information obtained during the employment process was handled in accordance with ADA confidentiality requirements. Three binary checks are evaluated: (1) medical information maintained on separate forms and in separate files; (2) access limited to permitted parties only; (3) no unauthorized disclosure. All three must pass for confidentiality_compliant = yes.",
+      "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)",
+
+      "inputs": {
+        "medical_info_in_separate_file": {
+          "name": "medical_info_in_separate_file",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if medical information is collected and maintained on separate forms and in separate files from general personnel records.",
+          "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)"
+        },
+        "access_limited_to_permitted_parties": {
+          "name": "access_limited_to_permitted_parties",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if access to medical information is restricted to: (a) supervisors and managers who need to know about work restrictions or accommodations; (b) first aid and safety personnel if the disability might require emergency treatment; (c) government officials investigating ADA compliance. All other access is unauthorized.",
+          "source_citation": "29 CFR § 1630.14(b)(1)(i)-(iii)"
+        },
+        "unauthorized_disclosure_occurred": {
+          "name": "unauthorized_disclosure_occurred",
+          "data_type": "boolean",
+          "required": true,
+          "description": "True if medical information was disclosed to parties outside the three permitted categories. True value triggers a confidentiality violation.",
+          "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)"
+        },
+        "supervisor_access_limited_to_restrictions_only": {
+          "name": "supervisor_access_limited_to_restrictions_only",
+          "data_type": "boolean",
+          "required": false,
+          "description": "True if supervisors and managers who were given access received only information about necessary work restrictions or accommodations, not full medical records or diagnosis information. Supports the permitted-parties check.",
+          "source_citation": "29 CFR § 1630.14(b)(1)(i)"
+        },
+        "disclosure_parties": {
+          "name": "disclosure_parties",
+          "data_type": "array",
+          "items_type": "string",
+          "required": false,
+          "description": "List of parties to whom medical information was disclosed, if unauthorized_disclosure_occurred is true. Used to populate reasoning output.",
+          "allowed_values": [
+            "supervisor_with_need_to_know",
+            "first_aid_safety_personnel",
+            "government_investigator",
+            "coworker_without_need_to_know",
+            "hr_without_need_to_know",
+            "external_party",
+            "other_unauthorized"
+          ]
+        }
+      },
+
+      "outputs": {
+        "confidentiality_checks": {
+          "name": "confidentiality_checks",
+          "data_type": "object",
+          "description": "Individual binary check results for each of the three confidentiality requirements.",
+          "fields": {
+            "separate_file_maintained": {
+              "name": "separate_file_maintained",
+              "data_type": "boolean",
+              "description": "True if medical information is on separate forms in separate files from personnel records.",
+              "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)"
+            },
+            "access_properly_limited": {
+              "name": "access_properly_limited",
+              "data_type": "boolean",
+              "description": "True if access is limited to permitted parties only.",
+              "source_citation": "29 CFR § 1630.14(b)(1)(i)-(iii)"
+            },
+            "no_unauthorized_disclosure": {
+              "name": "no_unauthorized_disclosure",
+              "data_type": "boolean",
+              "description": "True if no unauthorized disclosures occurred. False when unauthorized_disclosure_occurred input is true.",
+              "source_citation": "42 U.S.C. § 12112(d)(3)(B)"
+            }
+          }
+        },
+        "confidentiality_compliant": {
+          "name": "confidentiality_compliant",
+          "data_type": "boolean",
+          "description": "True only if all three confidentiality checks pass. False if any check fails.",
+          "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)"
+        },
+        "violated_requirements": {
+          "name": "violated_requirements",
+          "data_type": "array",
+          "items_type": "object",
+          "description": "Populated when confidentiality_compliant is false. One entry per failed check.",
+          "items_schema": {
+            "requirement": {
+              "name": "requirement",
+              "data_type": "string",
+              "allowed_values": [
+                "separate_file_not_maintained",
+                "access_not_limited_to_permitted_parties",
+                "unauthorized_disclosure_occurred"
+              ],
+              "description": "Identifier of the violated requirement."
+            },
+            "source_citation": {
+              "name": "source_citation",
+              "data_type": "string",
+              "description": "Specific subsection violated."
+            },
+            "description": {
+              "name": "description",
+              "data_type": "string",
+              "description": "Plain-language description of what requirement was violated."
+            }
+          }
+        },
+        "confidentiality_risk_level": {
+          "name": "confidentiality_risk_level",
+          "data_type": "string",
+          "allowed_values": ["minimal", "low", "moderate", "high", "critical"],
+          "vocabulary_reference": "risk_levels",
+          "description": "Ordinal risk rating. Unauthorized disclosure to external parties = critical. Improper access to coworkers = high. File commingling without disclosure = moderate."
+        },
+        "reasoning": {
+          "name": "reasoning",
+          "data_type": "string",
+          "description": "Plain-language explanation of each check result with specific subsection citations."
+        },
+        "sources_cited": {
+          "name": "sources_cited",
+          "data_type": "array",
+          "items_type": "string",
+          "description": "Source citations supporting the component determination."
+        }
+      }
+    }
+  }
+}

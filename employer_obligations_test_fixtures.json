@@ -1,0 +1,640 @@
+{
+  "module": "ada_employer_obligations",
+  "version": "0.1",
+  "last_updated": "2026-04-20",
+  "description": "Test fixtures for Module 3 Employer Obligations. One fixture per scenario (EO-001 through EO-008). Each fixture mirrors the corresponding scenario's structured input and expected output exactly. Fixtures are used for deterministic regression testing — identical inputs must produce identical outputs on every engine run.",
+  "test_cases": [
+
+    {
+      "test_id": "EO-001",
+      "description": "Full compliance — all three components pass. Warehouse employee with diabetes, modified break schedule, full good-faith interactive process, compliant during-employment documentation request, confidentiality maintained.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "accommodation_required": "yes"
+        },
+        "interactive_process": {
+          "request_acknowledged": true,
+          "accommodation_request_date": "2026-03-01",
+          "dialogue_initiated_date": "2026-03-06",
+          "business_days_to_initiation": 5,
+          "accommodation_options_documented": true,
+          "employer_initiated_dialogue_promptly": true,
+          "multiple_alternatives_considered": true,
+          "jan_or_equivalent_consulted": true,
+          "decision_communicated_with_explanation": true,
+          "follow_up_on_implemented_accommodation": true,
+          "employer_delayed_without_explanation": false,
+          "all_options_rejected_without_rationale": false,
+          "relied_on_disability_stereotypes": false,
+          "process_terminated_unilaterally": false,
+          "employee_interactive_process_participation": "good_faith"
+        },
+        "medical_inquiry_limitations": {
+          "multiple_inquiry_stages": [
+            {
+              "inquiry_stage": "during_employment",
+              "inquiry_type": "request_for_documentation",
+              "inquiry_description": "Employer requested medical documentation confirming diabetes diagnosis and need for modified breaks",
+              "during_employment_inquiry_job_related": true,
+              "during_employment_inquiry_business_necessity": true,
+              "during_employment_voluntary_wellness": false
+            }
+          ]
+        },
+        "confidentiality": {
+          "medical_info_in_separate_file": true,
+          "access_limited_to_permitted_parties": true,
+          "unauthorized_disclosure_occurred": false
+        }
+      },
+      "expected_output": {
+        "interactive_process": {
+          "process_mechanically_compliant": true,
+          "mechanical_compliance_checks": {
+            "acknowledged_request": true,
+            "initiated_dialogue_timely": true,
+            "documented_options_considered": true
+          },
+          "process_quality": "yes",
+          "process_quality_analysis": {
+            "factors_for": [
+              "employer considered multiple accommodation alternatives before reaching a decision — factor for good faith under EEOC Enforcement Guidance No. 915.002",
+              "employer consulted the Job Accommodation Network or equivalent resource — factor for good faith",
+              "employer communicated its accommodation decision with a reasoned explanation — factor for good faith",
+              "employer followed up after implementation to confirm effectiveness — factor for good faith",
+              "employer initiated dialogue promptly after the accommodation request — factor for good faith"
+            ],
+            "factors_against": [],
+            "key_uncertainties": [],
+            "nonparticipation_weighting_applied": false
+          },
+          "interactive_process_compliant": "yes",
+          "interactive_process_risk_level": "minimal"
+        },
+        "medical_inquiry_limitations": {
+          "inquiry_evaluations": [
+            {
+              "inquiry_stage": "during_employment",
+              "inquiry_type": "request_for_documentation",
+              "inquiry_permitted": "yes",
+              "violation_basis": "none",
+              "source_citation": "42 U.S.C. § 12112(d)(4)(A); 29 CFR § 1630.14(c)"
+            }
+          ],
+          "medical_inquiry_compliant": true,
+          "medical_inquiry_risk_level": "minimal"
+        },
+        "confidentiality": {
+          "confidentiality_checks": {
+            "separate_file_maintained": true,
+            "access_properly_limited": true,
+            "no_unauthorized_disclosure": true
+          },
+          "confidentiality_compliant": true,
+          "violated_requirements": [],
+          "confidentiality_risk_level": "minimal"
+        }
+      },
+      "rules_fired": ["R047", "R051", "R052", "R061", "R064"]
+    },
+
+    {
+      "test_id": "EO-002",
+      "description": "Mechanical compliance only — 3.1a passes, 3.1b fails → composite indeterminate. Retail employee with visual impairment, all options rejected without rationale, process terminated unilaterally.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "accommodation_required": "indeterminate"
+        },
+        "interactive_process": {
+          "request_acknowledged": true,
+          "accommodation_request_date": "2026-02-10",
+          "dialogue_initiated_date": "2026-02-19",
+          "business_days_to_initiation": 7,
+          "accommodation_options_documented": true,
+          "employer_initiated_dialogue_promptly": false,
+          "multiple_alternatives_considered": false,
+          "jan_or_equivalent_consulted": false,
+          "decision_communicated_with_explanation": false,
+          "follow_up_on_implemented_accommodation": false,
+          "employer_delayed_without_explanation": false,
+          "all_options_rejected_without_rationale": true,
+          "relied_on_disability_stereotypes": false,
+          "process_terminated_unilaterally": true,
+          "employee_interactive_process_participation": "good_faith"
+        },
+        "medical_inquiry_limitations": {
+          "multiple_inquiry_stages": []
+        },
+        "confidentiality": {
+          "medical_info_in_separate_file": true,
+          "access_limited_to_permitted_parties": true,
+          "unauthorized_disclosure_occurred": false
+        }
+      },
+      "expected_output": {
+        "interactive_process": {
+          "process_mechanically_compliant": true,
+          "mechanical_compliance_checks": {
+            "acknowledged_request": true,
+            "initiated_dialogue_timely": true,
+            "documented_options_considered": true
+          },
+          "process_quality": "no",
+          "process_quality_analysis": {
+            "factors_for": [],
+            "factors_against": [
+              "employer rejected all identified accommodation options without documented rationale — factor against good faith",
+              "employer terminated the interactive process unilaterally before reaching a conclusion — factor against good faith"
+            ],
+            "key_uncertainties": [],
+            "nonparticipation_weighting_applied": false
+          },
+          "interactive_process_compliant": "indeterminate",
+          "interactive_process_risk_level": "moderate"
+        },
+        "medical_inquiry_limitations": {
+          "inquiry_evaluations": [],
+          "medical_inquiry_compliant": true,
+          "medical_inquiry_risk_level": "minimal"
+        },
+        "confidentiality": {
+          "confidentiality_checks": {
+            "separate_file_maintained": true,
+            "access_properly_limited": true,
+            "no_unauthorized_disclosure": true
+          },
+          "confidentiality_compliant": true,
+          "violated_requirements": [],
+          "confidentiality_risk_level": "minimal"
+        }
+      },
+      "rules_fired": ["R047", "R051", "R052", "R064"]
+    },
+
+    {
+      "test_id": "EO-003",
+      "description": "Bad faith process — employer did not acknowledge, delayed 19 business days, relied on PTSD stereotypes, rejected all options without rationale. interactive_process_compliant = no, risk = critical.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "accommodation_required": "yes"
+        },
+        "interactive_process": {
+          "request_acknowledged": false,
+          "accommodation_request_date": "2026-01-05",
+          "dialogue_initiated_date": "2026-02-01",
+          "business_days_to_initiation": 19,
+          "accommodation_options_documented": false,
+          "employer_initiated_dialogue_promptly": false,
+          "multiple_alternatives_considered": false,
+          "jan_or_equivalent_consulted": false,
+          "decision_communicated_with_explanation": false,
+          "follow_up_on_implemented_accommodation": false,
+          "employer_delayed_without_explanation": true,
+          "all_options_rejected_without_rationale": true,
+          "relied_on_disability_stereotypes": true,
+          "process_terminated_unilaterally": false,
+          "employee_interactive_process_participation": "good_faith"
+        },
+        "medical_inquiry_limitations": {
+          "multiple_inquiry_stages": []
+        },
+        "confidentiality": {
+          "medical_info_in_separate_file": true,
+          "access_limited_to_permitted_parties": true,
+          "unauthorized_disclosure_occurred": false
+        }
+      },
+      "expected_output": {
+        "interactive_process": {
+          "process_mechanically_compliant": false,
+          "mechanical_compliance_checks": {
+            "acknowledged_request": false,
+            "initiated_dialogue_timely": false,
+            "documented_options_considered": false
+          },
+          "process_quality": "no",
+          "process_quality_analysis": {
+            "factors_for": [],
+            "factors_against": [
+              "employer delayed the interactive process without providing an explanation to the employee",
+              "employer rejected all identified accommodation options without documented rationale",
+              "employer's assessment relied on generalizations or stereotypes about the disability rather than an individualized assessment"
+            ],
+            "key_uncertainties": [],
+            "nonparticipation_weighting_applied": false
+          },
+          "interactive_process_compliant": "no",
+          "interactive_process_risk_level": "critical"
+        },
+        "medical_inquiry_limitations": {
+          "inquiry_evaluations": [],
+          "medical_inquiry_compliant": true,
+          "medical_inquiry_risk_level": "minimal"
+        },
+        "confidentiality": {
+          "confidentiality_checks": {
+            "separate_file_maintained": true,
+            "access_properly_limited": true,
+            "no_unauthorized_disclosure": true
+          },
+          "confidentiality_compliant": true,
+          "violated_requirements": [],
+          "confidentiality_risk_level": "minimal"
+        }
+      },
+      "rules_fired": ["R049", "R051", "R052", "R064"]
+    },
+
+    {
+      "test_id": "EO-004",
+      "description": "Employee refused participation with documented basis — weighting factor shifts process_quality from indeterminate to yes. One-tier shift only. interactive_process_compliant = yes.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "accommodation_required": "indeterminate"
+        },
+        "interactive_process": {
+          "request_acknowledged": true,
+          "accommodation_request_date": "2026-02-20",
+          "dialogue_initiated_date": "2026-02-28",
+          "business_days_to_initiation": 6,
+          "accommodation_options_documented": true,
+          "employer_initiated_dialogue_promptly": true,
+          "multiple_alternatives_considered": false,
+          "jan_or_equivalent_consulted": false,
+          "decision_communicated_with_explanation": false,
+          "follow_up_on_implemented_accommodation": false,
+          "employer_delayed_without_explanation": false,
+          "all_options_rejected_without_rationale": false,
+          "relied_on_disability_stereotypes": false,
+          "process_terminated_unilaterally": false,
+          "employee_interactive_process_participation": "refused",
+          "employer_documented_employee_nonparticipation": true
+        },
+        "medical_inquiry_limitations": {
+          "multiple_inquiry_stages": []
+        },
+        "confidentiality": {
+          "medical_info_in_separate_file": true,
+          "access_limited_to_permitted_parties": true,
+          "unauthorized_disclosure_occurred": false
+        }
+      },
+      "expected_output": {
+        "interactive_process": {
+          "process_mechanically_compliant": true,
+          "mechanical_compliance_checks": {
+            "acknowledged_request": true,
+            "initiated_dialogue_timely": true,
+            "documented_options_considered": true
+          },
+          "process_quality": "yes",
+          "process_quality_analysis": {
+            "factors_for": [
+              "employer initiated dialogue promptly after the accommodation request — factor for good faith"
+            ],
+            "factors_against": [],
+            "key_uncertainties": [],
+            "nonparticipation_weighting_applied": true
+          },
+          "interactive_process_compliant": "yes",
+          "interactive_process_risk_level": "low"
+        },
+        "medical_inquiry_limitations": {
+          "inquiry_evaluations": [],
+          "medical_inquiry_compliant": true,
+          "medical_inquiry_risk_level": "minimal"
+        },
+        "confidentiality": {
+          "confidentiality_checks": {
+            "separate_file_maintained": true,
+            "access_properly_limited": true,
+            "no_unauthorized_disclosure": true
+          },
+          "confidentiality_compliant": true,
+          "violated_requirements": [],
+          "confidentiality_risk_level": "minimal"
+        }
+      },
+      "rules_fired": ["R047", "R051", "R053", "R052", "R064"]
+    },
+
+    {
+      "test_id": "EO-005",
+      "description": "Pre-offer inquiry violation — two disability-related questions asked before job offer. Per se prohibitions under 42 U.S.C. § 12112(d)(2). medical_inquiry_compliant = false, risk = critical.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "accommodation_required": "indeterminate"
+        },
+        "interactive_process": null,
+        "medical_inquiry_limitations": {
+          "multiple_inquiry_stages": [
+            {
+              "inquiry_stage": "pre_offer",
+              "inquiry_type": "disability_related_question",
+              "inquiry_description": "Hiring manager asked: 'Do you have any physical conditions that would prevent you from lifting 50 pounds?'"
+            },
+            {
+              "inquiry_stage": "pre_offer",
+              "inquiry_type": "disability_related_question",
+              "inquiry_description": "Hiring manager asked: 'Have you ever filed a workers' compensation claim?'"
+            }
+          ]
+        },
+        "confidentiality": null
+      },
+      "expected_output": {
+        "interactive_process": null,
+        "medical_inquiry_limitations": {
+          "inquiry_evaluations": [
+            {
+              "inquiry_stage": "pre_offer",
+              "inquiry_type": "disability_related_question",
+              "inquiry_permitted": "no",
+              "violation_basis": "pre_offer_disability_question_prohibited",
+              "source_citation": "42 U.S.C. § 12112(d)(2); 29 CFR § 1630.13(a)"
+            },
+            {
+              "inquiry_stage": "pre_offer",
+              "inquiry_type": "disability_related_question",
+              "inquiry_permitted": "no",
+              "violation_basis": "pre_offer_disability_question_prohibited",
+              "source_citation": "42 U.S.C. § 12112(d)(2); 29 CFR § 1630.13(a)"
+            }
+          ],
+          "medical_inquiry_compliant": false,
+          "medical_inquiry_risk_level": "critical"
+        },
+        "confidentiality": null
+      },
+      "rules_fired": ["R054", "R054"]
+    },
+
+    {
+      "test_id": "EO-006",
+      "description": "During-employment medical examination without business necessity — comprehensive psychological evaluation beyond established functional limitations. inquiry_permitted = no, risk = high.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "accommodation_required": "yes"
+        },
+        "interactive_process": {
+          "request_acknowledged": true,
+          "accommodation_request_date": "2026-03-10",
+          "dialogue_initiated_date": "2026-03-14",
+          "business_days_to_initiation": 3,
+          "accommodation_options_documented": true,
+          "employer_initiated_dialogue_promptly": true,
+          "multiple_alternatives_considered": true,
+          "jan_or_equivalent_consulted": false,
+          "decision_communicated_with_explanation": true,
+          "follow_up_on_implemented_accommodation": false,
+          "employer_delayed_without_explanation": false,
+          "all_options_rejected_without_rationale": false,
+          "relied_on_disability_stereotypes": false,
+          "process_terminated_unilaterally": false,
+          "employee_interactive_process_participation": "good_faith"
+        },
+        "medical_inquiry_limitations": {
+          "multiple_inquiry_stages": [
+            {
+              "inquiry_stage": "during_employment",
+              "inquiry_type": "medical_examination",
+              "inquiry_description": "Comprehensive psychological evaluation and full psychiatric history from treating physician, beyond established functional limitations",
+              "during_employment_inquiry_job_related": true,
+              "during_employment_inquiry_business_necessity": false,
+              "during_employment_voluntary_wellness": false
+            }
+          ]
+        },
+        "confidentiality": {
+          "medical_info_in_separate_file": true,
+          "access_limited_to_permitted_parties": true,
+          "unauthorized_disclosure_occurred": false
+        }
+      },
+      "expected_output": {
+        "interactive_process": {
+          "process_mechanically_compliant": true,
+          "mechanical_compliance_checks": {
+            "acknowledged_request": true,
+            "initiated_dialogue_timely": true,
+            "documented_options_considered": true
+          },
+          "process_quality": "indeterminate",
+          "process_quality_analysis": {
+            "factors_for": [
+              "employer considered multiple accommodation alternatives before reaching a decision — factor for good faith",
+              "employer communicated its accommodation decision with a reasoned explanation — factor for good faith",
+              "employer initiated dialogue promptly after the accommodation request — factor for good faith"
+            ],
+            "factors_against": [],
+            "key_uncertainties": [
+              "Three factors for good faith present but one key indicator (JAN consultation or follow-up) not confirmed — classification as yes requires ≥3 factors for AND 0 against; with exactly 3 factors_for present this meets the threshold; engine should resolve as yes pending attorney review of threshold calibration"
+            ],
+            "nonparticipation_weighting_applied": false
+          },
+          "interactive_process_compliant": "yes",
+          "interactive_process_risk_level": "low"
+        },
+        "medical_inquiry_limitations": {
+          "inquiry_evaluations": [
+            {
+              "inquiry_stage": "during_employment",
+              "inquiry_type": "medical_examination",
+              "inquiry_permitted": "no",
+              "violation_basis": "during_employment_not_business_necessity",
+              "source_citation": "42 U.S.C. § 12112(d)(4)(A); 29 CFR § 1630.14(c)"
+            }
+          ],
+          "medical_inquiry_compliant": false,
+          "medical_inquiry_risk_level": "high"
+        },
+        "confidentiality": {
+          "confidentiality_checks": {
+            "separate_file_maintained": true,
+            "access_properly_limited": true,
+            "no_unauthorized_disclosure": true
+          },
+          "confidentiality_compliant": true,
+          "violated_requirements": [],
+          "confidentiality_risk_level": "minimal"
+        }
+      },
+      "rules_fired": ["R047", "R051", "R052", "R063", "R064"]
+    },
+
+    {
+      "test_id": "EO-007",
+      "description": "Confidentiality breach — medical file not maintained separately and unauthorized disclosure to coworkers. Both inquiry-level and confidentiality-level violations. confidentiality_compliant = false.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "accommodation_required": "indeterminate"
+        },
+        "interactive_process": null,
+        "medical_inquiry_limitations": {
+          "multiple_inquiry_stages": [
+            {
+              "inquiry_stage": "post_offer",
+              "inquiry_type": "medical_examination",
+              "inquiry_description": "Post-offer medical examination for all new kitchen staff",
+              "post_offer_all_employees_examined": true,
+              "post_offer_information_kept_confidential": false,
+              "post_offer_results_used_only_as_permitted": false
+            }
+          ]
+        },
+        "confidentiality": {
+          "medical_info_in_separate_file": false,
+          "access_limited_to_permitted_parties": false,
+          "unauthorized_disclosure_occurred": true,
+          "disclosure_parties": ["coworker_without_need_to_know"]
+        }
+      },
+      "expected_output": {
+        "interactive_process": null,
+        "medical_inquiry_limitations": {
+          "inquiry_evaluations": [
+            {
+              "inquiry_stage": "post_offer",
+              "inquiry_type": "medical_examination",
+              "inquiry_permitted": "no",
+              "violation_basis": "post_offer_confidentiality_not_maintained",
+              "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)"
+            }
+          ],
+          "medical_inquiry_compliant": false,
+          "medical_inquiry_risk_level": "high"
+        },
+        "confidentiality": {
+          "confidentiality_checks": {
+            "separate_file_maintained": false,
+            "access_properly_limited": false,
+            "no_unauthorized_disclosure": false
+          },
+          "confidentiality_compliant": false,
+          "violated_requirements": [
+            {
+              "requirement": "separate_file_not_maintained",
+              "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)",
+              "description": "Medical information was not maintained on separate forms and in separate files from general personnel records."
+            },
+            {
+              "requirement": "unauthorized_disclosure_occurred",
+              "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)",
+              "description": "Medical examination results were disclosed to coworkers without need-to-know, outside the three permitted categories."
+            }
+          ],
+          "confidentiality_risk_level": "high"
+        }
+      },
+      "rules_fired": ["R058", "R065", "R066", "R067"]
+    },
+
+    {
+      "test_id": "EO-008",
+      "description": "Mixed scenario — interactive process indeterminate (mechanical pass, process quality indeterminate — 1 factor for, 0 against) plus during-employment inquiry violation (not job-related). Two independent compliance failures.",
+      "input": {
+        "dependency_inputs": {
+          "is_covered_employer": true,
+          "is_covered_individual": true,
+          "accommodation_required": "yes"
+        },
+        "interactive_process": {
+          "request_acknowledged": true,
+          "accommodation_request_date": "2026-04-01",
+          "dialogue_initiated_date": "2026-04-11",
+          "business_days_to_initiation": 8,
+          "accommodation_options_documented": true,
+          "employer_initiated_dialogue_promptly": true,
+          "multiple_alternatives_considered": false,
+          "jan_or_equivalent_consulted": false,
+          "decision_communicated_with_explanation": false,
+          "follow_up_on_implemented_accommodation": false,
+          "employer_delayed_without_explanation": false,
+          "all_options_rejected_without_rationale": false,
+          "relied_on_disability_stereotypes": false,
+          "process_terminated_unilaterally": false,
+          "employee_interactive_process_participation": "good_faith"
+        },
+        "medical_inquiry_limitations": {
+          "multiple_inquiry_stages": [
+            {
+              "inquiry_stage": "during_employment",
+              "inquiry_type": "disability_related_question",
+              "inquiry_description": "HR asked: 'Has your psychiatric condition ever required hospitalization?'",
+              "during_employment_inquiry_job_related": false,
+              "during_employment_inquiry_business_necessity": false,
+              "during_employment_voluntary_wellness": false
+            }
+          ]
+        },
+        "confidentiality": {
+          "medical_info_in_separate_file": true,
+          "access_limited_to_permitted_parties": true,
+          "unauthorized_disclosure_occurred": false
+        }
+      },
+      "expected_output": {
+        "interactive_process": {
+          "process_mechanically_compliant": true,
+          "mechanical_compliance_checks": {
+            "acknowledged_request": true,
+            "initiated_dialogue_timely": true,
+            "documented_options_considered": true
+          },
+          "process_quality": "indeterminate",
+          "process_quality_analysis": {
+            "factors_for": [
+              "employer initiated dialogue promptly after the accommodation request — factor for good faith"
+            ],
+            "factors_against": [],
+            "key_uncertainties": [
+              "Insufficient good-faith factors to confirm compliance (only 1 of required 3 factors for present); no factors against identified; additional context on decision communication and alternatives may resolve"
+            ],
+            "nonparticipation_weighting_applied": false
+          },
+          "interactive_process_compliant": "indeterminate",
+          "interactive_process_risk_level": "low"
+        },
+        "medical_inquiry_limitations": {
+          "inquiry_evaluations": [
+            {
+              "inquiry_stage": "during_employment",
+              "inquiry_type": "disability_related_question",
+              "inquiry_permitted": "no",
+              "violation_basis": "during_employment_not_job_related",
+              "source_citation": "42 U.S.C. § 12112(d)(4)(A); 29 CFR § 1630.14(c)"
+            }
+          ],
+          "medical_inquiry_compliant": false,
+          "medical_inquiry_risk_level": "high"
+        },
+        "confidentiality": {
+          "confidentiality_checks": {
+            "separate_file_maintained": true,
+            "access_properly_limited": true,
+            "no_unauthorized_disclosure": true
+          },
+          "confidentiality_compliant": true,
+          "violated_requirements": [],
+          "confidentiality_risk_level": "minimal"
+        }
+      },
+      "rules_fired": ["R047", "R051", "R052", "R062", "R064"]
+    }
+
+  ]
+}

@@ -1,0 +1,508 @@
+{
+  "module": "ada_employer_obligations",
+  "version": "0.1",
+  "last_updated": "2026-04-20",
+  "description": "Rule-based and standards-based logic for Module 3 Employer Obligations. Execution order: 3.1 (interactive_process) → 3.2 (medical_inquiry_limitations) → 3.3 (confidentiality). Module 2 output (accommodation_required) is consumed as a dependency input. Components 3.2 and 3.3 are independent of each other and may be evaluated without Module 2 accommodation context when inquiries or medical information handling are the sole issue.",
+  "execution_order": [
+    "interactive_process",
+    "medical_inquiry_limitations",
+    "confidentiality"
+  ],
+  "execution_notes": "Components 3.2 and 3.3 may execute even if is_covered_individual is false, because medical inquiry limitations apply to job applicants and post-offer candidates regardless of disability status. Component 3.1 requires both is_covered_employer and is_covered_individual to be true. All three components may execute in parallel after dependency inputs are resolved. The interactive_process component (3.1) should still be evaluated when accommodation_required = no, to assess whether a procedurally defective process caused or contributed to the denial.",
+
+  "rules": [
+
+    {
+      "rule_id": "R047",
+      "component": "interactive_process",
+      "sub_component": "3.1a_process_mechanically_compliant",
+      "description": "Mechanical compliance — all three procedural steps satisfied. process_mechanically_compliant = true.",
+      "determination_type": "rule_based",
+      "condition": "request_acknowledged == true AND business_days_to_initiation <= 10 AND accommodation_options_documented == true",
+      "priority": 1,
+      "result": {
+        "process_mechanically_compliant": true,
+        "mechanical_compliance_checks": {
+          "acknowledged_request": true,
+          "initiated_dialogue_timely": true,
+          "documented_options_considered": true
+        }
+      },
+      "heuristic_basis": "engine_defined",
+      "heuristic_note": "The 10-business-day timeliness standard is an engine-defined heuristic operationalizing EEOC enforcement expectations. It is not a statutory deadline and does not appear in 42 U.S.C. § 12112, 29 CFR Part 1630, or EEOC Enforcement Guidance No. 915.002 as a numbered cutoff. Its use in this engine should be disclosed to API consumers.",
+      "reasoning_template": "The employer satisfied all three procedural steps: (1) acknowledged the accommodation request; (2) initiated dialogue within {business_days_to_initiation} business days — within the engine-defined 10-business-day heuristic (not a statutory deadline); (3) documented accommodation options considered. process_mechanically_compliant is true. NOTE: Mechanical compliance does not by itself establish good faith — see process_quality (3.1b).",
+      "source_citation": "EEOC Enforcement Guidance No. 915.002 § General Principles; 29 CFR § 1630 Appendix"
+    },
+
+    {
+      "rule_id": "R048",
+      "component": "interactive_process",
+      "sub_component": "3.1a_process_mechanically_compliant",
+      "description": "Mechanical compliance — failed on timeliness only. Dialogue initiated but exceeded 10-business-day heuristic.",
+      "determination_type": "rule_based",
+      "condition": "request_acknowledged == true AND business_days_to_initiation > 10 AND accommodation_options_documented == true",
+      "priority": 2,
+      "result": {
+        "process_mechanically_compliant": false,
+        "mechanical_compliance_checks": {
+          "acknowledged_request": true,
+          "initiated_dialogue_timely": false,
+          "documented_options_considered": true
+        }
+      },
+      "heuristic_basis": "engine_defined",
+      "heuristic_note": "The 10-business-day timeliness standard is an engine-defined heuristic operationalizing EEOC enforcement expectations. It is not a statutory deadline. Delay beyond 10 business days without explanation is a factor against good faith in process_quality (3.1b), and failures here also affect the mechanical compliance check.",
+      "reasoning_template": "The employer acknowledged the request and documented options, but initiated dialogue {business_days_to_initiation} business days after the request — exceeding the engine-defined 10-business-day heuristic. This heuristic is not a statutory deadline; however, delay without explanation is an EEOC enforcement concern. process_mechanically_compliant is false. See also process_quality for good-faith assessment.",
+      "source_citation": "EEOC Enforcement Guidance No. 915.002 § General Principles; 29 CFR § 1630 Appendix"
+    },
+
+    {
+      "rule_id": "R049",
+      "component": "interactive_process",
+      "sub_component": "3.1a_process_mechanically_compliant",
+      "description": "Mechanical compliance — failed on acknowledgment. Request not acknowledged.",
+      "determination_type": "rule_based",
+      "condition": "request_acknowledged == false",
+      "priority": 3,
+      "result": {
+        "process_mechanically_compliant": false,
+        "mechanical_compliance_checks": {
+          "acknowledged_request": false,
+          "initiated_dialogue_timely": false,
+          "documented_options_considered": false
+        }
+      },
+      "reasoning_template": "The employer did not acknowledge the accommodation request. Failure to acknowledge is itself a failure of the interactive process regardless of whether dialogue eventually occurred. All mechanical compliance checks fail. process_mechanically_compliant is false.",
+      "source_citation": "EEOC Enforcement Guidance No. 915.002 § General Principles; 29 CFR § 1630 Appendix"
+    },
+
+    {
+      "rule_id": "R050",
+      "component": "interactive_process",
+      "sub_component": "3.1a_process_mechanically_compliant",
+      "description": "Mechanical compliance — failed on documentation. Request acknowledged and dialogue initiated timely, but options not documented.",
+      "determination_type": "rule_based",
+      "condition": "request_acknowledged == true AND business_days_to_initiation <= 10 AND accommodation_options_documented == false",
+      "priority": 4,
+      "result": {
+        "process_mechanically_compliant": false,
+        "mechanical_compliance_checks": {
+          "acknowledged_request": true,
+          "initiated_dialogue_timely": true,
+          "documented_options_considered": false
+        }
+      },
+      "reasoning_template": "The employer acknowledged the request and initiated dialogue within the engine-defined 10-business-day heuristic, but did not document the accommodation options considered. Documentation of alternatives considered is an EEOC enforcement expectation. process_mechanically_compliant is false.",
+      "source_citation": "EEOC Enforcement Guidance No. 915.002 § General Principles; 29 CFR § 1630 Appendix"
+    },
+
+    {
+      "rule_id": "R051",
+      "component": "interactive_process",
+      "sub_component": "3.1b_process_quality",
+      "description": "Process quality — factor enumeration for good-faith assessment. Applied to all cases where process_quality evaluation is reached.",
+      "determination_type": "standards_based",
+      "condition": "true (always evaluated for 3.1b)",
+      "priority": 5,
+      "result": "factor_weighted_determination",
+      "factor_rules": {
+        "factors_for_good_faith": [
+          {
+            "factor_id": "PQ-F01",
+            "condition": "employer_initiated_dialogue_promptly == true",
+            "factor_text": "employer initiated dialogue promptly after the accommodation request, indicating proactive engagement with the process — factor for good faith under EEOC Enforcement Guidance No. 915.002 § General Principles"
+          },
+          {
+            "factor_id": "PQ-F02",
+            "condition": "multiple_alternatives_considered == true",
+            "factor_text": "employer considered multiple accommodation alternatives before reaching a decision — factor for good faith under EEOC Enforcement Guidance No. 915.002 § Selecting and Implementing Reasonable Accommodations"
+          },
+          {
+            "factor_id": "PQ-F03",
+            "condition": "jan_or_equivalent_consulted == true",
+            "factor_text": "employer consulted the Job Accommodation Network or equivalent resource, reflecting a good-faith effort to identify effective accommodations — factor for good faith under EEOC Enforcement Guidance No. 915.002; JAN Employer Guide"
+          },
+          {
+            "factor_id": "PQ-F04",
+            "condition": "decision_communicated_with_explanation == true",
+            "factor_text": "employer communicated its accommodation decision with a reasoned explanation — factor for good faith under EEOC Enforcement Guidance No. 915.002 § General Principles"
+          },
+          {
+            "factor_id": "PQ-F05",
+            "condition": "follow_up_on_implemented_accommodation == true",
+            "factor_text": "employer followed up after implementation to confirm the accommodation was effective — factor for good faith under ADA National Network Fact Sheet § RA Process"
+          }
+        ],
+        "factors_against_good_faith": [
+          {
+            "factor_id": "PQ-A01",
+            "condition": "employer_delayed_without_explanation == true",
+            "factor_text": "employer delayed the interactive process without providing an explanation to the employee — factor against good faith under EEOC Enforcement Guidance No. 915.002 § General Principles"
+          },
+          {
+            "factor_id": "PQ-A02",
+            "condition": "all_options_rejected_without_rationale == true",
+            "factor_text": "employer rejected all identified accommodation options without documented rationale — factor against good faith under EEOC Enforcement Guidance No. 915.002 § Selecting and Implementing Reasonable Accommodations"
+          },
+          {
+            "factor_id": "PQ-A03",
+            "condition": "relied_on_disability_stereotypes == true",
+            "factor_text": "employer's assessment relied on generalizations or stereotypes about the disability rather than an individualized assessment of this employee — factor against good faith under 29 CFR § 1630.2(r) principles applied to the interactive process context; EEOC Enforcement Guidance No. 915.002"
+          },
+          {
+            "factor_id": "PQ-A04",
+            "condition": "process_terminated_unilaterally == true",
+            "factor_text": "employer terminated the interactive process unilaterally before reaching a conclusion — factor against good faith under EEOC Enforcement Guidance No. 915.002 § General Principles; 29 CFR § 1630 Appendix"
+          }
+        ]
+      },
+      "output_determination_rules": {
+        "process_quality_yes": "factors_for_good_faith count >= 3 AND factors_against_good_faith count == 0",
+        "process_quality_no": "factors_against_good_faith count >= 2 AND factors_for_good_faith count <= 1",
+        "process_quality_indeterminate": "all other combinations; also when no quality-relevant inputs are provided"
+      },
+      "reasoning_template": "Good-faith interactive process assessment under EEOC Enforcement Guidance No. 915.002 and 29 CFR § 1630 Appendix. [Factor analysis follows.] process_quality = {process_quality}.",
+      "source_citation": "EEOC Enforcement Guidance No. 915.002 § General Principles; 29 CFR § 1630 Appendix"
+    },
+
+    {
+      "rule_id": "R052",
+      "component": "interactive_process",
+      "sub_component": "3.1c_interactive_process_compliant_composite",
+      "description": "Composite combination matrix for interactive_process_compliant. Applies all four explicit combinations and a catch-all for other cases.",
+      "determination_type": "composite",
+      "priority": 6,
+      "combination_matrix": [
+        {
+          "condition": "process_mechanically_compliant == false AND process_quality == 'no'",
+          "result": { "interactive_process_compliant": "no" },
+          "reasoning_note": "Employer failed both procedural steps and good-faith assessment. Clear interactive process violation."
+        },
+        {
+          "condition": "process_mechanically_compliant == false AND process_quality == 'indeterminate'",
+          "result": { "interactive_process_compliant": "indeterminate" },
+          "reasoning_note": "Employer failed procedural steps but good-faith quality is unclear. Cannot confirm compliance without more information."
+        },
+        {
+          "condition": "process_mechanically_compliant == true AND process_quality == 'no'",
+          "result": { "interactive_process_compliant": "indeterminate" },
+          "reasoning_note": "Mechanical compliance does not cure bad faith. A process may satisfy procedural checkboxes while still being conducted in bad faith. Indeterminate pending further review."
+        },
+        {
+          "condition": "process_mechanically_compliant == true AND process_quality == 'yes'",
+          "result": { "interactive_process_compliant": "yes" },
+          "reasoning_note": "Employer satisfied all procedural steps AND demonstrated good-faith engagement. Full compliance."
+        },
+        {
+          "condition": "all other combinations",
+          "result": { "interactive_process_compliant": "indeterminate" },
+          "reasoning_note": "Default for any combination not explicitly covered above."
+        }
+      ],
+      "risk_level_mapping": {
+        "interactive_process_compliant_yes_no_bad_faith_factors": "minimal",
+        "interactive_process_compliant_indeterminate_no_bad_faith_factors": "low",
+        "interactive_process_compliant_indeterminate_with_bad_faith_factors": "moderate",
+        "interactive_process_compliant_no": "high",
+        "interactive_process_compliant_no_with_all_options_rejected_or_stereotypes": "critical"
+      },
+      "reasoning_template": "Composite interactive process determination: process_mechanically_compliant = {process_mechanically_compliant}; process_quality = {process_quality}; interactive_process_compliant = {interactive_process_compliant}. [Combination logic applied per R052 matrix.]",
+      "source_citation": "EEOC Enforcement Guidance No. 915.002; 29 CFR § 1630 Appendix"
+    },
+
+    {
+      "rule_id": "R053",
+      "component": "interactive_process",
+      "sub_component": "3.1b_process_quality_nonparticipation_weighting",
+      "description": "Employee non-participation weighting factor. When employee_interactive_process_participation is refused or abandoned AND employer has documented basis, shifts process_quality one level in employer's favor. Does not affect process_mechanically_compliant. Does not automatically produce process_quality = yes.",
+      "determination_type": "standards_based",
+      "condition": "employee_interactive_process_participation IN ['refused', 'abandoned'] AND employer_documented_employee_nonparticipation == true",
+      "priority": 7,
+      "result": {
+        "nonparticipation_weighting_applied": true,
+        "process_quality_adjustment": "shift_one_level_toward_employer_favor"
+      },
+      "weighting_logic": {
+        "process_quality_no_shifts_to": "indeterminate",
+        "process_quality_indeterminate_shifts_to": "yes",
+        "process_quality_yes_stays": "yes",
+        "note": "This is a one-tier shift only. process_quality = no can shift to indeterminate but cannot jump directly to yes. Employer must still have satisfied some affirmative good-faith factors."
+      },
+      "reasoning_template": "Employee {employee_interactive_process_participation} participation in the interactive process, with documented employer basis for that characterization. Per EEOC enforcement principles, an employee who refuses to participate or abandons the process cannot then claim the employer failed to engage in good faith. This is a weighting factor only — it shifts process_quality one level in the employer's favor but does not automatically establish good faith. process_quality adjusted from {process_quality_before_adjustment} to {process_quality_after_adjustment}.",
+      "source_citation": "EEOC Enforcement Guidance No. 915.002 § General Principles (employee obligation to participate); 29 CFR § 1630 Appendix"
+    },
+
+    {
+      "rule_id": "R054",
+      "component": "medical_inquiry_limitations",
+      "sub_component": "3.2_pre_offer",
+      "description": "Pre-offer stage — disability-related question or medical examination prohibited. Per se violation. No exceptions for job-relatedness.",
+      "determination_type": "rule_based",
+      "condition": "inquiry_stage == 'pre_offer' AND inquiry_type IN ['disability_related_question', 'medical_examination']",
+      "priority": 1,
+      "result": {
+        "inquiry_permitted": "no",
+        "violation_basis": "pre_offer_disability_question_prohibited OR pre_offer_medical_exam_prohibited"
+      },
+      "violation_basis_logic": {
+        "if_inquiry_type_disability_related_question": "pre_offer_disability_question_prohibited",
+        "if_inquiry_type_medical_examination": "pre_offer_medical_exam_prohibited"
+      },
+      "reasoning_template": "At the pre-offer stage, {inquiry_type} is categorically prohibited regardless of whether it is job-related or consistent with business necessity. Under 42 U.S.C. § 12112(d)(2) and 29 CFR § 1630.13(a), no disability-related questions or medical examinations are permitted prior to a conditional job offer. This is a per se prohibition. inquiry_permitted = no.",
+      "source_citation": "42 U.S.C. § 12112(d)(2); 29 CFR § 1630.13(a)"
+    },
+
+    {
+      "rule_id": "R055",
+      "component": "medical_inquiry_limitations",
+      "sub_component": "3.2_pre_offer",
+      "description": "Pre-offer stage — non-disability job-related question permitted.",
+      "determination_type": "rule_based",
+      "condition": "inquiry_stage == 'pre_offer' AND inquiry_type == 'request_for_documentation'",
+      "priority": 2,
+      "result": {
+        "inquiry_permitted": "yes",
+        "violation_basis": "none"
+      },
+      "reasoning_template": "At the pre-offer stage, documentation requests that are not disability-related (e.g., requests for work authorization, educational transcripts, or professional licenses) are permitted. A request_for_documentation at the pre-offer stage is permissible provided it does not seek disability-related information. inquiry_permitted = yes.",
+      "source_citation": "42 U.S.C. § 12112(d)(2); 29 CFR § 1630.13(a)"
+    },
+
+    {
+      "rule_id": "R056",
+      "component": "medical_inquiry_limitations",
+      "sub_component": "3.2_post_offer",
+      "description": "Post-offer stage — medical examination or disability-related question fully permitted when all three ADA conditions are satisfied.",
+      "determination_type": "rule_based",
+      "condition": "inquiry_stage == 'post_offer' AND post_offer_all_employees_examined == true AND post_offer_information_kept_confidential == true AND post_offer_results_used_only_as_permitted == true",
+      "priority": 3,
+      "result": {
+        "inquiry_permitted": "yes",
+        "violation_basis": "none"
+      },
+      "reasoning_template": "At the post-offer / pre-employment stage, medical examinations and disability-related questions are permitted when all three statutory conditions are met: (1) all entering employees in the same job category are examined; (2) information is maintained on separate, confidential forms and in separate files; (3) results are used only as permitted by the ADA. All three conditions are satisfied here. inquiry_permitted = yes.",
+      "source_citation": "42 U.S.C. § 12112(d)(3)(A)-(C); 29 CFR § 1630.14(b)(1)-(3)"
+    },
+
+    {
+      "rule_id": "R057",
+      "component": "medical_inquiry_limitations",
+      "sub_component": "3.2_post_offer",
+      "description": "Post-offer stage — violation: not all entering employees examined in the same job category.",
+      "determination_type": "rule_based",
+      "condition": "inquiry_stage == 'post_offer' AND post_offer_all_employees_examined == false",
+      "priority": 4,
+      "result": {
+        "inquiry_permitted": "no",
+        "violation_basis": "post_offer_not_all_employees_examined"
+      },
+      "reasoning_template": "At the post-offer stage, medical examinations are permitted only if ALL entering employees in the same job category are subject to the same requirement. Selective examination of only some employees — including targeting an employee because of a perceived disability — violates 42 U.S.C. § 12112(d)(3)(A). inquiry_permitted = no.",
+      "source_citation": "42 U.S.C. § 12112(d)(3)(A); 29 CFR § 1630.14(b)(1)"
+    },
+
+    {
+      "rule_id": "R058",
+      "component": "medical_inquiry_limitations",
+      "sub_component": "3.2_post_offer",
+      "description": "Post-offer stage — violation: confidentiality not maintained.",
+      "determination_type": "rule_based",
+      "condition": "inquiry_stage == 'post_offer' AND post_offer_all_employees_examined == true AND post_offer_information_kept_confidential == false",
+      "priority": 5,
+      "result": {
+        "inquiry_permitted": "no",
+        "violation_basis": "post_offer_confidentiality_not_maintained"
+      },
+      "reasoning_template": "Medical information obtained at the post-offer stage must be collected and maintained on separate forms and in separate files from general personnel records. The employer did not maintain this separation, violating 42 U.S.C. § 12112(d)(3)(B) and 29 CFR § 1630.14(b)(1). inquiry_permitted = no.",
+      "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)"
+    },
+
+    {
+      "rule_id": "R059",
+      "component": "medical_inquiry_limitations",
+      "sub_component": "3.2_post_offer",
+      "description": "Post-offer stage — violation: results used improperly.",
+      "determination_type": "rule_based",
+      "condition": "inquiry_stage == 'post_offer' AND post_offer_all_employees_examined == true AND post_offer_information_kept_confidential == true AND post_offer_results_used_only_as_permitted == false",
+      "priority": 6,
+      "result": {
+        "inquiry_permitted": "no",
+        "violation_basis": "post_offer_results_used_improperly"
+      },
+      "reasoning_template": "Medical examination results at the post-offer stage may only be used as permitted by the ADA — the employer may not use results to discriminate on the basis of disability except where a qualification standard or direct threat defense applies. The results were used improperly, violating 42 U.S.C. § 12112(d)(3)(C) and 29 CFR § 1630.14(b)(3). inquiry_permitted = no.",
+      "source_citation": "42 U.S.C. § 12112(d)(3)(C); 29 CFR § 1630.14(b)(3)"
+    },
+
+    {
+      "rule_id": "R060",
+      "component": "medical_inquiry_limitations",
+      "sub_component": "3.2_during_employment",
+      "description": "During-employment stage — medical inquiry permitted under voluntary wellness program exception.",
+      "determination_type": "rule_based",
+      "condition": "inquiry_stage == 'during_employment' AND during_employment_voluntary_wellness == true",
+      "priority": 7,
+      "result": {
+        "inquiry_permitted": "yes",
+        "violation_basis": "none"
+      },
+      "reasoning_template": "The examination is part of a voluntary employee health or wellness program. Under 42 U.S.C. § 12112(d)(4)(B) and 29 CFR § 1630.14(d), voluntary wellness program examinations are excepted from the job-related and business necessity requirements applicable to other during-employment inquiries. inquiry_permitted = yes.",
+      "source_citation": "42 U.S.C. § 12112(d)(4)(B); 29 CFR § 1630.14(d)"
+    },
+
+    {
+      "rule_id": "R061",
+      "component": "medical_inquiry_limitations",
+      "sub_component": "3.2_during_employment",
+      "description": "During-employment stage — medical inquiry permitted: job-related AND consistent with business necessity.",
+      "determination_type": "rule_based",
+      "condition": "inquiry_stage == 'during_employment' AND during_employment_voluntary_wellness == false AND during_employment_inquiry_job_related == true AND during_employment_inquiry_business_necessity == true",
+      "priority": 8,
+      "result": {
+        "inquiry_permitted": "yes",
+        "violation_basis": "none"
+      },
+      "reasoning_template": "At the during-employment stage, medical examinations and disability-related inquiries are permitted when job-related and consistent with business necessity. Both conditions are satisfied here. inquiry_permitted = yes.",
+      "source_citation": "42 U.S.C. § 12112(d)(4)(A); 29 CFR § 1630.14(c)"
+    },
+
+    {
+      "rule_id": "R062",
+      "component": "medical_inquiry_limitations",
+      "sub_component": "3.2_during_employment",
+      "description": "During-employment stage — violation: inquiry not job-related.",
+      "determination_type": "rule_based",
+      "condition": "inquiry_stage == 'during_employment' AND during_employment_voluntary_wellness == false AND during_employment_inquiry_job_related == false",
+      "priority": 9,
+      "result": {
+        "inquiry_permitted": "no",
+        "violation_basis": "during_employment_not_job_related"
+      },
+      "reasoning_template": "During employment, medical examinations and disability-related questions are permitted only if job-related and consistent with business necessity. This inquiry is not job-related, violating 42 U.S.C. § 12112(d)(4)(A) and 29 CFR § 1630.14(c). inquiry_permitted = no.",
+      "source_citation": "42 U.S.C. § 12112(d)(4)(A); 29 CFR § 1630.14(c)"
+    },
+
+    {
+      "rule_id": "R063",
+      "component": "medical_inquiry_limitations",
+      "sub_component": "3.2_during_employment",
+      "description": "During-employment stage — violation: inquiry job-related but not consistent with business necessity.",
+      "determination_type": "rule_based",
+      "condition": "inquiry_stage == 'during_employment' AND during_employment_voluntary_wellness == false AND during_employment_inquiry_job_related == true AND during_employment_inquiry_business_necessity == false",
+      "priority": 10,
+      "result": {
+        "inquiry_permitted": "no",
+        "violation_basis": "during_employment_not_business_necessity"
+      },
+      "reasoning_template": "During employment, medical examinations and disability-related questions must be both job-related AND consistent with business necessity. This inquiry is job-related but does not satisfy the business necessity requirement under 42 U.S.C. § 12112(d)(4)(A) and 29 CFR § 1630.14(c). inquiry_permitted = no.",
+      "source_citation": "42 U.S.C. § 12112(d)(4)(A); 29 CFR § 1630.14(c)"
+    },
+
+    {
+      "rule_id": "R064",
+      "component": "confidentiality",
+      "sub_component": "3.3_all_checks",
+      "description": "Confidentiality — full compliance. All three binary checks pass.",
+      "determination_type": "rule_based",
+      "condition": "medical_info_in_separate_file == true AND access_limited_to_permitted_parties == true AND unauthorized_disclosure_occurred == false",
+      "priority": 1,
+      "result": {
+        "confidentiality_compliant": true,
+        "confidentiality_checks": {
+          "separate_file_maintained": true,
+          "access_properly_limited": true,
+          "no_unauthorized_disclosure": true
+        },
+        "violated_requirements": [],
+        "confidentiality_risk_level": "minimal"
+      },
+      "reasoning_template": "All three ADA medical information confidentiality requirements are satisfied: (1) medical information is maintained on separate forms and in separate files from general personnel records (42 U.S.C. § 12112(d)(3)(B)); (2) access is limited to permitted parties — supervisors with need to know, first aid/safety personnel, and government investigators (29 CFR § 1630.14(b)(1)(i)-(iii)); (3) no unauthorized disclosures occurred. confidentiality_compliant = true.",
+      "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1); 29 CFR § 1630.14(b)(1)(i)-(iii)"
+    },
+
+    {
+      "rule_id": "R065",
+      "component": "confidentiality",
+      "sub_component": "3.3_separate_file_check",
+      "description": "Confidentiality — violation: medical information not maintained in separate file.",
+      "determination_type": "rule_based",
+      "condition": "medical_info_in_separate_file == false",
+      "priority": 2,
+      "result": {
+        "confidentiality_compliant": false,
+        "confidentiality_checks": {
+          "separate_file_maintained": false
+        },
+        "violated_requirements_entry": {
+          "requirement": "separate_file_not_maintained",
+          "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)",
+          "description": "Medical information was not maintained on separate forms and in separate files from general personnel records as required by 42 U.S.C. § 12112(d)(3)(B) and 29 CFR § 1630.14(b)(1)."
+        },
+        "confidentiality_risk_level": "moderate"
+      },
+      "reasoning_template": "Medical information must be collected and maintained on separate forms and in separate files from general personnel records. The employer commingled medical information with personnel records, violating 42 U.S.C. § 12112(d)(3)(B) and 29 CFR § 1630.14(b)(1). confidentiality_compliant = false.",
+      "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)"
+    },
+
+    {
+      "rule_id": "R066",
+      "component": "confidentiality",
+      "sub_component": "3.3_access_check",
+      "description": "Confidentiality — violation: access not limited to permitted parties.",
+      "determination_type": "rule_based",
+      "condition": "access_limited_to_permitted_parties == false",
+      "priority": 3,
+      "result": {
+        "confidentiality_compliant": false,
+        "confidentiality_checks": {
+          "access_properly_limited": false
+        },
+        "violated_requirements_entry": {
+          "requirement": "access_not_limited_to_permitted_parties",
+          "source_citation": "29 CFR § 1630.14(b)(1)(i)-(iii)",
+          "description": "Access to medical information was not limited to the three permitted categories: (i) supervisors and managers with need to know work restrictions; (ii) first aid and safety personnel for emergency treatment purposes; (iii) government officials investigating ADA compliance."
+        },
+        "confidentiality_risk_level": "high"
+      },
+      "reasoning_template": "Under 29 CFR § 1630.14(b)(1)(i)-(iii), access to medical information is permitted only for: (i) supervisors and managers who need to know about an employee's work restrictions or accommodations; (ii) first aid and safety personnel if the disability might require emergency treatment; (iii) government officials investigating compliance with the ADA. The employer provided access to persons outside these categories. confidentiality_compliant = false.",
+      "source_citation": "29 CFR § 1630.14(b)(1)(i)-(iii)"
+    },
+
+    {
+      "rule_id": "R067",
+      "component": "confidentiality",
+      "sub_component": "3.3_disclosure_check",
+      "description": "Confidentiality — violation: unauthorized disclosure occurred.",
+      "determination_type": "rule_based",
+      "condition": "unauthorized_disclosure_occurred == true",
+      "priority": 4,
+      "result": {
+        "confidentiality_compliant": false,
+        "confidentiality_checks": {
+          "no_unauthorized_disclosure": false
+        },
+        "violated_requirements_entry": {
+          "requirement": "unauthorized_disclosure_occurred",
+          "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)",
+          "description": "Medical information was disclosed to unauthorized parties outside the three permitted categories."
+        },
+        "confidentiality_risk_level_logic": "critical if external_party in disclosure_parties; high if coworker_without_need_to_know or hr_without_need_to_know; high otherwise"
+      },
+      "reasoning_template": "Medical information was disclosed to unauthorized parties ({disclosure_parties}). Under 42 U.S.C. § 12112(d)(3)(B) and 29 CFR § 1630.14(b)(1), medical information may only be disclosed to the three permitted categories. Unauthorized disclosure is a per se ADA violation. confidentiality_compliant = false.",
+      "source_citation": "42 U.S.C. § 12112(d)(3)(B); 29 CFR § 1630.14(b)(1)"
+    }
+
+  ],
+
+  "rule_count_summary": {
+    "total_rules": 21,
+    "rule_id_range": "R047–R067",
+    "interactive_process_rules": 7,
+    "medical_inquiry_limitations_rules": 10,
+    "confidentiality_rules": 4,
+    "rule_based_rules": 16,
+    "standards_based_rules": 2,
+    "composite_rules": 1,
+    "hybrid_component": 1,
+    "heuristic_labeled_rules": ["R047", "R048"],
+    "notes": "Rules R047–R067 follow sequentially from Module 2 which ended at R046. The 10-business-day timeliness heuristic in R047 and R048 is labeled heuristic_basis: engine_defined and must not be represented to API consumers as a statutory deadline."
+  }
+}
